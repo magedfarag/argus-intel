@@ -197,21 +197,23 @@ def test_job_to_dict_with_error(valid_analyze_request_dict):
 
 def test_celery_result_mock():
     """Test mocking Celery AsyncResult for job status polling."""
-    with patch("celery.result.AsyncResult") as mock_async_result:
-        # Simulate PENDING state
-        mock_result = MagicMock()
-        mock_result.state = "PENDING"
-        mock_async_result.return_value = mock_result
+    # Mock AsyncResult without requiring actual celery import
+    mock_async_result_class = MagicMock()
+    
+    # Simulate PENDING state
+    mock_result = MagicMock()
+    mock_result.state = "PENDING"
+    mock_async_result_class.return_value = mock_result
 
-        result = mock_async_result("job-id-123")
-        assert result.state == "PENDING"
+    result = mock_async_result_class("job-id-123")
+    assert result.state == "PENDING"
 
-        # Simulate SUCCESS state
-        mock_result.state = "SUCCESS"
-        result_data = {"job_id": "job-id-123", "state": "completed"}
-        mock_result.result = result_data
-        assert result.state == "SUCCESS"
-        assert result.result["state"] == "completed"
+    # Simulate SUCCESS state
+    mock_result.state = "SUCCESS"
+    result_data = {"job_id": "job-id-123", "state": "completed"}
+    mock_result.result = result_data
+    assert result.state == "SUCCESS"
+    assert result.result["state"] == "completed"
 
 
 def test_job_polling_pending_to_completed():
