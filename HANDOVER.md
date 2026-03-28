@@ -3,7 +3,7 @@
 **Date:** 2026-03-28
 **Repository:** https://github.com/magedfarag/construction-monitor-demo
 **Branch:** `main`
-**Test status:** 38 / 38 passing
+**Test status:** 89 / 89 passing (11 integration + 78 unit tests)
 
 ---
 
@@ -354,8 +354,8 @@ python -m pytest tests/ --cov=backend/app --cov-fail-under=80
 | P3-4 | Multi-worker circuit breaker | ⏳ TODO | Move `CircuitBreaker` state from process memory to Redis |
 | P3-5 | Actual satellite thumbnails | ⏳ TODO | Generate real scene thumbnails instead of static demo PNGs |
 | P3-6 | `add_rate_limit` middleware | ⏳ TODO | Protect all mutation endpoints |
-| P3-7 | Refresh `docs/API.md` | ⏳ TODO | Still references `demo-fusion` provider name from original demo |
-| P3-8 | Refresh `docs/ARCHITECTURE.md` | ⏳ TODO | Still describes demo-only architecture |
+| P3-7 | Refresh `docs/API.md` | ✅ DONE (commit fe58f32) | Complete endpoint specification with auth examples |
+| P3-8 | Refresh `docs/ARCHITECTURE.md` | ✅ DONE (commit dcab5d4) | Full v2.0 system design + request lifecycle |
 
 ---
 
