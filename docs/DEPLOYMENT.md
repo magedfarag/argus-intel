@@ -1,181 +1,477 @@
-# Deployment Guide
+# Deployment Guide — Construction Activity Monitor v2.0
 
-## Prerequisites
-
-| Tool | Minimum version |
-|---|---|
-| Python | 3.11 |
-| Docker (optional) | 24.0 |
-| Docker Compose (optional) | 2.20 |
-| Redis (optional) | 7.0 |
-| GDAL / libgdal | 3.4 (installed automatically in Dockerfile) |
+**Last Updated**: 2026-03-28  
+**Production Ready**: Yes (with security hardening checklist completed)
 
 ---
 
-## 1. Local development (demo mode, no Redis)
+## **1. Prerequisites**
+
+| Component | Version | Notes |
+|-----------|---------|-------|
+| Python | 3.11+ | Dataclasses frozen, type hints |
+| Docker | 24.0+ | Multi-stage builds |
+| Docker Compose | 2.20+ | For local/staging |
+| Redis | 7.0+ | For cache & Celery broker |
+| GDAL/libgdal | 3.4+ | For rasterio; installed in Dockerfile |
+| Git | 2.30+ | For GitHub integration |
+
+---
+
+## **2. Deployment Scenarios**
+
+### **2.1 Local Development (Demo Mode)**
+
+**No Redis, no credentials required**. Ideal for feature development and prototyping.
 
 ```bash
-# Clone and enter directory
 git clone https://github.com/magedfarag/construction-monitor-demo
 cd construction-monitor-demo
 
-# Create virtual environment
 python -m venv .venv
-.venv\Scripts\activate          # Windows
-# source .venv/bin/activate     # macOS / Linux
+.venv\Scripts\activate    # Windows
+# source .venv/bin/activate  # macOS/Linux
 
-# Install deps
 pip install -r requirements.txt
 
-# Run with auto-reload
+# Run with auto-reload (hot changes)
 uvicorn backend.app.main:app --reload
 
 # Open http://127.0.0.1:8000
 ```
 
-The server starts in `APP_MODE=auto`. With no credentials or Redis set, it
-degrades to demo mode automatically.
+**Demo mode behavior**:
+- `APP_MODE=auto` (default)
+- No Redis configured → in-memory cache only
+- No Sentinel-2 credentials → auto-fallback to Landsat/demo
+- Celery unavailable → sync execution only
+
+**Coverage**: All endpoints work; analysis returns curated demo results.
 
 ---
 
-## 2. Local development with Redis and async workers
+### **2.2 Local Development with Redis + Async**
+
+**For testing async job pipeline and real caching**.
 
 ```powershell
-# Start Redis (Docker)
+# Terminal 1: Start Redis container
 docker run --name redis-dev -p 6379:6379 -d redis:7-alpine
 
-# Terminal 2 — API server
+# Terminal 2: API server with auto-reload
 $env:REDIS_URL = "redis://localhost:6379/0"
-$env:APP_MODE  = "auto"
+$env:APP_MODE = "auto"
+$env:LOG_FORMAT = "text"  # Human-readable logs
+
 uvicorn backend.app.main:app --reload
 
-# Terminal 3 — Celery worker
+# Terminal 3: Celery worker (background tasks)
 $env:REDIS_URL = "redis://localhost:6379/0"
+
 celery -A backend.app.workers.celery_app.celery_app worker `
-    --loglevel=info --pool=solo --concurrency=2
+    --loglevel=info `
+    --pool=solo `
+    --concurrency=2 `
+    --task-events
+```
+
+**Test async job submission**:
+```bash
+# Terminal 4: Submit a job
+curl -X POST http://localhost:8000/api/analyze \
+  -H "Content-Type: application/json" \
+  -d '{
+    "geometry": {"type": "Polygon", "coordinates": [[[30, 50], [30.1, 50], [30.1, 50.1], [30, 50.1], [30, 50]]]},
+    "start_date": "2026-03-27",
+    "end_date": "2026-03-28",
+    "async_execution": true
+  }'
+
+# Response: {"job_id": "job-...", "state": "pending", ...}
+
+# Poll status
+curl http://localhost:8000/api/jobs/job-XXXXX
 ```
 
 ---
 
-## 3. Docker Compose (recommended for staging / production)
+### **2.3 Docker Compose (Staging / Production)**
 
-### 3.1 Create .env
+**Recommended** for integrated testing with all services.
+
+#### **Step 1: Create .env**
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and fill in at minimum:
+Edit `.env` with your configuration:
 
 ```env
-APP_MODE=auto
-REDIS_URL=redis://redis:6379/0
-SENTINEL2_CLIENT_ID=your-client-id
-SENTINEL2_CLIENT_SECRET=your-client-secret
-LOG_FORMAT=json
+# ──────────────────────────────────────────────────────────────
+# App behavior
+# ──────────────────────────────────────────────────────────────
+APP_MODE=live                    # auto / live / demo
+LOG_LEVEL=INFO                   # DEBUG / INFO / WARNING / ERROR
+LOG_FORMAT=json                  # json / text
+
+# ──────────────────────────────────────────────────────────────
+# CORS & Security (P1-5 & P1-6)
+# ──────────────────────────────────────────────────────────────
+ALLOWED_ORIGINS=https://myapp.com,https://api.myapp.com
+API_KEY=your-strong-api-key     # Generate: openssl rand -hex 32
+
+# ──────────────────────────────────────────────────────────────
+# Infrastructure
+# ──────────────────────────────────────────────────────────────
+REDIS_URL=redis://redis:6379/0  # In Docker: redis service name
+
+# ──────────────────────────────────────────────────────────────
+# Sentinel-2 (optional; required for app_mode=live)
+# ──────────────────────────────────────────────────────────────
+SENTINEL2_CLIENT_ID=...         # Get from: https://dataspace.copernicus.eu
+SENTINEL2_CLIENT_SECRET=...
+
+# ──────────────────────────────────────────────────────────────
+# Caching & resilience
+# ──────────────────────────────────────────────────────────────
+CACHE_TTL_SECONDS=3600          # 1 hour
+CIRCUIT_BREAKER_FAILURE_THRESHOLD=5
+CIRCUIT_BREAKER_RECOVERY_TIMEOUT=60
 ```
 
-### 3.2 Build and start
+#### **Step 2: Start Services**
 
 ```bash
+# Build images and start all services in background
 docker compose up --build -d
+
+# Verify all running
+docker compose ps
+
+# Watch logs
+docker compose logs -f api           # API server
+docker compose logs -f worker        # Celery worker
+docker compose logs -f redis         # Redis
 ```
 
-Services started:
-- `redis` — Redis 7 Alpine on port 6379
-- `api` — FastAPI app on port 8000
-- `worker` — Celery worker (2 concurrent tasks)
-
-### 3.3 Check health
+#### **Step 3: Health Check**
 
 ```bash
+# API health
 curl http://localhost:8000/api/health
+
+# Expected response:
+# {"status": "ok", "mode": "live", "redis": "healthy", ...}
+
+# Check providers
+curl http://localhost:8000/api/providers
 ```
 
-Expected response:
-```json
-{"status": "ok", "mode": "auto", "redis": "connected", "providers": {...}}
-```
-
-### 3.4 Stop all services
+#### **Step 4: Stop Services**
 
 ```bash
 docker compose down
+
+# Remove volumes (WARNING: deletes data)
+docker compose down -v
 ```
 
 ---
 
-## 4. Environment variables
+### **2.4 Kubernetes Deployment**
 
-All variables can be set via `.env` or as OS environment variables.
-See `.env.example` for a fully annotated list.
+For cloud-scale deployments (AWS EKS, GCP GKE, Azure AKS, or self-hosted).
 
-### Essential
-
-| Variable | Default | Notes |
-|---|---|---|
-| `APP_MODE` | `auto` | `demo` / `auto` / `live` |
-| `LOG_LEVEL` | `INFO` | `DEBUG` / `INFO` / `WARNING` |
-| `LOG_FORMAT` | `json` | `json` for production; `text` for local dev |
-| `REDIS_URL` | `` | Required for async jobs and distributed cache |
-
-### Sentinel-2 (optional — enables live imagery)
-
-| Variable | Description |
-|---|---|
-| `SENTINEL2_CLIENT_ID` | OAuth2 client ID from Copernicus CDSE |
-| `SENTINEL2_CLIENT_SECRET` | OAuth2 client secret |
-| `SENTINEL2_TOKEN_URL` | Override the default token endpoint |
-| `SENTINEL2_STAC_URL` | Override the default STAC search endpoint |
-
-### Landsat (optional — credentials needed only for M2M bulk download)
-
-| Variable | Description |
-|---|---|
-| `LANDSAT_USERNAME` | USGS ERS username (M2M only) |
-| `LANDSAT_PASSWORD` | USGS ERS password (M2M only) |
-| `LANDSAT_STAC_URL` | Override the default USGS STAC endpoint |
-
-### Cache and circuit breaker
-
-| Variable | Default | Notes |
-|---|---|---|
-| `CACHE_TTL_SECONDS` | `3600` | Analysis result cache lifetime |
-| `CACHE_MAX_ENTRIES` | `256` | In-memory cache max size |
-| `CIRCUIT_BREAKER_FAILURE_THRESHOLD` | `5` | Failures before circuit opens |
-| `CIRCUIT_BREAKER_RECOVERY_TIMEOUT` | `60` | Seconds in OPEN before half-open probe |
-
-### Analysis pipeline
-
-| Variable | Default | Notes |
-|---|---|---|
-| `DEFAULT_CLOUD_THRESHOLD` | `20` | Max cloud cover % to accept a scene |
-| `ASYNC_AREA_THRESHOLD_KM2` | `25` | AOI areas above this are auto-promoted to async |
-| `HTTP_TIMEOUT_SECONDS` | `30` | External provider request timeout |
-| `HTTP_MAX_RETRIES` | `3` | Retry attempts on transient errors |
-
----
-
-## 5. Running tests
+#### **2.4.1 Building the image**
 
 ```bash
-pip install -r requirements-dev.txt
-python -m pytest tests/ -v
+# Build and push to your registry
+docker build -t myregistry.azurecr.io/construction-monitor:v2.0.0 .
+docker push myregistry.azurecr.io/construction-monitor:v2.0.0
+```
 
-# With coverage
-python -m pytest tests/ --cov=backend/app --cov-report=term-missing
+#### **2.4.2 Kubernetes manifests**
+
+Create `kubernetes/` directory with deployment manifests:
+
+```yaml
+# kubernetes/redis-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+spec:
+  selector:
+    app: redis
+  ports:
+  - port: 6379
+    targetPort: 6379
+  type: ClusterIP
+```
+
+```yaml
+# kubernetes/api-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: construction-monitor-api
+spec:
+  replicas: 3                           # Horizontal scaling
+  selector:
+    matchLabels:
+      app: construction-monitor
+      component: api
+  template:
+    metadata:
+      labels:
+        app: construction-monitor
+        component: api
+    spec:
+      containers:
+      - name: api
+        image: myregistry.azurecr.io/construction-monitor:v2.0.0
+        ports:
+        - containerPort: 8000
+        env:
+        - name: REDIS_URL
+          value: "redis://redis:6379/0"
+        - name: APP_MODE
+          value: "live"
+        - name: LOG_FORMAT
+          value: "json"
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: api-key
+        - name: SENTINEL2_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: sentinel2-client-id
+        - name: SENTINEL2_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: sentinel2-client-secret
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/config
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: construction-monitor-api
+spec:
+  selector:
+    app: construction-monitor
+    component: api
+  ports:
+  - port: 80
+    targetPort: 8000
+    protocol: TCP
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: construction-monitor-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: construction-monitor
+      component: worker
+  template:
+    metadata:
+      labels:
+        app: construction-monitor
+        component: worker
+    spec:
+      containers:
+      - name: worker
+        image: myregistry.azurecr.io/construction-monitor:v2.0.0
+        command: ["celery", "-A", "backend.app.workers.celery_app.celery_app", "worker", "--loglevel=info"]
+        env:
+        - name: REDIS_URL
+          value: "redis://redis:6379/0"
+        - name: LOG_FORMAT
+          value: "json"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+```
+
+**Deploy to cluster**:
+```bash
+kubectl create namespace construction-monitor
+kubectl create secret generic app-secrets \
+  --from-literal=api-key=<YOUR-API-KEY> \
+  --from-literal=sentinel2-client-id=<CLIENT-ID> \
+  --from-literal=sentinel2-client-secret=<CLIENT-SECRET> \
+  -n construction-monitor
+kubectl apply -f kubernetes/ -n construction-monitor
+kubectl get pods -n construction-monitor
 ```
 
 ---
 
-## 6. Production hardening checklist
+## **3. Environment Variables Reference**
 
-- [ ] Set `APP_MODE=live` to require live providers
-- [ ] Restrict `allow_origins` in `main.py` CORS middleware
-- [ ] Add API key or OAuth2 middleware
-- [ ] Add `slowapi` rate limiting on `/api/analyze`
-- [ ] Enable `LOG_FORMAT=json` and ship logs to your observability stack
-- [ ] Set `CACHE_TTL_SECONDS` appropriate for your data freshness SLA
-- [ ] Use a managed Redis with TLS (e.g. `rediss://…`)
-- [ ] Run `pip-audit` in CI to detect vulnerable dependencies
-- [ ] Set `ASYNC_AREA_THRESHOLD_KM2=10` to reduce synchronous load for large AOIs
+### **Core Settings**
+
+| Variable | Default | Production Value | Notes |
+|----------|---------|------------------|-------|
+| `APP_MODE` | `auto` | `live` | Fail-fast if no live provider available |
+| `LOG_LEVEL` | `INFO` | `WARNING` | Reduce log volume |
+| `LOG_FORMAT` | `json` | `json` | Machine-readable for log aggregation |
+
+### **Security (P1-5, P1-6)**
+
+| Variable | Default | Production Value | Notes |
+|----------|---------|------------------|-------|
+| `ALLOWED_ORIGINS` | `http://localhost:3000,…` | Your domains | Comma-separated CORS origins |
+| `API_KEY` | `` (empty) | `openssl rand -hex 32` | Strong random 64-char hex string |
+
+### **Infrastructure**
+
+| Variable | Default | Notes |
+|----------|---------|-------|
+| `REDIS_URL` | `` | Format: `redis://[user:password@]host:port/db` |
+| `HTTP_TIMEOUT_SECONDS` | `30` | Provider request timeout |
+| `HTTP_MAX_RETRIES` | `3` | Transient error retry count |
+
+### **Sentinel-2 (Copernicus)**
+
+| Variable | Required | Notes |
+|----------|----------|-------|
+| `SENTINEL2_CLIENT_ID` | If `APP_MODE=live` | OAuth2 client ID |
+| `SENTINEL2_CLIENT_SECRET` | If `APP_MODE=live` | OAuth2 client secret |
+
+---
+
+## **4. Advanced Configuration**
+
+### **4.1 Redis with TLS**
+
+```bash
+REDIS_URL=rediss://user:password@myredis.cache.redis.io:6380/0
+#                ^ 'rediss' = TLS
+```
+
+### **4.2 Reverse Proxy (Nginx)**
+
+Place behind reverse proxy for HTTPS, load balancing, compression.
+
+### **4.3 Kubernetes Health Probes**
+
+- **Liveness**: `GET /api/health` (restart if fails)
+- **Readiness**: `GET /api/config` (remove from load balancer if fails)
+
+---
+
+## **5. Production Hardening Checklist**
+
+### **Security**
+- [ ] Set `APP_MODE=live` (fail-fast mode)
+- [ ] Configure `ALLOWED_ORIGINS` for your domain
+- [ ] Generate strong `API_KEY` (`openssl rand -hex 32`)
+- [ ] Use TLS for Redis (`rediss://`)
+- [ ] Run `pip-audit` in CI
+
+### **Reliability**
+- [ ] Enable Kubernetes health probes
+- [ ] Configure horizontal pod autoscaling
+- [ ] Set resource limits (requests + limits)
+- [ ] Enable circuit breaker
+
+### **Performance**
+- [ ] Set `CACHE_TTL_SECONDS` per SLA
+- [ ] Configure `ASYNC_AREA_THRESHOLD_KM2`
+- [ ] Use CDN for static assets
+- [ ] Enable response compression
+
+### **Observability**
+- [ ] Enable JSON logging
+- [ ] Set up dashboards (Prometheus + Grafana)
+- [ ] Configure alerts (error rate, latency, providers)
+- [ ] Retain logs 30+ days
+
+---
+
+## **6. Troubleshooting**
+
+### **Redis Connection Error**
+```
+ConnectionError: Error 11001 getaddrinfo failed
+```
+- Verify Redis running: `docker ps | grep redis`
+- Check `REDIS_URL` in `.env`
+- Test: `redis-cli -h localhost ping`
+
+### **Sentinel-2 OAuth2 Failure**
+```
+HTTPStatusError: 401 Unauthorized
+```
+- Verify credentials at https://dataspace.copernicus.eu
+- Check `SENTINEL2_CLIENT_ID`, `SENTINEL2_CLIENT_SECRET`
+- Test manually with curl
+
+### **Rate Limit (429) Errors**
+- You're hitting `5/minute` on `/api/analyze`
+- Wait 60 seconds before retrying
+- Distribute across multiple API keys
+
+---
+
+## **7. Support**
+
+For issues: https://github.com/magedfarag/construction-monitor-demo/issues
