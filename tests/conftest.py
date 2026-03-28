@@ -48,3 +48,17 @@ def app_client(demo_registry, memory_cache, circuit_breaker) -> TestClient:
 @pytest.fixture(scope="session")
 def demo_settings() -> AppSettings:
     return AppSettings(app_mode="demo", redis_url="")
+
+
+@pytest.fixture(scope="session")
+def sentinel2_settings() -> AppSettings:
+    """AppSettings with Sentinel-2 credentials configured for testing."""
+    return AppSettings(
+        app_mode="auto",
+        redis_url="",
+        sentinel2_client_id="test_client_id",
+        sentinel2_client_secret="test_client_secret",
+        sentinel2_token_url="https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token",
+        sentinel2_stac_url="https://catalogue.dataspace.copernicus.eu/stac/v1",
+        http_timeout_seconds=10,
+    )
