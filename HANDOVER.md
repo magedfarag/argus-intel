@@ -306,8 +306,8 @@ After P1, focus on test coverage and CI:
 |------|----------|------|--------|
 | **P2-1** | pytest-cov + 80% | High | ✅ DONE (2026-03-28) |
 | **P2-2** | Circuit breaker tests | High | ✅ DONE (2026-03-28) |
+| **P2-3** | Async job tests | Medium | ✅ DONE (2026-03-28) |
 | **P2-4** | GitHub Actions CI | High | ✅ DONE (2026-03-28) |
-| **P2-3** | Async job tests | Medium | ⏳ Ready |
 | **P2-5** | Rate limiting | Medium | ⏳ Ready |
 
 ### P2-1: pytest-cov Setup
@@ -340,7 +340,7 @@ python -m pytest tests/ --cov=backend/app --cov-fail-under=80
 |---|---|---|---|
 | P2-1 | Add pytest-cov and 80 % threshold to CI | ✅ DONE (2026-03-28) | Created `pytest.ini` with coverage config |
 | P2-2 | Test circuit breaker state transitions | ✅ DONE (2026-03-28) | 12/12 tests passing: CLOSED→OPEN (threshold=3); OPEN→HALF-OPEN (timeout=1s); per-provider isolation |
-| P2-3 | Test async job dispatch + poll cycle | ⏳ TODO | Integration test: `async_execution=True` → `job_id` → poll until `completed` |
+| P2-3 | Test async job dispatch + poll cycle | ✅ DONE (2026-03-28) | 19/19 tests passing: Job creation; state transitions; serialization; polling simulation |
 | P2-4 | GitHub Actions CI workflow | ✅ DONE (2026-03-28) | `.github/workflows/ci.yml` created — pytest + coverage + ruff + bandit + Docker build on push |
 | P2-5 | Rate-limit `/api/analyze` | ⏳ TODO | Add `slowapi` or CDN-level rate limiting |
 
