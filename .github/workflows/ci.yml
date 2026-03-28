@@ -1,0 +1,86 @@
+name: CI — Tests & Code Quality
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  test:
+    name: Test (Unit + Integration)
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Lint with ruff (non-blocking)
+        run: ruff check backend/ tests/ || true
+      - name: Tests — Unit
+        run: python -m pytest tests/unit/ -v --tb=short
+      - name: Tests — Integration
+        env:
+          REDIS_URL: redis://localhost:6379/0
+        run: python -m pytest tests/integration/ -v --tb=short
+      - name: Coverage Report
+        run: >
+          python -m pytest tests/ 
+          --cov=backend/app 
+          --cov-report=term-missing 
+          --cov-report=html 
+          -v
+      - name: Check Coverage Threshold (>20%)
+        run: >
+          python -m pytest tests/ 
+          --cov=backend/app 
+          --cov-fail-under=20 
+          -q
+      - name: Upload Coverage (HTML)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: htmlcov/
+
+  security:
+    name: Security Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install bandit safety
+      - name: Check for secrets (bandit)
+        run: bandit -r backend/ -ll || true
+      - name: Check dependency vulnerabilities (safety)
+        run: safety check || true
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: construction-monitor-demo:latest
