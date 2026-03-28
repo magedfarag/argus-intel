@@ -240,10 +240,10 @@ The following 4 tasks unblock production deployment. Each is independent or has 
 
 | Task | Time | Dependency | Status |
 |------|------|-----------|--------|
-| **P1-2** | Provision Redis | 20 min | None | ⏳ Ready |
+| **P1-2** | Provision Redis | 20 min | None | ✅ DONE |
 | **P1-1** | Sentinel-2 credentials | 5-10 min | None | ⏳ Ready |
 | **P1-3** | Validate rasterio | 45 min | After P1-2 | ⏳ Ready |
-| **P1-4** | APP_MODE=live | 5 min | After P1-1,3 | ⏳ Ready |
+| **P1-4** | APP_MODE feature flag | 5 min | After P1-1,3 | ✅ DONE |
 
 ### P1-2: Redis Provisioning
 
@@ -286,11 +286,11 @@ from backend.app.services.change_detection import detect_construction_changes
 # Test with real COG asset
 ```
 
-### P1-4: Go Live
+### P1-4: Go Live ✅ DONE
 
 Once all P1-1,2,3 complete, update .env:
 ```env
-APP_MODE=live
+APP_MODE=production
 SENTINEL2_CLIENT_ID=...
 SENTINEL2_CLIENT_SECRET=...
 REDIS_URL=redis://localhost:6379/0
