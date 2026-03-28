@@ -5,7 +5,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from backend.app.dependencies import get_registry, verify_api_key, verify_api_key
+from backend.app.dependencies import get_registry, verify_api_key
 from backend.app.models.requests import SearchRequest
 from backend.app.models.responses import SceneSearchResult, SearchResponse
 from backend.app.providers.registry import ProviderRegistry

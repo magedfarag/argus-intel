@@ -6,7 +6,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.app.config import AppSettings
-from backend.app.dependencies import get_app_settings, verify_api_key, verify_api_key
+from backend.app.dependencies import get_app_settings, verify_api_key
 from backend.app.models.responses import AnalyzeResponse, JobStatusResponse
 
 router = APIRouter(prefix="/api", tags=["jobs"])

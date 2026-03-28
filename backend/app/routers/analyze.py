@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from backend.app.cache.client import CacheClient
 from backend.app.config import AppSettings
-from backend.app.dependencies import get_app_settings, get_cache, get_circuit_breaker, get_registry, verify_api_key, verify_api_key
+from backend.app.dependencies import get_app_settings, get_cache, get_circuit_breaker, get_registry, verify_api_key
 from backend.app.models.requests import AnalyzeRequest
 from backend.app.models.responses import AnalyzeResponse, JobStatusResponse
 from backend.app.providers.base import ProviderUnavailableError
