@@ -96,10 +96,13 @@ def verify_api_key(
     # Extract Bearer token from Authorization header (format: "Bearer <key>")
     provided_key = None
     if header_key:
-        if header_key.startswith("Bearer "):
-            provided_key = header_key[7:]  # Strip "Bearer " prefix
-        else:
-            provided_key = header_key
+        if not header_key.startswith("Bearer "):
+            # Authorization header without "Bearer " prefix is invalid
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Invalid API key format. Use 'Authorization: Bearer <key>' header, ?api_key query param, or api_key cookie.",
+            )
+        provided_key = header_key[7:]  # Strip "Bearer " prefix
     elif query_key:
         provided_key = query_key
     elif cookie_key:
