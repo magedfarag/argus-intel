@@ -113,42 +113,6 @@ def verify_api_key(
 
     return provided_key
 
-
-# ──────────────────────────────────────────────────────────────────────────
-# API Key authentication — REQUIRED for all mutation endpoints
-# ──────────────────────────────────────────────────────────────────────────
-# Supports three methods (in priority order):
-#   1. Authorization: Bearer <key> header
-#   2. ?api_key=<key> query parameter (for WebSocket / browser testing)
-#   3. api_key=<key> cookie (for SPAs)
-#
-# Set API_KEY in .env. If unset, authentication is skipped (insecure dev mode).
-# For production, MUST set a strong API_KEY (e.g., openssl rand -hex 32).
-
-_api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
-_api_key_query = APIKeyQuery(name="api_key", auto_error=False)
-_api_key_cookie = APIKeyCookie(name="api_key", auto_error=False)
-
-
-def verify_api_key(
-    header_key: str | None = Security(_api_key_header),
-    query_key: str | None = Security(_api_key_query),
-    cookie_key: str | None = Security(_api_key_cookie),
-) -> str:
-    """
-    Verify API key from one of three sources: Authorization header (Bearer),
-    query parameter, or cookie. Raises HTTPException(403) if no valid key found.
-
-    In secure mode (API_KEY env var set), one of these three MUST be provided
-    and match. In insecure mode (API_KEY unset), skips validation.
-    """
-    settings = get_settings()
-    configured_key = settings.api_key
-
-    # Insecure dev mode: no API key configured
-    if not configured_key:
-        return "INSECURE_DEV_MODE"
-
     # Extract Bearer token from Authorization header (format: "Bearer <key>")
     provided_key = None
     if header_key:
