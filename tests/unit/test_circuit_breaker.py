@@ -183,5 +183,36 @@ def test_circuit_breaker_per_provider_isolation(breaker):
     assert breaker.status("provider_b") == CBState.CLOSED
 
 
+def test_circuit_breaker_sentinel2_success(breaker):
+    """Test Sentinel-2 provider state: success keeps breaker CLOSED."""
+    breaker.record_success("sentinel2")
+    assert breaker.status("sentinel2") == CBState.CLOSED
+    assert breaker.is_open("sentinel2") is False
+
+
+def test_circuit_breaker_sentinel2_open_after_failures(breaker):
+    """Test Sentinel-2 provider state: OPEN after failures."""
+    for _ in range(3):
+        breaker.record_failure("sentinel2")
+    assert breaker.status("sentinel2") == CBState.OPEN
+    assert breaker.is_open("sentinel2") is True
+
+
+def test_circuit_breaker_landsat_state_independent(breaker):
+    """Test Landsat provider state independent of Sentinel-2."""
+    # Sentinel-2 fails
+    for _ in range(3):
+        breaker.record_failure("sentinel2")
+    assert breaker.status("sentinel2") == CBState.OPEN
+    
+    # Landsat should still be CLOSED
+    assert breaker.status("landsat") == CBState.CLOSED
+    
+    # Landsat success should not affect Sentinel-2
+    breaker.record_success("landsat")
+    assert breaker.status("sentinel2") == CBState.OPEN
+    assert breaker.status("landsat") == CBState.CLOSED
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
