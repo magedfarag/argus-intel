@@ -5,37 +5,37 @@ import time
 
 import pytest
 
-from backend.app.resilience.circuit_breaker import CircuitBreaker
+from backend.app.resilience.circuit_breaker import CBState, CircuitBreaker
 
 
 @pytest.fixture
 def breaker():
-    """Fresh circuit breaker instance."""
+    """Fresh circuit breaker instance with threshold=3, timeout=1 second."""
     return CircuitBreaker(failure_threshold=3, recovery_timeout=1)
 
 
 def test_circuit_breaker_init_closed(breaker):
-    """Test circular breaker initializes in CLOSED state."""
-    assert breaker.get_state("test_provider") == "closed"
-    assert breaker.failure_count.get("test_provider", 0) == 0
+    """Test circuit breaker initializes in CLOSED state."""
+    assert breaker.status("test_provider") == CBState.CLOSED
+    assert breaker.is_open("test_provider") is False
 
 
 def test_circuit_breaker_success_keeps_closed(breaker):
     """Test successful operation keeps breaker CLOSED."""
     breaker.record_success("test_provider")
-    assert breaker.get_state("test_provider") == "closed"
-    assert breaker.failure_count.get("test_provider", 0) == 0
+    assert breaker.status("test_provider") == CBState.CLOSED
+    assert breaker.is_open("test_provider") is False
 
 
 def test_circuit_breaker_failure_increments_count(breaker):
-    """Test failures increment counter."""
+    """Test failures increment internal counter but don't open immediately."""
     breaker.record_failure("test_provider")
-    assert breaker.failure_count.get("test_provider", 0) == 1
-    assert breaker.get_state("test_provider") == "closed"
+    assert breaker.status("test_provider") == CBState.CLOSED
+    assert breaker.is_open("test_provider") is False
 
     breaker.record_failure("test_provider")
-    assert breaker.failure_count.get("test_provider", 0) == 2
-    assert breaker.get_state("test_provider") == "closed"
+    assert breaker.status("test_provider") == CBState.CLOSED
+    assert breaker.is_open("test_provider") is False
 
 
 def test_circuit_breaker_opens_after_threshold(breaker):
@@ -43,12 +43,12 @@ def test_circuit_breaker_opens_after_threshold(breaker):
     # Trigger 2 failures
     breaker.record_failure("test_provider")
     breaker.record_failure("test_provider")
-    assert breaker.get_state("test_provider") == "closed"
+    assert breaker.status("test_provider") == CBState.CLOSED
 
     # Third failure should OPEN the breaker
     breaker.record_failure("test_provider")
-    assert breaker.failure_count.get("test_provider", 0) == 3
-    assert breaker.get_state("test_provider") == "open"
+    assert breaker.status("test_provider") == CBState.OPEN
+    assert breaker.is_open("test_provider") is True
 
 
 def test_circuit_breaker_open_blocks_requests(breaker):
@@ -58,18 +58,19 @@ def test_circuit_breaker_open_blocks_requests(breaker):
         breaker.record_failure("test_provider")
 
     assert breaker.is_open("test_provider") is True
+    assert breaker.status("test_provider") == CBState.OPEN
 
 
 def test_circuit_breaker_success_resets_in_closed(breaker):
     """Test success in CLOSED state resets failure count."""
     breaker.record_failure("test_provider")
     breaker.record_failure("test_provider")
-    assert breaker.failure_count.get("test_provider", 0) == 2
+    assert breaker.status("test_provider") == CBState.CLOSED
 
     # Success should reset counter
     breaker.record_success("test_provider")
-    assert breaker.failure_count.get("test_provider", 0) == 0
-    assert breaker.get_state("test_provider") == "closed"
+    assert breaker.status("test_provider") == CBState.CLOSED
+    assert breaker.is_open("test_provider") is False
 
 
 def test_circuit_breaker_transitions_to_half_open_after_timeout(breaker):
@@ -77,13 +78,12 @@ def test_circuit_breaker_transitions_to_half_open_after_timeout(breaker):
     # Open the breaker
     for _ in range(3):
         breaker.record_failure("test_provider")
-    assert breaker.get_state("test_provider") == "open"
+    assert breaker.status("test_provider") == CBState.OPEN
 
-    # Wait for recovery timeout
+    # Wait for recovery timeout and check is_open (which should transition to HALF_OPEN)
     time.sleep(1.1)  # Slightly longer than recovery_timeout=1
-
-    # Breaker should allow one test request (HALF_OPEN)
-    assert breaker.get_state("test_provider") == "half_open"
+    assert breaker.is_open("test_provider") is False  # HALF_OPEN allows probe
+    assert breaker.status("test_provider") == CBState.HALF_OPEN
 
 
 def test_circuit_breaker_closes_on_half_open_success(breaker):
@@ -91,15 +91,17 @@ def test_circuit_breaker_closes_on_half_open_success(breaker):
     # Open and wait for timeout
     for _ in range(3):
         breaker.record_failure("test_provider")
-    assert breaker.get_state("test_provider") == "open"
+    assert breaker.status("test_provider") == CBState.OPEN
 
     time.sleep(1.1)
-    assert breaker.get_state("test_provider") == "half_open"
+    # Transition to HALF_OPEN via is_open check
+    assert breaker.is_open("test_provider") is False
+    assert breaker.status("test_provider") == CBState.HALF_OPEN
 
     # Success in HALF_OPEN should close breaker
     breaker.record_success("test_provider")
-    assert breaker.get_state("test_provider") == "closed"
-    assert breaker.failure_count.get("test_provider", 0) == 0
+    assert breaker.status("test_provider") == CBState.CLOSED
+    assert breaker.is_open("test_provider") is False
 
 
 def test_circuit_breaker_reopens_on_half_open_failure(breaker):
@@ -108,11 +110,14 @@ def test_circuit_breaker_reopens_on_half_open_failure(breaker):
     for _ in range(3):
         breaker.record_failure("test_provider")
     time.sleep(1.1)
-    assert breaker.get_state("test_provider") == "half_open"
+    # Transition to HALF_OPEN
+    assert breaker.is_open("test_provider") is False
+    assert breaker.status("test_provider") == CBState.HALF_OPEN
 
     # Failure in HALF_OPEN should reopen
     breaker.record_failure("test_provider")
-    assert breaker.get_state("test_provider") == "open"
+    assert breaker.status("test_provider") == CBState.OPEN
+    assert breaker.is_open("test_provider") is True
 
 
 def test_circuit_breaker_multiple_cycles(breaker):
@@ -120,28 +125,30 @@ def test_circuit_breaker_multiple_cycles(breaker):
     # Cycle 1: CLOSED → OPEN
     for _ in range(3):
         breaker.record_failure("test_provider")
-    assert breaker.get_state("test_provider") == "open"
+    assert breaker.status("test_provider") == CBState.OPEN
 
     # Wait and transition to HALF_OPEN
     time.sleep(1.1)
-    assert breaker.get_state("test_provider") == "half_open"
+    assert breaker.is_open("test_provider") is False
+    assert breaker.status("test_provider") == CBState.HALF_OPEN
 
     # Success → CLOSED
     breaker.record_success("test_provider")
-    assert breaker.get_state("test_provider") == "closed"
+    assert breaker.status("test_provider") == CBState.CLOSED
 
     # Cycle 2: CLOSED → OPEN again
     for _ in range(3):
         breaker.record_failure("test_provider")
-    assert breaker.get_state("test_provider") == "open"
+    assert breaker.status("test_provider") == CBState.OPEN
 
     # Wait and transition to HALF_OPEN
     time.sleep(1.1)
-    assert breaker.get_state("test_provider") == "half_open"
+    assert breaker.is_open("test_provider") is False
+    assert breaker.status("test_provider") == CBState.HALF_OPEN
 
     # Success → CLOSED
     breaker.record_success("test_provider")
-    assert breaker.get_state("test_provider") == "closed"
+    assert breaker.status("test_provider") == CBState.CLOSED
 
 
 def test_circuit_breaker_custom_threshold(breaker):
@@ -151,11 +158,13 @@ def test_circuit_breaker_custom_threshold(breaker):
     # Should remain CLOSED until 5 failures
     for i in range(1, 5):
         custom_breaker.record_failure("test_provider")
-        assert custom_breaker.get_state("test_provider") == "closed", f"Failed at iteration {i}"
+        assert (
+            custom_breaker.status("test_provider") == CBState.CLOSED
+        ), f"Failed at iteration {i}"
 
     # 5th failure should open
     custom_breaker.record_failure("test_provider")
-    assert custom_breaker.get_state("test_provider") == "open"
+    assert custom_breaker.status("test_provider") == CBState.OPEN
 
 
 def test_circuit_breaker_per_provider_isolation(breaker):
@@ -163,15 +172,15 @@ def test_circuit_breaker_per_provider_isolation(breaker):
     # Provider A fails 3 times → OPEN
     for _ in range(3):
         breaker.record_failure("provider_a")
-    assert breaker.get_state("provider_a") == "open"
+    assert breaker.status("provider_a") == CBState.OPEN
 
     # Provider B should be CLOSED independently
-    assert breaker.get_state("provider_b") == "closed"
+    assert breaker.status("provider_b") == CBState.CLOSED
 
     # Success on provider B should have no effect on provider A
     breaker.record_success("provider_b")
-    assert breaker.get_state("provider_a") == "open"
-    assert breaker.get_state("provider_b") == "closed"
+    assert breaker.status("provider_a") == CBState.OPEN
+    assert breaker.status("provider_b") == CBState.CLOSED
 
 
 if __name__ == "__main__":
