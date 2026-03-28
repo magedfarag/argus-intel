@@ -115,3 +115,19 @@ def test_cache_is_healthy_checks_backend():
     # Invalid Redis should still have memory fallback
     invalid_cache = CacheClient(redis_url="redis://invalid:9999/0", ttl_seconds=10)
     assert invalid_cache.is_healthy() is True  # Fallback makes it healthy
+
+
+def test_cache_from_settings_class_method():
+    """Verify from_settings() initializes cache from settings object."""
+    from unittest.mock import Mock
+
+    settings = Mock()
+    settings.redis_url = ""
+    settings.cache_ttl_seconds = 120
+    settings.cache_max_entries = 512
+
+    c = CacheClient.from_settings(settings)
+
+    assert c._ttl == 120
+    assert c._memory is not None
+    assert c._redis is None
