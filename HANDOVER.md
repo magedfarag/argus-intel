@@ -3,7 +3,7 @@
 **Date:** 2026-03-28
 **Repository:** https://github.com/magedfarag/construction-monitor-demo
 **Branch:** `main`
-**Test status:** 150 / 150 passing (7 skipped)
+**Test status:** 227 / 227 passing (7 skipped)
 
 ---
 
@@ -38,22 +38,27 @@ construction-monitor-demo/
 │   │   ├── demo.py               Always-available deterministic fallback (3 scenarios)
 │   │   ├── sentinel2.py          Copernicus Data Space OAuth2 + STAC search
 │   │   ├── landsat.py            USGS LandsatLook STAC (no auth required)
+│   │   ├── maxar.py              Maxar SecureWatch / Open Data STAC (commercial)
+│   │   ├── planet.py             Planet Labs Data API (commercial daily)
 │   │   └── registry.py           Priority-ordered provider resolution
 │   ├── services/
 │   │   ├── analysis.py           Orchestrator: search → select → detect → fallback chain
 │   │   ├── change_detection.py   Rasterio NDVI pipeline on remote COGs
 │   │   ├── scene_selection.py    Composite ranking + before/after pair selection
-│   │   └── job_manager.py        Redis-backed async job CRUD (in-memory fallback)
+│   │   ├── job_manager.py        Redis-backed async job CRUD (in-memory fallback)
+│   │   ├── postgres_jobs.py      SQLAlchemy PostgreSQL job persistence
+│   │   └── thumbnails.py         COG → PNG thumbnail cache (rasterio + LRU)
 │   ├── cache/client.py           Redis primary + cachetools TTLCache fallback
 │   ├── resilience/
-│   │   ├── circuit_breaker.py    Thread-safe CLOSED / OPEN / HALF-OPEN per provider
+│   │   ├── circuit_breaker.py    Thread-safe CLOSED / OPEN / HALF-OPEN per provider (optional Redis)
+│   │   ├── rate_limiter.py       slowapi limiter factory
 │   │   └── retry.py              tenacity wait_random_exponential decorator
 │   ├── models/
 │   │   ├── requests.py           AnalyzeRequest, SearchRequest (Pydantic v2)
 │   │   ├── responses.py          AnalyzeResponse, ChangeRecord, JobStatusResponse …
 │   │   ├── scene.py              SceneMetadata dataclass
 │   │   └── jobs.py               Job, JobState enum
-│   ├── routers/                  7 routers — 13 total endpoints
+│   ├── routers/                  9 routers — 15 total endpoints (incl. WebSocket + thumbnails)
 │   ├── workers/
 │   │   ├── celery_app.py         Celery instance (graceful no-op if Redis absent)
 │   │   └── tasks.py              run_analysis_task Celery task
@@ -63,11 +68,11 @@ construction-monitor-demo/
 │       └── styles.css            Dark theme + all new component styles
 ├── tests/
 │   ├── conftest.py               Session-scoped shared fixtures
-│   ├── unit/                     27 tests (config, cache, demo provider, scene selection)
+│   ├── unit/                     216 tests (config, cache, providers, resilience, jobs, WS, thumbnails)
 │   └── integration/test_api.py  11 tests — all endpoints tested
 ├── docs/
-│   ├── API.md                    Legacy endpoint reference (needs refresh — see §8)
-│   ├── ARCHITECTURE.md           Legacy architecture notes (needs refresh — see §8)
+│   ├── API.md                    Endpoint reference v3.0 (auth, providers, WS, thumbnails)
+│   ├── ARCHITECTURE.md           Architecture reference v3.0 (providers, persistence, resilience)
 │   ├── DEPLOYMENT.md             NEW — Docker + env vars operational guide
 │   ├── PROVIDERS.md              NEW — Sentinel-2 / Landsat credential setup
 │   └── CHANGE_DETECTION.md      NEW — Pipeline technical reference
@@ -193,7 +198,7 @@ requested provider
 - [x] `CircuitBreaker` wired into `AnalysisService._run_live_analysis()`
 - [x] `analyze.py` router injects `breaker` from DI
 - [x] `providers.py` duplicate-code bug fixed
-- [x] **150 / 150 tests passing** (7 skipped)
+- [x] **227 / 227 tests passing** (7 skipped)
 
 ### Phase 4 — Frontend
 - [x] `index.html` — provider strip, mode badge, cloud slider, processing mode,
@@ -317,7 +322,7 @@ After P1, focus on test coverage and CI:
 python -m pytest tests/ --cov=backend/app --cov-fail-under=80
 ```
 
-**Current test status**: 150/150 passing, 7 skipped (verified in HANDOVER Phase 3)
+**Current test status**: 227/227 passing, 7 skipped (verified in HANDOVER Phase 5)
 
 ---
 
