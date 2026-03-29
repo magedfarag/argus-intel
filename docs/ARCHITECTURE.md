@@ -1,8 +1,8 @@
-# Architecture — Construction Activity Monitor v2.0
+# Architecture — Construction Activity Monitor v3.0
 
 **Date**: 2026-03-28  
-**Version**: 2.0.0  
-**Mode**: FastAPI + Redis + Celery (async jobs) + rasterio (change detection)
+**Version**: 3.0.0  
+**Mode**: FastAPI + Redis + Celery (async jobs) + rasterio (change detection) + PostgreSQL (job persistence)
 
 ---
 
@@ -14,17 +14,20 @@
 │  (Static JS)    │  Draws AOI, computes area
 └────────┬────────┘
          │ POST /api/analyze (GeoJSON + dates)
+         │ WS /api/jobs/{id}/stream (live progress)
          ▼
 ┌─────────────────────────────────────────────────────┐
 │          FastAPI Application                        │
 ├─────────────────────────────────────────────────────┤
 │ • AnalysisService: Orchestrates search → select →   │
 │   detect → fallback chain                           │
-│ • ProviderRegistry: sentinel2 → landsat → demo      │
+│ • ProviderRegistry: sentinel2 → landsat → maxar →   │
+│   planet → demo (mode-dependent priority)           │
 │ • CacheClient: Redis + TTLCache dual-layer         │
-│ • CircuitBreaker: Per-provider state tracking       │
+│ • CircuitBreaker: Per-provider (Redis or in-memory) │
 │ • RateLimiter: 5/10/20 req/min per endpoint        │
-│ • JobManager: Redis-backed async job CRUD          │
+│ • JobManager: Redis + PostgreSQL + memory hierarchy │
+│ • ThumbnailService: COG→PNG crop with LRU cache    │
 │                                                     │
 │ Routers:                                            │
 │   ├─ health.py: GET /api/health                    │
@@ -33,15 +36,17 @@
 │   ├─ analyze.py: POST /api/analyze (rate-limited)  │
 │   ├─ search.py: POST /api/search (rate-limited)    │
 │   ├─ jobs.py: GET/DELETE /api/jobs/* (async mgmt)  │
+│   ├─ ws_jobs.py: WS /api/jobs/{id}/stream          │
+│   ├─ thumbnails.py: GET /api/thumbnails/{id}       │
 │   └─ credits.py: GET /api/credits                  │
 └────────┬────────────────────────────────────────────┘
          │
-    ┌────┴────────────┬────────────┬──────────────┐
-    ▼                 ▼            ▼              ▼
-┌────────────┐  ┌──────────┐  ┌────────┐  ┌──────────────┐
-│   Redis    │  │ Sentinel2│  │Landsat │  │Demo Provider │
-│  (Cache)   │  │ Provider │  │Provider│  │(Deterministic)
-└────────────┘  └──────────┘  └────────┘  └──────────────┘
+    ┌────┴────────┬────────────┬──────────┬──────────────┐
+    ▼             ▼            ▼          ▼              ▼
+┌────────────┐ ┌──────────┐ ┌────────┐ ┌──────┐ ┌──────────────┐
+│   Redis    │ │ Sentinel2│ │Landsat │ │Maxar │ │Demo Provider │
+│  (Cache)   │ │ Provider │ │Provider│ │Planet│ │(Deterministic)
+└────────────┘ └──────────┘ └────────┘ └──────┘ └──────────────┘
                       │             │
                       └─────┬───────┘
                            ▼
@@ -54,7 +59,13 @@
     ┌─────────────────────────────────────┐
     │    Celery Worker (Background)        │
     │    Processes async analysis tasks    │
-    │    store results in Redis            │
+    │    Store results: Redis + PostgreSQL │
+    └─────────────────────────────────────┘
+    
+    ┌─────────────────────────────────────┐
+    │    PostgreSQL (Optional)             │
+    │    Persistent job history            │
+    │    Survives Redis TTL expiry         │
     └─────────────────────────────────────┘
 ```
 
@@ -109,14 +120,17 @@
 2. Celery Worker (Background)
    ├─ Receive task (job_id + AnalyzeRequest)
    ├─ Execute same pipeline as sync
-   ├─ Store result in Redis
+   ├─ Store result in Redis + PostgreSQL (write-through)
    ├─ Update job state (pending → running → completed/failed)
    └─ Return job_id to client immediately
 
-3. Client polls: GET /api/jobs/{job_id}
-   ├─ Check Redis for job status
-   ├─ Return state: "pending" | "running" | "completed" | "failed"
-   └─ If completed, include full AnalyzeResponse
+3. Client receives updates via WebSocket or HTTP polling:
+   ├─ WS /api/jobs/{job_id}/stream (preferred, server-push)
+   │  ├─ Receives JSON frames: progress, completed, failed
+   │  └─ Auto-closes on terminal state
+   └─ GET /api/jobs/{job_id} (fallback, 3s HTTP poll)
+      ├─ Return state: "pending" | "running" | "completed" | "failed"
+      └─ If completed, include full AnalyzeResponse
 
 4. Client can cancel: DELETE /api/jobs/{job_id}/cancel
    └─ Celery revokes task + terminates worker
@@ -141,11 +155,22 @@
   - Requires: None
   - Resolution: 30 m
 
+- **maxar.py**: Maxar SecureWatch STAC (API key auth)
+  - Requires: `MAXAR_API_KEY`
+  - Resolution: 0.3–0.5 m (WorldView-3/4)
+  - Commercial; subscription required
+
+- **planet.py**: Planet Data API (Basic auth)
+  - Requires: `PLANET_API_KEY`
+  - Resolution: 3–5 m (PlanetScope), 0.5 m (SkySat)
+  - Commercial; daily revisit
+
 - **demo.py**: Deterministic mock (3 hardcoded scenarios)
   - Requires: None
   - Always available; used for testing & fallback
 
 - **registry.py**: Provider priority routing
+  - Mode-aware: DEMO (demo only), STAGING (sentinel2→landsat→maxar→planet→demo), PRODUCTION (sentinel2→landsat→maxar→planet)
   - Respects CircuitBreaker state per provider
   - Maintains request counts for credits endpoint
 
@@ -165,9 +190,21 @@
   - Detects clusters via scikit-image + morphology
 
 - **job_manager.py**: `JobManager`
-  - Redis-backed async job CRUD
-  - Polls Celery AsyncResult for status
-  - In-memory fallback if Redis unavailable
+  - Write-through persistence: Redis → PostgreSQL → Memory
+  - Redis: fast ephemeral cache (24h TTL)
+  - PostgreSQL: durable persistent store (via SQLAlchemy, optional)
+  - In-memory dict: last-resort fallback for local dev
+  - Reads check Redis first, then PostgreSQL, then memory
+
+- **postgres_jobs.py**: `PostgresJobStore`
+  - SQLAlchemy model for the `jobs` table
+  - CRUD with upsert (save/load)
+  - Requires `DATABASE_URL` in config
+
+- **thumbnails.py**: `ThumbnailService`
+  - Generates PNG crops from COG scenes via rasterio
+  - LRU cache (max 128 entries)
+  - Graceful degradation: returns None if rasterio unavailable
 
 ### **Cache** (`backend/app/cache/`)
 
@@ -181,6 +218,8 @@
 
 - **circuit_breaker.py**: Per-provider state machine
   - States: CLOSED (normal) → OPEN (failed) → HALF_OPEN (probe)
+  - Optional Redis backend for multi-worker state sharing
+  - Falls back to in-process memory if Redis unavailable
   - Configurable threshold & recovery timeout
   - Thread-safe via `threading.Lock`
 
@@ -215,6 +254,8 @@
 - **analyze.py**: POST /api/analyze (auth + rate-limited)
 - **search.py**: POST /api/search (auth + rate-limited)
 - **jobs.py**: GET/DELETE /api/jobs/{job_id} (auth + rate-limited)
+- **ws_jobs.py**: WS /api/jobs/{job_id}/stream (WebSocket live progress)
+- **thumbnails.py**: GET /api/thumbnails/{scene_id} (cached PNG crops)
 - **credits.py**: GET /api/credits (no auth)
 
 ---
@@ -293,36 +334,40 @@ Output: Change Records
 
 ## **Configuration**
 
-All via environment variables (`.env` file):
+All via environment variables (`.env` file). See `.env.example` for full reference.
 
 ```
-# App
-APP_MODE=live                           # or demo (fallback only)
+# App mode: demo | staging | production
+APP_MODE=staging
 
 # Providers
-SENTINEL2_CLIENT_ID=...                 # Leave empty to skip sentinel2
+SENTINEL2_CLIENT_ID=...                 # Leave empty to skip Sentinel-2
 SENTINEL2_CLIENT_SECRET=...
-LANDSAT_AVAILABLE=true                  # Landsat always available (no auth)
+# Landsat: no auth needed for STAC search
+MAXAR_API_KEY=...                       # Leave empty to skip Maxar
+PLANET_API_KEY=...                      # Leave empty to skip Planet
 
 # Cache
 REDIS_URL=redis://localhost:6379        # Leave empty to use TTLCache only
 CACHE_TTL_SECONDS=3600
 
+# Database (optional — for persistent job history)
+DATABASE_URL=postgresql+psycopg2://user:pass@localhost:5432/construction_monitor
+
 # Celery / Async
 CELERY_BROKER_URL=${REDIS_URL}          # Same as REDIS_URL
-ASYNC_AREA_THRESHOLD_KM2=50.0          # Trigger async for AOI > 50 km²
+ASYNC_AREA_THRESHOLD_KM2=25.0          # Trigger async for AOI > 25 km²
 
 # Resilience
 CIRCUIT_BREAKER_FAILURE_THRESHOLD=5     # Open after 5 failures
 CIRCUIT_BREAKER_RECOVERY_TIMEOUT=60     # Try recovery after 60s
 
 # Security
-ALLOWED_ORIGINS=http://localhost:3000,https://myapp.com
-API_KEY_REQUIRED=true                   # Enforce auth on protected endpoints
-REQUIRED_API_KEYS="key1,key2,key3"      # Comma-separated list (if set, only these allowed)
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000,http://127.0.0.1:8000
+API_KEY=                                # Set to a strong value for production
 
 # Logging
-LOG_LEVEL=info                          # debug | info | warning | error
+LOG_LEVEL=INFO                          # DEBUG | INFO | WARNING | ERROR
 LOG_FORMAT=json                         # or text
 ```
 
@@ -331,9 +376,10 @@ LOG_FORMAT=json                         # or text
 ## **Deployment**
 
 - **Docker**: `docker build -t construction-monitor . && docker-compose up`
-- **Services**: redis (cache/broker), api (FastAPI), worker (Celery)
+- **Services**: redis (cache/broker), postgresql (job persistence), api (FastAPI), worker (Celery)
 - **Reverse Proxy**: Nginx/HAProxy for:
   - HTTPS termination
+  - WebSocket proxying (`Upgrade: websocket`)
   - Rate limiting at CDN level (optional second layer)
   - CORS headers (backup; app enforces primary)
   - Load balancing across multiple API + worker instances
@@ -343,7 +389,7 @@ LOG_FORMAT=json                         # or text
 ## **Future Extensions**
 
 1. **Streaming Tiles**: Replace static scene pair with sliding-window analysis
-2. **User Accounts**: Add PostgreSQL + JWT authentication
+2. **User Accounts**: Add JWT authentication alongside API keys
 3. **Vector Output**: Export change polygons as GeoJSON; integrate with GIS workflows
 4. **Multi-Temporal**: Composite 3+ scenes for seasonal suppression
 5. **Segmentation**: Deep learning model (U-Net, ResNet) instead of NDVI rules

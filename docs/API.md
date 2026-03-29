@@ -1,8 +1,8 @@
-# API Reference — Construction Activity Monitor v2.0
+# API Reference — Construction Activity Monitor v3.0
 
 **Base URL**: `http://localhost:8000` (development)  
-**Version**: 2.0.0  
-**Authentication**: Optional API key via `X-API-Key` header (required if `API_KEY_REQUIRED=true`)
+**Version**: 3.0.0  
+**Authentication**: Optional API key via Bearer token, query param, or cookie (required if `API_KEY` is set)
 
 ---
 
@@ -25,20 +25,8 @@ curl http://localhost:8000/api/health
     "redis": "healthy",
     "sentinel2_provider": "healthy",
     "landsat_provider": "unhealthy",
-    "demo_provider": "healthy"
-  }
-}
-```
-
-**Response** (503 Service Unavailable):
-```json
-{
-  "status": "degraded",
-  "timestamp": "2026-03-28T10:15:00Z",
-  "dependencies": {
-    "redis": "unhealthy",
-    "sentinel2_provider": "unavailable",
-    "landsat_provider": "healthy",
+    "maxar_provider": "unavailable",
+    "planet_provider": "unavailable",
     "demo_provider": "healthy"
   }
 }
@@ -57,11 +45,11 @@ curl http://localhost:8000/api/config
 **Response** (200 OK):
 ```json
 {
-  "app_mode": "live",
+  "app_mode": "staging",
   "cache_enabled": true,
   "async_enabled": true,
-  "async_area_threshold_km2": 50.0,
-  "supported_providers": ["sentinel2", "landsat", "demo"],
+  "async_area_threshold_km2": 25.0,
+  "supported_providers": ["sentinel2", "landsat", "maxar", "planet", "demo"],
   "available_providers": ["landsat", "demo"],
   "max_area_km2": 100.0,
   "min_area_km2": 0.01,
@@ -96,6 +84,30 @@ curl http://localhost:8000/api/providers
       "last_failure": "2026-03-28T09:45:00Z",
       "resolution_m": 10,
       "latency_ms": 1250
+    },
+    {
+      "id": "landsat",
+      "name": "Landsat 8/9 (USGS)",
+      "available": true,
+      "status": "CLOSED",
+      "resolution_m": 30,
+      "latency_ms": 850
+    },
+    {
+      "id": "maxar",
+      "name": "Maxar (SecureWatch)",
+      "available": false,
+      "status": "CLOSED",
+      "resolution_m": 0.5,
+      "notes": ["Requires MAXAR_API_KEY", "Commercial high-resolution (0.3-0.5 m)"]
+    },
+    {
+      "id": "planet",
+      "name": "Planet (PlanetScope/SkySat)",
+      "available": false,
+      "status": "CLOSED",
+      "resolution_m": 3,
+      "notes": ["Requires PLANET_API_KEY", "Daily revisit at 3-5 m resolution"]
     },
     {
       "id": "landsat",
@@ -160,7 +172,7 @@ Analyze an area of interest (AOI) for construction changes between two dates (au
 
 **Request Headers**:
 ```
-X-API-Key: your-api-key  (if API_KEY_REQUIRED=true)
+Authorization: Bearer <your-api-key>  (if API_KEY is set)
 Content-Type: application/json
 ```
 
@@ -191,7 +203,7 @@ Content-Type: application/json
 - `geometry` (required): GeoJSON Polygon or MultiPolygon (must be valid geography)
 - `start_date` (required): ISO 8601 date string (YYYY-MM-DD)
 - `end_date` (required): ISO 8601 date string (YYYY-MM-DD)
-- `provider` (optional, default: "auto"): "sentinel2" | "landsat" | "demo" | "auto"
+- `provider` (optional, default: "auto"): "sentinel2" | "landsat" | "maxar" | "planet" | "demo" | "auto"
 - `confidence_threshold` (optional, default: 50): 0–100, filter changes below threshold
 - `async_execution` (optional, default: false): true to dispatch to background worker
 
@@ -303,7 +315,7 @@ Search for satellite imagery scenes without performing change detection (auth re
 
 **Request Headers**:
 ```
-X-API-Key: your-api-key
+Authorization: Bearer <your-api-key>
 Content-Type: application/json
 ```
 
@@ -356,6 +368,70 @@ Content-Type: application/json
 
 ---
 
+## **WebSocket — Live Job Progress**
+
+### `WS /api/jobs/{job_id}/stream`
+Real-time job state streaming via WebSocket. Replaces HTTP polling with server-push.
+
+**Connection**:
+```javascript
+const ws = new WebSocket('ws://localhost:8000/api/jobs/job-123/stream');
+ws.onmessage = (e) => console.log(JSON.parse(e.data));
+```
+
+**Server Messages**:
+
+Progress update (sent on each state change):
+```json
+{ "type": "progress", "job_id": "job-123", "state": "started" }
+```
+
+Completion:
+```json
+{ "type": "completed", "job_id": "job-123", "state": "completed", "result": { ... } }
+```
+
+Failure:
+```json
+{ "type": "failed", "job_id": "job-123", "state": "failed", "error": "reason" }
+```
+
+Error (e.g., Celery not configured):
+```json
+{ "type": "error", "message": "Async jobs require Redis / Celery." }
+```
+
+**Notes**:
+- Connection closes automatically on terminal states (completed, failed, cancelled).
+- Frontend falls back to HTTP polling if WebSocket is unavailable.
+- Requires Redis/Celery to be configured (otherwise sends error frame and closes).
+
+---
+
+## **Thumbnails**
+
+### `GET /api/thumbnails/{scene_id}?key={cache_key}`
+Serve a pre-generated satellite scene thumbnail as PNG.
+
+**Request**:
+```bash
+curl http://localhost:8000/api/thumbnails/S2A_MSIL2A_20260315?key=abc123def456
+```
+
+**Response** (200 OK): PNG image bytes with `Content-Type: image/png`
+
+**Response** (404 Not Found):
+```json
+{ "detail": "Thumbnail not found for scene 'S2A_MSIL2A_20260315'. It may have expired or was never generated." }
+```
+
+**Notes**:
+- Thumbnails are generated during change detection and cached in-memory (LRU, max 128 entries).
+- The `key` query parameter is returned by the analysis endpoint in `before_image` / `after_image` URLs.
+- In demo mode, static PNG assets are used instead.
+
+---
+
 ## **Async Jobs**
 
 ### `GET /api/jobs/{job_id}`
@@ -363,7 +439,7 @@ Check the status and result of an async analysis job (auth required).
 
 **Request**:
 ```bash
-curl -H "X-API-Key: your-api-key" http://localhost:8000/api/jobs/job-20260328-def456
+curl -H "Authorization: Bearer your-api-key" http://localhost:8000/api/jobs/job-20260328-def456
 ```
 
 **Response** (200 OK, pending):
@@ -433,7 +509,7 @@ Cancel an in-progress async analysis job (auth required).
 
 **Request**:
 ```bash
-curl -X DELETE -H "X-API-Key: your-api-key" \
+curl -X DELETE -H "Authorization: Bearer your-api-key" \
   http://localhost:8000/api/jobs/job-20260328-def456/cancel
 ```
 
@@ -510,14 +586,27 @@ When limit exceeded: **429 Too Many Requests** with `Retry-After` header.
 ## **Authentication**
 
 ### API Key
-If `API_KEY_REQUIRED=true`, include API key in all protected endpoints:
+If `API_KEY` is set in `.env`, include the key in all protected endpoints via one of three methods:
 
+1. **Bearer token** (recommended):
 ```bash
-curl -H "X-API-Key: your-api-key" http://localhost:8000/api/analyze
+curl -H "Authorization: Bearer your-api-key" http://localhost:8000/api/analyze
 ```
 
+2. **Query parameter** (useful for WebSocket/browser testing):
+```bash
+curl "http://localhost:8000/api/analyze?api_key=your-api-key"
+```
+
+3. **Cookie**:
+```bash
+curl --cookie "api_key=your-api-key" http://localhost:8000/api/analyze
+```
+
+If `API_KEY` is empty, authentication is disabled (insecure dev mode).
+
 ### CORS
-Allowed origins configured via `ALLOWED_ORIGINS` env (default: `http://localhost:3000`).
+Allowed origins configured via `ALLOWED_ORIGINS` env (default: `http://localhost:3000,http://localhost:8000,http://127.0.0.1:8000`).
 
 ---
 
@@ -567,6 +656,15 @@ curl -X POST http://localhost:8000/api/search \
 ---
 
 ## **Changelog**
+
+### v3.0.0 (2026-03-28)
+- Added commercial provider stubs: Maxar (SecureWatch) and Planet (PlanetScope/SkySat)
+- Added WebSocket endpoint (`/api/jobs/{job_id}/stream`) for live job progress
+- Added satellite thumbnail endpoint (`/api/thumbnails/{scene_id}`)
+- Added PostgreSQL job persistence (optional, via `DATABASE_URL`)
+- Redis-backed circuit breaker with in-process fallback
+- Authentication via Bearer token, query param, or cookie (replaces `X-API-Key` header)
+- `APP_MODE` supports `demo`, `staging`, `production` (replaces `live`)
 
 ### v2.0.0 (2026-03-28)
 - Added async job management (`/api/jobs/*`)

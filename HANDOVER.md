@@ -348,14 +348,14 @@ python -m pytest tests/ --cov=backend/app --cov-fail-under=80
 
 | ID | Task | Status | Notes |
 |---|---|---|---|
-| P3-1 | Commercial provider stub | ⏳ TODO | `MaxarProvider` or `PlanetProvider` extending `SatelliteProvider` |
-| P3-2 | WebSocket live progress | ⏳ TODO | Replace 3 s polling with `ws://…/api/jobs/{id}/stream` |
-| P3-3 | Persist job history to PostgreSQL | ⏳ TODO | Replace in-memory `JobManager` fallback with SQLAlchemy + pg |
-| P3-4 | Multi-worker circuit breaker | ⏳ TODO | Move `CircuitBreaker` state from process memory to Redis |
-| P3-5 | Actual satellite thumbnails | ⏳ TODO | Generate real scene thumbnails instead of static demo PNGs |
+| P3-1 | Commercial provider stubs | ✅ DONE (2026-03-28) | `MaxarProvider` + `PlanetProvider` extending `SatelliteProvider`; 28 tests |
+| P3-2 | WebSocket live progress | ✅ DONE (2026-03-28) | `ws://…/api/jobs/{id}/stream` with HTTP polling fallback; 9 tests |
+| P3-3 | Persist job history to PostgreSQL | ✅ DONE (2026-03-28) | SQLAlchemy `PostgresJobStore` + `DATABASE_URL` config; write-through Redis→PG→Memory; 11 tests |
+| P3-4 | Multi-worker circuit breaker | ✅ DONE (2026-03-28) | Redis-backed `CircuitBreaker` with in-process fallback; 12 tests |
+| P3-5 | Actual satellite thumbnails | ✅ DONE (2026-03-28) | `ThumbnailService` COG→PNG via rasterio + LRU cache + `GET /api/thumbnails/{id}`; 17 tests |
 | P3-6 | `add_rate_limit` middleware | ✅ DONE | slowapi `@limiter.limit()` on `/analyze` (5/min), `/search` (10/min), `/jobs` (20/min) |
-| P3-7 | Refresh `docs/API.md` | ⏳ TODO | Still references `demo-fusion` provider name from original demo |
-| P3-8 | Refresh `docs/ARCHITECTURE.md` | ⏳ TODO | Still describes demo-only architecture |
+| P3-7 | Refresh `docs/API.md` | ✅ DONE (2026-03-28) | Updated to v3.0: auth, providers, WebSocket, thumbnails, config refs |
+| P3-8 | Refresh `docs/ARCHITECTURE.md` | ✅ DONE (2026-03-28) | Updated to v3.0: system diagram, providers, persistence, routers |
 
 ---
 
@@ -371,6 +371,8 @@ python -m pytest tests/ --cov=backend/app --cov-fail-under=80
 | POST | `/api/analyze` | Run change detection; returns result or `{job_id}` |
 | GET | `/api/jobs/{id}` | Job state + result when complete (requires Redis) |
 | DELETE | `/api/jobs/{id}` | Cancel / delete a job (requires Redis) |
+| WS | `/api/jobs/{id}/stream` | WebSocket live job progress |
+| GET | `/api/thumbnails/{id}` | Cached satellite scene thumbnail (PNG) |
 | POST | `/api/search` | Search imagery without running detection |
 
 ### POST /api/analyze — request body
