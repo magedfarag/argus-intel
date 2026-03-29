@@ -28,6 +28,18 @@
       <span id="providerItems" class="provider-strip__items">loading…</span>
     </div>
 
+    <!-- Analysis History -->
+    <div id="historyPanel" class="history-panel">
+      <div class="history-panel__header" id="historyToggle">
+        <span class="history-panel__title">Analysis History <span id="historyCount" class="history-count">0</span></span>
+        <div class="history-panel__actions">
+          <button id="clearHistoryBtn" class="secondary danger history-btn" type="button">Clear</button>
+          <span id="historyChevron" class="history-chevron">▾</span>
+        </div>
+      </div>
+      <div id="historyList" class="history-list hidden"></div>
+    </div>
+
     <main class="layout">
       <section class="panel controls-panel">
         <h2>1. Define Area of Interest</h2>

@@ -92,6 +92,7 @@ class LandsatProvider(SatelliteProvider):
             "red": "B4", "SR_B4": "B4", "nir08": "B5", "SR_B5": "B5",
             "swir16": "B6", "SR_B6": "B6", "blue": "B2", "SR_B2": "B2",
             "green": "B3", "SR_B3": "B3", "qa_pixel": "QA_PIXEL",
+            "thumbnail": "thumbnail",
         }
         assets = {band_map.get(k, k): v.get("href", "") for k, v in raw_assets.items() if v.get("href")}
         satellite_id = props.get("landsat:satellite_id", "")

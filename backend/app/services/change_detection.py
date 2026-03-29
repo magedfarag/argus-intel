@@ -317,10 +317,25 @@ def run_change_detection(
 
         ch_bbox = [round(v, 6) for v in [ch_min_lon, ch_min_lat, ch_max_lon, ch_max_lat]]
 
-        # Build thumbnail URLs for the change region
-        from backend.app.services.thumbnails import thumbnail_url
-        before_thumb = thumbnail_url(before.scene_id, ch_bbox)
-        after_thumb = thumbnail_url(after.scene_id, ch_bbox)
+        # Generate thumbnails from TCI/visual COG (populates cache for /api/thumbnails)
+        from backend.app.services.thumbnails import generate_thumbnail, thumbnail_url
+        tci_before = before.assets.get("TCI", "")
+        tci_after = after.assets.get("TCI", "")
+        before_thumb = None
+        after_thumb = None
+        if tci_before:
+            png = generate_thumbnail(tci_before, ch_bbox, before.scene_id, bearer_token=bearer_token)
+            if png:
+                before_thumb = thumbnail_url(before.scene_id, ch_bbox)
+        if tci_after:
+            png = generate_thumbnail(tci_after, ch_bbox, after.scene_id, bearer_token=bearer_token)
+            if png:
+                after_thumb = thumbnail_url(after.scene_id, ch_bbox)
+        # Fallback: STAC-provided thumbnail (full scene overview, not per-change crop)
+        if not before_thumb:
+            before_thumb = before.assets.get("thumbnail") or None
+        if not after_thumb:
+            after_thumb = after.assets.get("thumbnail") or None
 
         changes.append({
             "change_id":       f"det-{after.scene_id[:8]}-{component_idx}",

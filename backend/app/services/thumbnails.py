@@ -71,6 +71,7 @@ def generate_thumbnail(
     bbox: List[float],
     scene_id: str,
     size: Tuple[int, int] = _THUMBNAIL_SIZE,
+    bearer_token: Optional[str] = None,
 ) -> Optional[bytes]:
     """Generate a PNG thumbnail from a COG scene URL, cropped to bbox.
 
@@ -84,6 +85,8 @@ def generate_thumbnail(
         Unique scene identifier (used for cache key).
     size:
         (width, height) of the output thumbnail in pixels.
+    bearer_token:
+        Optional OAuth2 bearer token for authenticated COG access.
 
     Returns
     -------
@@ -101,10 +104,27 @@ def generate_thumbnail(
     try:
         import numpy as np
         import rasterio
+        from rasterio.crs import CRS
+        from rasterio.warp import transform_bounds
         from rasterio.windows import from_bounds
 
-        with rasterio.open(scene_url) as src:
-            window = from_bounds(*bbox, transform=src.transform)
+        env_kwargs = {}
+        if bearer_token:
+            env_kwargs["GDAL_HTTP_BEARER"] = bearer_token
+            env_kwargs["GDAL_HTTP_AUTH"] = "BEARER"
+
+        with rasterio.Env(**env_kwargs), rasterio.open(scene_url) as src:
+            # Reproject bbox from WGS84 to scene CRS if needed
+            src_crs = src.crs
+            wgs84 = CRS.from_epsg(4326)
+            bounds = list(bbox)
+            if src_crs and src_crs != wgs84:
+                bounds = list(transform_bounds(wgs84, src_crs, *bbox))
+            window = from_bounds(*bounds, transform=src.transform)
+            # Clamp window to dataset bounds
+            window = window.intersection(
+                rasterio.windows.Window(0, 0, src.width, src.height)
+            )
             # Read RGB bands (1, 2, 3) or as many as available
             band_count = min(src.count, 3)
             data = src.read(
