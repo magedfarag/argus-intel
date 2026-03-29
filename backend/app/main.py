@@ -39,10 +39,23 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
             registry.register(LandsatProvider(settings))
         except Exception as exc:
             _log.getLogger(__name__).warning("LandsatProvider: %s", exc)
+    if settings.maxar_is_configured():
+        try:
+            from backend.app.providers.maxar import MaxarProvider
+            registry.register(MaxarProvider(settings))
+        except Exception as exc:
+            _log.getLogger(__name__).warning("MaxarProvider: %s", exc)
+    if settings.planet_is_configured():
+        try:
+            from backend.app.providers.planet import PlanetProvider
+            registry.register(PlanetProvider(settings))
+        except Exception as exc:
+            _log.getLogger(__name__).warning("PlanetProvider: %s", exc)
     cache   = CacheClient.from_settings(settings)
     breaker = CircuitBreaker(
         failure_threshold=settings.circuit_breaker_failure_threshold,
         recovery_timeout=settings.circuit_breaker_recovery_timeout,
+        redis_url=settings.redis_url,
     )
     dependencies.set_registry(registry)
     dependencies.set_cache(cache)

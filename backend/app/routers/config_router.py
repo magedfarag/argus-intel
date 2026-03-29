@@ -24,7 +24,7 @@ def config(
         min_area_km2=MIN_AREA_KM2,
         max_area_km2=MAX_AREA_KM2,
         max_lookback_days=MAX_LOOKBACK,
-        supported_providers=["demo", "auto", "sentinel2", "landsat"],
+        supported_providers=["demo", "auto", "sentinel2", "landsat", "maxar", "planet"],
         app_mode=settings.app_mode,
         async_area_threshold_km2=settings.async_area_threshold_km2,
         default_cloud_threshold=settings.default_cloud_threshold,

@@ -24,6 +24,18 @@ _NOTES: dict = {
         "Free public access via USGS LandsatLook STAC (no credentials required for search)",
         "Suitable for large-area developments; may be too coarse for small urban sites",
     ],
+    "maxar": [
+        "0.3-0.5 m resolution (WorldView-3/4, GeoEye-1)",
+        "Commercial subscription required (SecureWatch)",
+        "Archive search via STAC-like API; tasked collection available",
+        "Best for fine-grained urban construction monitoring",
+    ],
+    "planet": [
+        "3-5 m resolution (PlanetScope); 0.5 m (SkySat)",
+        "Commercial subscription required (Planet API key)",
+        "Daily global revisit — ideal for change detection cadence",
+        "Search via Planet Data API; COG streaming supported",
+    ],
     "demo": [
         "Synthetic deterministic data — no real imagery",
         "Always available; used as fallback when live providers are unconfigured",

@@ -92,6 +92,20 @@ class AppSettings(BaseSettings):
         default="https://landsatlook.usgs.gov/stac-server"
     )
 
+    # ── Maxar (SecureWatch / Open Data) ──────────────────────────────────────
+    # Commercial high-resolution (0.3-0.5 m).  Requires SecureWatch subscription.
+    maxar_api_key: str = Field(default="")
+    maxar_stac_url: str = Field(
+        default="https://api.maxar.com/discovery/v1"
+    )
+
+    # ── Planet (PlanetScope / SkySat) ────────────────────────────────────────
+    # Commercial daily revisit (3-5 m PlanetScope, 0.5 m SkySat).
+    planet_api_key: str = Field(default="")
+    planet_api_url: str = Field(
+        default="https://api.planet.com/data/v1"
+    )
+
     # ── Redis ─────────────────────────────────────────────────────────────────
     redis_url: str = Field(
         default="",
@@ -166,6 +180,14 @@ class AppSettings(BaseSettings):
     def landsat_is_configured(self) -> bool:
         """Landsat STAC search is publicly accessible; always returns True."""
         return True
+
+    def maxar_is_configured(self) -> bool:
+        """Return True when Maxar API key is present."""
+        return bool(self.maxar_api_key)
+
+    def planet_is_configured(self) -> bool:
+        """Return True when Planet API key is present."""
+        return bool(self.planet_api_key)
 
 
 @dataclass(frozen=True)

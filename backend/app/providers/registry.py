@@ -68,9 +68,9 @@ class ProviderRegistry:
         if mode == AppMode.DEMO:
             return ["demo"], "Demo mode: DemoProvider only"
         elif mode == AppMode.STAGING:
-            return ["sentinel2", "landsat", "demo"], "Staging mode: real providers with demo fallback"
+            return ["sentinel2", "landsat", "maxar", "planet", "demo"], "Staging mode: real providers with demo fallback"
         elif mode == AppMode.PRODUCTION:
-            return ["sentinel2", "landsat"], "Production mode: real providers only, fail-fast"
+            return ["sentinel2", "landsat", "maxar", "planet"], "Production mode: real providers only, fail-fast"
         else:
             raise ValueError(f"Unknown AppMode: {mode}")
 
