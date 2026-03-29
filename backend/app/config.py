@@ -112,6 +112,12 @@ class AppSettings(BaseSettings):
         description="Redis connection URL. Required for Celery + persistent job cache.",
     )
 
+    # ── PostgreSQL ────────────────────────────────────────────────────────────
+    database_url: str = Field(
+        default="",
+        description="PostgreSQL connection URL for persistent job history (e.g. postgresql+psycopg2://user:pass@host/db).",
+    )
+
     # ── Celery ────────────────────────────────────────────────────────────────
     # Defaults fall back to redis_url when not explicitly set (see properties).
     celery_broker_url: str = Field(default="")

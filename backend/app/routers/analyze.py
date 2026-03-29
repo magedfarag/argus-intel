@@ -30,8 +30,8 @@ def _get_analysis_service(
 ) -> AnalysisService:
     """Construct AnalysisService with optional JobManager."""
     jm: Union[JobManager, None] = None
-    if settings.redis_available():
-        jm = JobManager(redis_url=settings.redis_url)
+    if settings.redis_available() or settings.database_url:
+        jm = JobManager(redis_url=settings.redis_url, database_url=settings.database_url)
     return AnalysisService(registry=registry, cache=cache, settings=settings, job_manager=jm, breaker=breaker)
 
 

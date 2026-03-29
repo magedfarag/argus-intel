@@ -315,19 +315,26 @@ def run_change_detection(
             )
             confidence *= 0.80
 
+        ch_bbox = [round(v, 6) for v in [ch_min_lon, ch_min_lat, ch_max_lon, ch_max_lat]]
+
+        # Build thumbnail URLs for the change region
+        from backend.app.services.thumbnails import thumbnail_url
+        before_thumb = thumbnail_url(before.scene_id, ch_bbox)
+        after_thumb = thumbnail_url(after.scene_id, ch_bbox)
+
         changes.append({
             "change_id":       f"det-{after.scene_id[:8]}-{component_idx}",
             "detected_at":     after.acquired_at,
             "change_type":     change_type,
             "confidence":      round(confidence * 100, 1),
             "center":          {"lng": round(cx, 6), "lat": round(cy, 6)},
-            "bbox":            [round(v, 6) for v in [ch_min_lon, ch_min_lat, ch_max_lon, ch_max_lat]],
+            "bbox":            ch_bbox,
             "provider":        provider,
             "summary":         f"{change_type} detected between {before.acquired_at.date()} and {after.acquired_at.date()}.",
             "rationale":       rationale,
-            "before_image":    "",   # thumbnails not generated in this version
-            "after_image":     "",
-            "thumbnail":       "",
+            "before_image":    before_thumb,
+            "after_image":     after_thumb,
+            "thumbnail":       after_thumb,
             "scene_id_before": before.scene_id,
             "scene_id_after":  after.scene_id,
             "resolution_m":    resolution_m,

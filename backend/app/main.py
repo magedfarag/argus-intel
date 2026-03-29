@@ -95,7 +95,7 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 def index() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html")
 
-from backend.app.routers import health, config_router, providers_router, credits, analyze, jobs, search
+from backend.app.routers import health, config_router, providers_router, credits, analyze, jobs, search, ws_jobs, thumbnails
 app.include_router(health.router)
 app.include_router(config_router.router)
 app.include_router(providers_router.router)
@@ -103,3 +103,5 @@ app.include_router(credits.router)
 app.include_router(analyze.router)
 app.include_router(jobs.router)
 app.include_router(search.router)
+app.include_router(ws_jobs.router)
+app.include_router(thumbnails.router)

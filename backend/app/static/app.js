@@ -244,16 +244,53 @@ function handleAnalysisResult(body) {
   }
 }
 
-// ─── Job Polling ──────────────────────────────────────────────────────────────
+// ─── Job Polling (WebSocket with HTTP fallback) ──────────────────────────────
 const POLL_INTERVAL_MS = 3000;
 
 function startPoll(jobId) {
   cancelPoll();
-  state.pollTimer = setInterval(() => pollJob(jobId), POLL_INTERVAL_MS);
+  // Try WebSocket first; fall back to HTTP polling on failure
+  try {
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${proto}//${location.host}/api/jobs/${jobId}/stream`);
+    state.ws = ws;
+
+    ws.onmessage = (evt) => {
+      const msg = JSON.parse(evt.data);
+      if (msg.type === 'completed' && msg.result) {
+        cancelPoll();
+        setJobProgress(false);
+        handleAnalysisResult(msg.result);
+      } else if (msg.type === 'failed') {
+        cancelPoll();
+        setJobProgress(false);
+        setMessage(`Job failed: ${msg.error ?? 'unknown error'}`, true);
+      } else if (msg.type === 'error') {
+        // Server cannot stream — fall back to HTTP polling
+        cancelPoll();
+        state.pollTimer = setInterval(() => pollJob(jobId), POLL_INTERVAL_MS);
+      } else {
+        document.getElementById('jobProgressLabel').textContent =
+          `Processing\u2026 (${msg.state ?? msg.type})`;
+      }
+    };
+
+    ws.onerror = () => {
+      // WebSocket unavailable — fall back to HTTP polling
+      cancelPoll();
+      state.pollTimer = setInterval(() => pollJob(jobId), POLL_INTERVAL_MS);
+    };
+
+    ws.onclose = () => { state.ws = null; };
+  } catch (_) {
+    // WebSocket constructor failed — fall back to HTTP polling
+    state.pollTimer = setInterval(() => pollJob(jobId), POLL_INTERVAL_MS);
+  }
 }
 
 function cancelPoll() {
   if (state.pollTimer) { clearInterval(state.pollTimer); state.pollTimer = null; }
+  if (state.ws) { try { state.ws.close(); } catch (_) {} state.ws = null; }
 }
 
 async function pollJob(jobId) {
@@ -272,7 +309,7 @@ async function pollJob(jobId) {
       setMessage(`Job failed: ${job.error ?? 'unknown error'}`, true);
     } else {
       document.getElementById('jobProgressLabel').textContent =
-        `Processing… (${job.state})`;
+        `Processing\u2026 (${job.state})`;
     }
   } catch (_) {
     // Transient network error — keep polling
