@@ -6,13 +6,32 @@ import httpx
 from backend.app.config import AppSettings
 from backend.app.providers.sentinel2 import Sentinel2Provider
 
+_CDSE_STAC_URL = "https://catalogue.dataspace.copernicus.eu/stac/v1"
+_E84_STAC_URL  = "https://earth-search.aws.element84.com/v1"
+
+
 @pytest.fixture
 def sentinel2_settings():
+    """Settings configured for CDSE (default OAuth2 flow)."""
     return AppSettings(
         app_mode="staging",
         redis_url="",
         sentinel2_client_id="test_id",
         sentinel2_client_secret="test_secret",
+        sentinel2_stac_url=_CDSE_STAC_URL,
+        http_timeout_seconds=10,
+    )
+
+
+@pytest.fixture
+def element84_settings():
+    """Settings configured for Element84 Earth Search (public, no auth)."""
+    return AppSettings(
+        app_mode="staging",
+        redis_url="",
+        sentinel2_client_id="",
+        sentinel2_client_secret="",
+        sentinel2_stac_url=_E84_STAC_URL,
         http_timeout_seconds=10,
     )
 
@@ -27,12 +46,13 @@ class TestSentinel2OAuth2:
             assert "OAuth2" in msg
 
     def test_validate_credentials_no_creds(self):
-        """Test credential validation fails when credentials not set."""
+        """Test credential validation fails when credentials not set (CDSE)."""
         settings = AppSettings(
             app_mode="demo",
             redis_url="",
             sentinel2_client_id="",
             sentinel2_client_secret="",
+            sentinel2_stac_url=_CDSE_STAC_URL,
         )
         provider = Sentinel2Provider(settings)
         ok, msg = provider.validate_credentials()
@@ -102,8 +122,8 @@ class TestSentinel2STAC:
 class TestSentinel2Capabilities:
     """Test suite for provider capabilities."""
 
-    def test_capabilities(self, sentinel2_settings):
-        """Test that Sentinel-2 provider reports correct capabilities."""
+    def test_capabilities_cdse(self, sentinel2_settings):
+        """Test that CDSE provider reports correct capabilities."""
         provider = Sentinel2Provider(sentinel2_settings)
         assert provider.resolution_m == 10
         assert provider.provider_name == "sentinel2"
@@ -113,6 +133,67 @@ class TestSentinel2Capabilities:
         assert caps.get("supports_cog_streaming") is True
         assert caps.get("requires_credentials") is True
         assert caps.get("collection") == "SENTINEL-2"
+
+    def test_capabilities_element84(self, element84_settings):
+        """Test that Element84 provider reports correct capabilities."""
+        provider = Sentinel2Provider(element84_settings)
+        assert provider.display_name == "Sentinel-2 (Element84 Earth Search)"
+        
+        caps = provider.get_capabilities()
+        assert caps.get("supports_cog_streaming") is True
+        assert caps.get("requires_credentials") is False
+        assert caps.get("collection") == "sentinel-2-l2a"
+
+
+class TestElement84EarthSearch:
+    """Test suite for Element84 Earth Search backend."""
+
+    def test_validate_credentials_public(self, element84_settings):
+        """Element84 requires no credentials — always valid."""
+        provider = Sentinel2Provider(element84_settings)
+        ok, msg = provider.validate_credentials()
+        assert ok is True
+        assert "publicly accessible" in msg.lower()
+
+    def test_get_token_returns_empty(self, element84_settings):
+        """Element84 needs no auth token."""
+        provider = Sentinel2Provider(element84_settings)
+        assert provider._get_token() == ""
+
+    def test_search_imagery_post_filters_cloud(self, element84_settings):
+        """Element84 search omits query/sortby and post-filters cloud cover."""
+        provider = Sentinel2Provider(element84_settings)
+        stac_resp = {"features": [
+            {
+                "id": "S2A_good",
+                "properties": {"datetime": "2026-03-28T00:00:00Z", "eo:cloud_cover": 10.0},
+                "bbox": [35.0, 31.0, 36.0, 32.0],
+                "geometry": {"type": "Polygon", "coordinates": [[[35, 31], [36, 31], [36, 32], [35, 32], [35, 31]]]},
+                "assets": {"red": {"href": "s3://red.tif"}, "nir": {"href": "s3://nir.tif"}},
+            },
+            {
+                "id": "S2A_cloudy",
+                "properties": {"datetime": "2026-03-27T00:00:00Z", "eo:cloud_cover": 90.0},
+                "bbox": [35.0, 31.0, 36.0, 32.0],
+                "geometry": {"type": "Polygon", "coordinates": [[[35, 31], [36, 31], [36, 32], [35, 32], [35, 31]]]},
+                "assets": {"red": {"href": "s3://red2.tif"}},
+            },
+        ]}
+        test_aoi = {"type": "Polygon", "coordinates": [[[35, 31], [36, 31], [36, 32], [35, 32], [35, 31]]]}
+
+        with patch("backend.app.providers.sentinel2.httpx.post") as m_post:
+            m_post.return_value = MagicMock(json=lambda: stac_resp, raise_for_status=lambda: None)
+            scenes = provider.search_imagery(test_aoi, "2026-02-26", "2026-03-28", cloud_threshold=20.0)
+
+            # Only the low-cloud scene should pass the post-filter
+            assert len(scenes) == 1
+            assert scenes[0].scene_id == "S2A_good"
+
+            # Verify payload has no query/sortby
+            sent_payload = m_post.call_args[1]["json"]
+            assert "query" not in sent_payload
+            assert "sortby" not in sent_payload
+            assert sent_payload["collections"] == ["sentinel-2-l2a"]
 
 
 class TestSentinel2CircuitBreaker:
