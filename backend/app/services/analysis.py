@@ -117,10 +117,30 @@ class AnalysisService:
                 "DEMO MODE: Results are synthetic curated data, not real satellite detections."
             )
         else:
-            changes_raw, detection_warnings = self._run_live_analysis(
-                provider, request, bounds, area_km2
-            )
-            warnings.extend(detection_warnings)
+            try:
+                changes_raw, detection_warnings = self._run_live_analysis(
+                    provider, request, bounds, area_km2
+                )
+                warnings.extend(detection_warnings)
+            except ProviderUnavailableError as exc:
+                if self._settings.app_mode == "live":
+                    raise
+                log.warning(
+                    "Live provider '%s' failed (%s); falling back to demo.",
+                    provider.provider_name, exc,
+                )
+                is_demo = True
+                provider = self._demo
+                changes_raw = self._demo.generate_changes(
+                    bounds, request.start_date, request.end_date
+                )
+                warnings.append(
+                    f"Live provider '{request.provider}' timed out or failed. "
+                    "Falling back to demo data."
+                )
+                warnings.append(
+                    "DEMO MODE: Results are synthetic curated data, not real satellite detections."
+                )
 
         # Build ChangeRecord objects
         changes = [ChangeRecord(**c) for c in changes_raw]

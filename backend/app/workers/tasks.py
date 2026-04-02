@@ -4,15 +4,13 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict
 
+from backend.app.workers.celery_app import celery_app
+
 log = logging.getLogger(__name__)
 
-try:
-    from backend.app.workers.celery_app import celery_app
-    if celery_app is None:
-        raise ImportError("celery_app is None")
 
-    @celery_app.task(bind=True, name="run_analysis_task")
-    def run_analysis_task(self, request_json: Dict[str, Any]) -> Dict[str, Any]:
+@celery_app.task(bind=True, name="run_analysis_task")
+def run_analysis_task(self, request_json: Dict[str, Any]) -> Dict[str, Any]:
         """Execute a full analysis and return the serialised AnalyzeResponse."""
         from backend.app.config import get_settings
         from backend.app.cache.client import CacheClient
@@ -47,20 +45,3 @@ try:
         request = AnalyzeRequest(**request_json)
         result  = svc.run_sync(request)
         return result.model_dump(mode="json")
-
-except (ImportError, Exception) as exc:
-    log.warning("Celery tasks not registered: %s", exc)
-
-    class _FakeCeleryTask:
-        """Fake Celery task that raises an error when called."""
-        def delay(self, *args, **kwargs):
-            raise RuntimeError(
-                "Celery is not configured. Set REDIS_URL or CELERY_BROKER_URL to enable async jobs."
-            )
-        
-        def apply_async(self, *args, **kwargs):
-            raise RuntimeError(
-                "Celery is not configured. Set REDIS_URL or CELERY_BROKER_URL to enable async jobs."
-            )
-
-    run_analysis_task = _FakeCeleryTask()  # type: ignore[assignment]

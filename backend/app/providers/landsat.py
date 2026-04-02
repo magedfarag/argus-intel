@@ -31,7 +31,7 @@ class LandsatProvider(SatelliteProvider):
         except Exception as exc:
             return False, str(exc)
 
-    @with_retry(max_attempts=3)
+    @with_retry(max_attempts=3, retry_on=(httpx.TimeoutException, httpx.ConnectError))
     def search_imagery(self, geometry, start_date, end_date, cloud_threshold=20.0, max_results=10):
         payload = {
             "collections": [_COLLECTION],

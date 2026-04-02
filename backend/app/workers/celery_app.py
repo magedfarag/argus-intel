@@ -39,6 +39,15 @@ try:
         task_track_started=True,
         worker_prefetch_multiplier=1,
     )
+    
+    # Auto-discover tasks from this package
+    celery_app.autodiscover_tasks(["backend.app.workers"])
+    
+    # Explicitly import tasks to ensure they're registered
+    try:
+        from backend.app.workers import tasks  # noqa: F401
+    except ImportError as e:
+        log.error("Failed to import tasks module: %s", e)
 
 except ImportError:
     log.error("celery package not installed — async jobs disabled")

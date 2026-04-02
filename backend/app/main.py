@@ -22,7 +22,7 @@ STATIC_DIR = APP_DIR / "static"
 async def lifespan(application: FastAPI) -> AsyncIterator[None]:
     import logging as _log
     settings = get_settings()
-    configure_logging(log_level=settings.log_level, log_format=settings.log_format)
+    configure_logging(level=settings.log_level, fmt=settings.log_format)
     registry = ProviderRegistry()
     registry.register(DemoProvider())
     if settings.sentinel2_is_configured():

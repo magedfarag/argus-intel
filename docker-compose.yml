@@ -31,6 +31,7 @@ services:
     command: >
       celery -A backend.app.workers.celery_app.celery_app worker
       --loglevel=info --pool=solo --concurrency=2
+      --include=backend.app.workers.tasks
     environment:
       REDIS_URL: "redis://redis:6379/0"
       APP_MODE: "auto"

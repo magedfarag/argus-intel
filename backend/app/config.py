@@ -103,7 +103,7 @@ class AppSettings(BaseSettings):
     )
 
     # ── HTTP client ───────────────────────────────────────────────────────────
-    http_timeout_seconds: float = Field(default=30.0)
+    http_timeout_seconds: float = Field(default=45.0)
     http_max_retries: int = Field(default=3)
 
     # ── Circuit breaker ───────────────────────────────────────────────────────
