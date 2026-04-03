@@ -2,7 +2,7 @@ name: CI — Tests & Code Quality
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, "feature/**"]
   pull_request:
     branches: [main, develop]
 
@@ -35,7 +35,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements-dev.txt
       - name: Lint with ruff (non-blocking)
-        run: ruff check backend/ tests/ || true
+        run: ruff check app/ src/ tests/ || true
       - name: Tests — Unit
         env:
           APP_MODE: ${{ matrix.app_mode }}
@@ -49,25 +49,27 @@ jobs:
         env:
           APP_MODE: ${{ matrix.app_mode }}
         run: >
-          python -m pytest tests/ 
-          --cov=backend/app 
-          --cov-report=term-missing 
-          --cov-report=html 
-          -v
+          python -m pytest tests/unit/
+          --cov=app
+          --cov=src
+          --cov-report=term-missing
+          --cov-report=html:htmlcov/${{ matrix.app_mode }}
+          -q
       - name: Check Coverage Threshold (>20%)
         env:
           APP_MODE: ${{ matrix.app_mode }}
         run: >
-          python -m pytest tests/ 
-          --cov=backend/app 
-          --cov-fail-under=20 
+          python -m pytest tests/unit/
+          --cov=app
+          --cov=src
+          --cov-fail-under=20
           -q
       - name: Upload Coverage (HTML)
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: coverage-report-${{ matrix.app_mode }}
-          path: htmlcov/
+          path: htmlcov/${{ matrix.app_mode }}/
 
   security:
     name: Security Checks
@@ -79,7 +81,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: pip install bandit safety
       - name: Check for secrets (bandit)
-        run: bandit -r backend/ -ll || true
+        run: bandit -r app/ src/ -ll || true
       - name: Check dependency vulnerabilities (safety)
         run: safety check || true
 

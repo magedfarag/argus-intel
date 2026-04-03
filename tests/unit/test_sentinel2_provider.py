@@ -39,7 +39,7 @@ class TestSentinel2OAuth2:
     def test_validate_credentials_success(self, sentinel2_settings):
         provider = Sentinel2Provider(sentinel2_settings)
         mock_resp = {"access_token": "token123", "expires_in": 3600}
-        with patch("backend.app.providers.sentinel2.httpx.post") as m:
+        with patch("app.providers.sentinel2.httpx.post") as m:
             m.return_value = MagicMock(json=lambda: mock_resp, raise_for_status=lambda: None)
             ok, msg = provider.validate_credentials()
             assert ok is True
@@ -63,7 +63,7 @@ class TestSentinel2OAuth2:
         """Test that _get_token caches the token and reuses it."""
         provider = Sentinel2Provider(sentinel2_settings)
         mock_resp = {"access_token": "token123", "expires_in": 3600}
-        with patch("backend.app.providers.sentinel2.httpx.post") as m:
+        with patch("app.providers.sentinel2.httpx.post") as m:
             m.return_value = MagicMock(json=lambda: mock_resp, raise_for_status=lambda: None)
             t1 = provider._get_token()
             assert t1 == "token123"
@@ -91,7 +91,7 @@ class TestSentinel2STAC:
         }]}
         test_aoi = {"type": "Polygon", "coordinates": [[[-1.0, 51.4], [-0.5, 51.4], [-0.5, 51.8], [-1.0, 51.8], [-1.0, 51.4]]]}
         
-        with patch("backend.app.providers.sentinel2.httpx.post") as m_post:
+        with patch("app.providers.sentinel2.httpx.post") as m_post:
             # Mock httpx.post to return token on first call, STAC response on second
             m_post.side_effect = [
                 MagicMock(json=lambda: token_resp, raise_for_status=lambda: None),  # _get_token() call
@@ -110,7 +110,7 @@ class TestSentinel2STAC:
         stac_resp = {"features": []}
         test_aoi = {"type": "Polygon", "coordinates": [[[-90.0, -60.0], [-89.0, -60.0], [-89.0, -59.0], [-90.0, -59.0], [-90.0, -60.0]]]}
         
-        with patch("backend.app.providers.sentinel2.httpx.post") as m_post:
+        with patch("app.providers.sentinel2.httpx.post") as m_post:
             m_post.side_effect = [
                 MagicMock(json=lambda: token_resp, raise_for_status=lambda: None),  # _get_token() call
                 MagicMock(json=lambda: stac_resp, raise_for_status=lambda: None),   # search_imagery() call
@@ -181,7 +181,7 @@ class TestElement84EarthSearch:
         ]}
         test_aoi = {"type": "Polygon", "coordinates": [[[35, 31], [36, 31], [36, 32], [35, 32], [35, 31]]]}
 
-        with patch("backend.app.providers.sentinel2.httpx.post") as m_post:
+        with patch("app.providers.sentinel2.httpx.post") as m_post:
             m_post.return_value = MagicMock(json=lambda: stac_resp, raise_for_status=lambda: None)
             scenes = provider.search_imagery(test_aoi, "2026-02-26", "2026-03-28", cloud_threshold=20.0)
 

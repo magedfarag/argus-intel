@@ -51,11 +51,11 @@ class TestWebSocketWithCelery:
         mock_celery = MagicMock()
 
         return (
-            patch("backend.app.routers.ws_jobs.get_settings", return_value=mock_settings),
-            patch("backend.app.routers.ws_jobs._POLL_INTERVAL", 0),
+            patch("app.routers.ws_jobs.get_settings", return_value=mock_settings),
+            patch("app.routers.ws_jobs._POLL_INTERVAL", 0),
             patch.dict("sys.modules", {
                 "celery.result": MagicMock(AsyncResult=mock_ar_cls),
-                "backend.app.workers.celery_app": MagicMock(celery_app=mock_celery),
+                "app.workers.celery_app": MagicMock(celery_app=mock_celery),
             }),
         )
 

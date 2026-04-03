@@ -50,3 +50,4 @@ construction-monitor-demo/
 # Session / orchestration artifacts
 SESSION_SUMMARY.md
 debug_test*.py
+node_modules

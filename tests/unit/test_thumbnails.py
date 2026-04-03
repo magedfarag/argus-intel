@@ -129,7 +129,7 @@ class TestGenerateThumbnailGracefulDegradation:
     def test_returns_none_without_rasterio(self):
         from unittest.mock import patch
         from app.services.thumbnails import generate_thumbnail
-        with patch("backend.app.services.thumbnails._rasterio_available", return_value=False):
+        with patch("app.services.thumbnails._rasterio_available", return_value=False):
             result = generate_thumbnail(
                 "https://example.com/scene.tif",
                 SAMPLE_BBOX,

@@ -14,7 +14,26 @@ from typing import Any, Dict
 
 
 class _JsonFormatter(logging.Formatter):
-    """Emit each log record as a single JSON object."""
+    """Emit each log record as a single JSON object.
+
+    Enriched fields bound via ``logging.LoggerAdapter`` or the ``extra=``
+    keyword are automatically promoted to the top-level JSON object so
+    log aggregation systems can index them without parsing the message string.
+    """
+
+    # All context keys we promote to the top level (P0-5.2)
+    _CONTEXT_KEYS = frozenset({
+        "request_id",
+        "job_id",
+        "provider",
+        "aoi_id",
+        "aoi_hash",
+        "connector",
+        "source",
+        "event_id",
+        "session_id",
+        "duration_ms",
+    })
 
     def format(self, record: logging.LogRecord) -> str:  # noqa: D102
         payload: Dict[str, Any] = {
@@ -23,8 +42,7 @@ class _JsonFormatter(logging.Formatter):
             "logger": record.name,
             "message": record.getMessage(),
         }
-        # Attach any extra fields passed via LogRecord.__dict__
-        for key in ("request_id", "job_id", "provider", "aoi_hash"):
+        for key in self._CONTEXT_KEYS:
             if key in record.__dict__:
                 payload[key] = record.__dict__[key]
 
@@ -75,3 +93,17 @@ def configure_logging(level: str = "INFO", fmt: str = "json") -> None:
     # Quieten noisy third-party loggers
     for lib in ("uvicorn.access", "celery.app.trace", "httpx"):
         logging.getLogger(lib).setLevel(logging.WARNING)
+
+
+def get_logger(name: str, **context: Any) -> logging.LoggerAdapter:  # type: ignore[type-arg]
+    """Return a LoggerAdapter that injects structured context into every record.
+
+    Usage (P0-5.2)::
+
+        log = get_logger(__name__, connector="connector.cdse.stac", aoi_id="abc123")
+        log.info("Scene ingested", extra={"event_id": evt.event_id})
+
+    The merged context is emitted as top-level JSON keys by ``_JsonFormatter``.
+    """
+    base = logging.getLogger(name)
+    return logging.LoggerAdapter(base, context)

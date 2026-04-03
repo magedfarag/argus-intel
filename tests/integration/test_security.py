@@ -24,8 +24,8 @@ def client_with_auth():
 
     with patch.dict(os.environ, {"API_KEY": "test-secret-key"}):
         # Force reimport to pick up env var
-        if 'backend.app.config' in __import__('sys').modules:
-            __import__('sys').modules['backend.app.config']._settings = None
+        if 'app.config' in __import__('sys').modules:
+            __import__('sys').modules['app.config']._settings = None
         from app.main import app
         from app.resilience.rate_limiter import limiter
         limiter.reset()
@@ -46,8 +46,8 @@ def client_no_auth():
         del os.environ["API_KEY"]
 
     try:
-        if 'backend.app.config' in __import__('sys').modules:
-            __import__('sys').modules['backend.app.config']._settings = None
+        if 'app.config' in __import__('sys').modules:
+            __import__('sys').modules['app.config']._settings = None
         from app.main import app
         from app.resilience.rate_limiter import limiter
         limiter.reset()

@@ -195,6 +195,120 @@ class AppSettings(BaseSettings):
         """Return True when Planet API key is present."""
         return bool(self.planet_api_key)
 
+    # ── V2 connector settings (P0-2.5) ───────────────────────────────────────
+
+    # Object storage (MinIO for local dev; S3-compatible for production)
+    object_storage_endpoint: str = Field(
+        default="", description="S3-compatible endpoint URL, e.g. http://localhost:9000"
+    )
+    object_storage_bucket: str = Field(
+        default="geoint-raw", description="Bucket for raw payloads and artifacts"
+    )
+    object_storage_access_key: str = Field(default="")
+    object_storage_secret_key: str = Field(default="")
+
+    # AISStream (WebSocket maritime tracking)
+    aisstream_api_key: str = Field(
+        default="", description="AISStream API key; register at https://aisstream.io"
+    )
+    aisstream_ws_url: str = Field(
+        default="wss://stream.aisstream.io/v0/stream",
+        description="AISStream WebSocket endpoint",
+    )
+
+    # OpenSky Network (aviation, non-commercial restrictions)
+    opensky_username: str = Field(default="")
+    opensky_password: str = Field(default="")
+    opensky_api_url: str = Field(
+        default="https://opensky-network.org/api",
+        description="OpenSky REST API base URL",
+    )
+
+    # GDELT 2.0 (contextual news events)
+    gdelt_base_url: str = Field(
+        default="https://api.gdeltproject.org/api/v2",
+        description="GDELT DOC 2.0 API base URL",
+    )
+
+    # Earth Search (Element 84) — free STAC, no auth
+    earth_search_stac_url: str = Field(
+        default="https://earth-search.aws.element84.com/v1",
+        description="Element 84 Earth Search STAC endpoint",
+    )
+
+    # Microsoft Planetary Computer
+    planetary_computer_stac_url: str = Field(
+        default="https://planetarycomputer.microsoft.com/api/stac/v1",
+        description="Microsoft Planetary Computer STAC endpoint",
+    )
+    planetary_computer_token: str = Field(
+        default="", description="Optional Planetary Computer subscription key"
+    )
+
+    # ── P5: Production Hardening settings ────────────────────────────────────
+
+    # P5-1: Caching TTLs (seconds)
+    cache_ttl_timeline_seconds: int = Field(
+        default=300, description="TTL for hot timeline window cache entries (P5-1.1)"
+    )
+    cache_ttl_stac_seconds: int = Field(
+        default=900, description="TTL for STAC search result cache entries (P5-1.2)"
+    )
+    cache_ttl_playback_seconds: int = Field(
+        default=120, description="TTL for playback query result cache entries (P5-1.3)"
+    )
+    cache_ttl_source_health_seconds: int = Field(
+        default=60, description="TTL for source health snapshot cache entries (P5-1.4)"
+    )
+
+    # P5-1.5: Server-side density reduction threshold
+    events_density_threshold: int = Field(
+        default=500,
+        description=(
+            "When an event search returns more than this many results, "
+            "apply server-side subsampling before returning the response."
+        ),
+    )
+    events_density_max_results: int = Field(
+        default=200,
+        description="Maximum results to return after density reduction.",
+    )
+
+    # P5-2.4: Per-provider hourly request caps (0 = unlimited)
+    aisstream_max_requests_per_hour: int = Field(
+        default=0, description="Hard cap for AISStream hourly calls (0 = unlimited)"
+    )
+    opensky_max_requests_per_hour: int = Field(
+        default=60, description="OpenSky non-commercial friendly rate cap (1/min)"
+    )
+    planet_max_requests_per_hour: int = Field(
+        default=200, description="Planet Labs API hourly cap (paid tier)"
+    )
+
+    # P5-3.2: Freshness SLA defaults (minutes)
+    sla_gdelt_max_age_minutes: int = Field(default=30)
+    sla_opensky_max_age_minutes: int = Field(default=5)
+    sla_aisstream_max_age_minutes: int = Field(default=5)
+    sla_sentinel2_max_age_minutes: int = Field(default=60)
+    sla_landsat_max_age_minutes: int = Field(default=120)
+
+    # P5-4.4: Automated data retention enforcement
+    retention_enforcement_enabled: bool = Field(
+        default=True, description="Enable automatic telemetry retention enforcement via Celery beat"
+    )
+    retention_enforcement_interval_seconds: int = Field(
+        default=3600, description="Celery beat interval for retention enforcement (seconds)"
+    )
+
+    def aisstream_is_configured(self) -> bool:
+        return bool(self.aisstream_api_key)
+
+    def opensky_is_configured(self) -> bool:
+        return bool(self.opensky_username and self.opensky_password)
+
+    def object_storage_is_configured(self) -> bool:
+        return bool(self.object_storage_endpoint and self.object_storage_access_key)
+
 
 @dataclass(frozen=True)
 class Sentinel2Config:
