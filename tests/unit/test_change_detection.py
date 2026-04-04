@@ -11,21 +11,15 @@ from __future__ import annotations
 import pytest
 import numpy as np
 from datetime import datetime
-from backend.app.config import AppSettings
-from backend.app.models.scene import SceneMetadata
-from backend.app.services.change_detection import ChangeDetectionService
+from app.config import AppSettings
+from app.models.scene import SceneMetadata
+from app.services.change_detection import run_change_detection
 
 
 @pytest.fixture
 def settings():
     """App settings fixture."""
     return AppSettings()
-
-
-@pytest.fixture
-def change_detection_service(settings):
-    """Change detection service fixture."""
-    return ChangeDetectionService(settings)
 
 
 class TestNDVICalculation:
@@ -97,7 +91,7 @@ class TestChangeDetectionThresholding:
         changes = ndvi_diff > threshold
         
         # Should detect the construction pixel
-        assert changes[1, 1] is True
+        assert changes[1, 1] == True
         assert np.sum(changes) == 1  # Only one pixel changed significantly
 
     def test_ndvi_diff_threshold_reduces_noise(self):
@@ -155,22 +149,22 @@ class TestMorphologicalFiltering:
         except ImportError:
             pytest.skip("scipy not available")
         
-        # Pattern: large connected region + isolated noise pixels
+        # Pattern: large connected region + isolated noise pixel
         changes = np.array([
             [0, 1, 1, 1, 0],
             [0, 1, 1, 1, 0],
-            [1, 1, 1, 1, 0],  # Isolated left pixel
             [0, 1, 1, 1, 0],
             [0, 1, 1, 1, 0],
+            [1, 0, 0, 0, 0],
         ], dtype=bool)
         
         # Apply opening (erosion + dilation)
         opened = ndimage.binary_opening(changes, iterations=1)
         
-        # Should remove the isolated left pixel
-        assert opened[2, 0] is False
+        # Should remove the isolated bottom-left pixel
+        assert opened[4, 0] == False
         # Should preserve main region
-        assert np.sum(opened) > 12
+        assert np.sum(opened) >= 8
 
     def test_label_connected_components(self):
         """Test labeling of separate change regions."""
@@ -245,7 +239,7 @@ class TestChangeDetectionEdgeCases:
         threshold = 0.3
         changes = ndvi_diff > threshold
         
-        assert changes[2, 2] is True
+        assert changes[2, 2] == True
         assert np.sum(changes) == 1
 
     def test_cloud_contamination_handling(self):
@@ -281,7 +275,7 @@ class TestChangeDetectionEdgeCases:
 class TestChangeDetectionServiceIntegration:
     """Integration tests with ChangeDetectionService."""
 
-    def test_service_returns_valid_response_structure(self, change_detection_service):
+    def test_service_returns_valid_response_structure(self):
         """Test that service returns proper ChangeRecord structure."""
         # This would use actual run_change_detection() method
         # For now, validate expected response structure

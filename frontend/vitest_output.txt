@@ -1,0 +1,33 @@
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/Projects/construction-monitor-demo/frontend[39m
+
+ [32mΓ£ô[39m src/components/GlobeView/__tests__/GlobeView.smoke.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[90m 153[2mms[22m[39m
+ [31mΓ¥»[39m e2e/app.spec.ts [2m([22m[2m0 test[22m[2m)[22m
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Suites 1 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  e2e/app.spec.ts [ e2e/app.spec.ts ]
+Error: Playwright Test did not expect test.describe() to be called here.
+Most common reasons include:
+- You are calling test.describe() in a configuration file.
+- You are calling test.describe() in a file that is imported by the configuration file.
+- You have two different versions of @playwright/test. This usually happens
+  when one of the dependencies in your package.json depends on @playwright/test.
+ Γ¥» TestTypeImpl._currentSuite ../node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13
+ Γ¥» TestTypeImpl._describe ../node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24
+ Γ¥» Function.describe ../node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12
+ Γ¥» e2e/app.spec.ts:3:6
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+      1| import { test, expect } from "@playwright/test";
+      2| 
+      3| test.describe("GEOINT Platform ΓÇö smoke tests (P1-1.9)", () => {
+       |      ^
+      4|   test("page loads and shows map container", async ({ page }) => {
+      5|     await page.goto("/");
+[2m      Tests [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m   Start at [22m 14:38:11
+[2m   Duration [22m 33.87s[2m (transform 494ms, setup 1.45s, collect 2.28s, tests 153ms, environment 9.91s, prepare 2.50s)[22m
+
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/1]ΓÄ»
+

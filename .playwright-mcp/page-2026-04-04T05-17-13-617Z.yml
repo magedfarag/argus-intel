@@ -1,0 +1,63 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: 🗺
+      - heading "GEOINT Platform" [level=1] [ref=e7]
+      - generic [ref=e8]: Construction Activity Monitor
+    - textbox "API key for authenticated endpoints" [ref=e10]:
+      - /placeholder: API Key (optional)
+  - generic [ref=e11]:
+    - navigation [ref=e12]:
+      - button "AOIs" [ref=e13] [cursor=pointer]
+      - button "Layers" [ref=e14] [cursor=pointer]
+      - button "Events" [ref=e15] [cursor=pointer]
+      - button "Playback" [ref=e16] [cursor=pointer]
+      - button "Analytics" [ref=e17] [cursor=pointer]
+      - button "Export" [ref=e18] [cursor=pointer]
+      - button "Compare" [ref=e19] [cursor=pointer]
+      - button "Health" [ref=e20] [cursor=pointer]
+    - generic [ref=e22]:
+      - heading "Areas of Interest" [level=3] [ref=e23]
+      - generic [ref=e24]:
+        - button "⬜ BBox" [ref=e25] [cursor=pointer]
+        - button "⬡ Polygon" [ref=e26] [cursor=pointer]
+      - list [ref=e27]:
+        - listitem [ref=e28] [cursor=pointer]:
+          - generic [ref=e29]: Hormoz
+          - button "✕" [ref=e30]
+    - generic [ref=e31]:
+      - generic [ref=e32]:
+        - button "2D" [ref=e33] [cursor=pointer]
+        - button "🌐 3D" [ref=e34] [cursor=pointer]
+      - generic [ref=e35]:
+        - button "⬜ BBox" [ref=e36] [cursor=pointer]
+        - button "⬡ Polygon" [ref=e37] [cursor=pointer]
+      - generic [ref=e38]:
+        - generic [ref=e39]: Imagery opacity
+        - 'slider "Imagery opacity: 10%" [ref=e40]': "0.1"
+        - generic [ref=e41]: 10%
+      - generic [ref=e43]:
+        - region "Map" [ref=e44]
+        - generic:
+          - generic [ref=e45]:
+            - button "Zoom in" [ref=e46] [cursor=pointer]
+            - button "Zoom out" [ref=e48] [cursor=pointer]
+            - button "Drag to rotate map, click to reset north" [ref=e50]
+          - generic [ref=e52]: 300 km
+          - group [ref=e53]:
+            - generic "Toggle attribution" [ref=e54] [cursor=pointer]
+            - link "MapLibre" [ref=e56] [cursor=pointer]:
+              - /url: https://maplibre.org/
+  - generic [ref=e58]:
+    - generic [ref=e59]:
+      - heading "Timeline" [level=3] [ref=e60]
+      - button "▼" [ref=e61] [cursor=pointer]
+    - generic [ref=e62]:
+      - button "24h" [ref=e63] [cursor=pointer]
+      - button "7d" [ref=e64] [cursor=pointer]
+      - button "30d" [ref=e65] [cursor=pointer]
+    - generic [ref=e66]:
+      - textbox [ref=e67]: 2026-03-05T05:17
+      - generic [ref=e68]: –
+      - textbox [ref=e69]: 2026-04-04T05:17
+    - paragraph [ref=e70]: No events in range

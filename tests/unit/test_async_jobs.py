@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime
+from datetime import datetime, UTC
 
-from backend.app.models.requests import AnalyzeRequest
-from backend.app.models.responses import JobStatusResponse, AnalyzeResponse
-from backend.app.models.jobs import Job, JobState
+from app.models.requests import AnalyzeRequest
+from app.models.responses import JobStatusResponse, AnalyzeResponse
+from app.models.jobs import Job, JobState
 
 
 POLYGON = {
@@ -70,7 +70,7 @@ def test_async_execution_request_flag_required():
 
 def test_job_status_response_structure():
     """Test JobStatusResponse contains all required fields."""
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     response = JobStatusResponse(
         job_id="job-123",
         state="pending",

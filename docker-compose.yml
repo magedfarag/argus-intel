@@ -9,19 +9,36 @@ services:
       interval: 5s
       retries: 5
 
+  db:
+    image: postgis/postgis:16-3.4-alpine
+    ports: ["5432:5432"]
+    environment:
+      POSTGRES_DB: geoint
+      POSTGRES_USER: geoint
+      POSTGRES_PASSWORD: geoint
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geoint -d geoint"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   api:
     build: .
     ports: ["8000:8000"]
+    env_file: .env
     environment:
       REDIS_URL: "redis://redis:6379/0"
-      APP_MODE: "auto"
-      LOG_LEVEL: "INFO"
-      LOG_FORMAT: "json"
-      # Set these to enable live Sentinel-2 searches:
-      # SENTINEL2_CLIENT_ID: ""
-      # SENTINEL2_CLIENT_SECRET: ""
+      OBJECT_STORAGE_ENDPOINT: "http://minio:9000"
+      OBJECT_STORAGE_BUCKET: "raw"
+      DATABASE_URL: "postgresql+psycopg2://geoint:geoint@db:5432/geoint"
     depends_on:
       redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      db:
         condition: service_healthy
     volumes:
       - .:/app:ro
@@ -29,12 +46,74 @@ services:
   worker:
     build: .
     command: >
-      celery -A backend.app.workers.celery_app.celery_app worker
+      celery -A app.workers.celery_app.celery_app worker
       --loglevel=info --pool=solo --concurrency=2
-      --include=backend.app.workers.tasks
+    env_file: .env
     environment:
       REDIS_URL: "redis://redis:6379/0"
-      APP_MODE: "auto"
+      OBJECT_STORAGE_ENDPOINT: "http://minio:9000"
+      OBJECT_STORAGE_BUCKET: "raw"
+      DATABASE_URL: "postgresql+psycopg2://geoint:geoint@db:5432/geoint"
     depends_on:
       redis:
         condition: service_healthy
+      minio:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+
+  beat:
+    build: .
+    command: >
+      celery -A app.workers.celery_app.celery_app beat
+      --loglevel=info --schedule=/tmp/celerybeat-schedule
+    env_file: .env
+    environment:
+      REDIS_URL: "redis://redis:6379/0"
+      OBJECT_STORAGE_ENDPOINT: "http://minio:9000"
+      OBJECT_STORAGE_BUCKET: "raw"
+      DATABASE_URL: "postgresql+psycopg2://geoint:geoint@db:5432/geoint"
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+
+  # P0-4.5: MinIO object storage — bucket structure: raw/, exports/, thumbnails/, artifacts/
+  minio:
+    image: minio/minio:RELEASE.2024-10-13T13-34-11Z
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  createbuckets:
+    image: minio/mc:RELEASE.2024-11-17T19-35-25Z
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set local http://minio:9000 minioadmin minioadmin123;
+      /usr/bin/mc mb --ignore-existing local/raw;
+      /usr/bin/mc mb --ignore-existing local/exports;
+      /usr/bin/mc mb --ignore-existing local/thumbnails;
+      /usr/bin/mc mb --ignore-existing local/artifacts;
+      /usr/bin/mc anonymous set download local/thumbnails;
+      echo 'Buckets ready: raw exports thumbnails artifacts';
+      exit 0;
+      "
+
+volumes:
+  minio-data:
+  postgres-data:

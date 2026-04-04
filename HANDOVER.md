@@ -1,9 +1,9 @@
 # Construction Activity Monitor — Project Handover
 
 **Date:** 2026-03-28
-**Repository:** https://github.com/magedfarag/construction-monitor-demo
+**Repository:** https://github.com/magedfarag/argus-intel
 **Branch:** `main`
-**Test status:** 89 / 89 passing (11 integration + 78 unit tests)
+**Test status:** 38 / 38 passing
 
 ---
 
@@ -27,7 +27,7 @@ three services: `redis`, `api`, `worker`.
 ## 2. Repository Layout
 
 ```
-construction-monitor-demo/
+argus-intel/
 ├── backend/app/
 │   ├── main.py                   FastAPI app + lifespan DI wiring
 │   ├── config.py                 Flat AppSettings (pydantic-settings)
@@ -185,7 +185,7 @@ requested provider
 ### Phase 2 — Git + GitHub
 - [x] `.gitignore` created
 - [x] Initial commit: 102 files, 16 260 insertions
-- [x] GitHub repository created: https://github.com/magedfarag/construction-monitor-demo
+- [x] GitHub repository created: https://github.com/magedfarag/argus-intel
 - [x] Default branch: `main`
 
 ### Phase 3 — Quality
@@ -210,114 +210,22 @@ requested provider
 - [x] `docs/CHANGE_DETECTION.md` — pipeline technical reference
 - [x] `README.md` — updated for production system
 
----
+### WorldView Phase 5 — Investigation Workflows (2026-04-04) COMPLETE
 
-## 6.1 Batch 1A — Completed ✅
+All four backend tracks delivered and verified:
 
-**P1-5 (CORS Hardening)** and **P1-6 (API Key Authentication)** have been successfully implemented and committed.
+| Track | Service | Tests | Endpoints |
+|-------|---------|-------|-----------|
+| A — Saved Investigations | `src/services/investigation_service.py` | 47 (23 unit + 24 integration) | `/api/v1/investigations` (10 endpoints) |
+| B — Evidence Packs | `src/services/evidence_pack_service.py` | 29 (15 unit + 14 integration) | `/api/v1/evidence-packs` (7 endpoints) |
+| C — Analyst Workflows | `src/services/analyst_query_service.py` | 39 (20 unit + 19 integration) | `/api/v1/analyst` (11 endpoints) |
+| D — Absence Analytics | `src/services/absence_analytics.py` | 45 (24 unit + 21 integration) | `/api/v1/absence` (8 endpoints) |
 
-- Commit: `7e0af65` — Merged to main on 2026-03-28
-- Changes: 7 files modified; 74 insertions
-- Validation: ✅ Config loads; ✅ Auth imports; ✅ FastAPI starts
+**Frontend**: `InvestigationsPanel` React component with investigation navigation and absence-alert surfaces; 14 frontend tests pass; TypeScript compiles with 0 errors.
 
-### Implementation Details
+**Suite totals**: 1338 backend tests passing (0 failures, 11 skipped); 14/14 frontend tests passing.
 
-**P1-5**: CORS changed from `allow_origins=["*"]` to configurable `ALLOWED_ORIGINS` env var
-- Default: `http://localhost:3000,http://localhost:8000,http://127.0.0.1:8000`
-- Methods: `GET, POST, DELETE` only
-- Headers: `Content-Type, Authorization` only
-
-**P1-6**: API Key authentication on mutation endpoints (3 methods: Bearer header, query param, cookie)
-- Applied to: `POST /analyze`, `POST /search`, `DELETE /jobs/{id}/cancel`
-- Security: Optional for dev (`API_KEY=`), required for production
-- Env var: `API_KEY` (set strong value or leave empty for dev)
-
----
-
-## 6.2 Batch 1B — Ready for Execution
-
-The following 4 tasks unblock production deployment. Each is independent or has clear dependencies:
-
-| Task | Time | Dependency | Status |
-|------|------|-----------|--------|
-| **P1-2** | Provision Redis | 20 min | None | ⏳ Ready |
-| **P1-1** | Sentinel-2 credentials | 5-10 min | None | ⏳ Ready |
-| **P1-3** | Validate rasterio | 45 min | After P1-2 | ⏳ Ready |
-| **P1-4** | APP_MODE=live | 5 min | After P1-1,3 | ⏳ Ready |
-
-### P1-2: Redis Provisioning
-
-**Docker Compose (recommended)**:
-```bash
-docker compose up -d  # Starts redis, api, worker
-docker compose ps     # Verify all services running
-```
-
-**Alternative**: Redis Cloud (https://redis.com/redis-cloud) for managed service
-
-**Verify**:
-```python
-import redis
-r = redis.Redis.from_url("redis://localhost:6379/0")
-print(r.ping())  # Should print: True
-```
-
-### P1-1: Sentinel-2 Credentials
-
-**Steps**:
-1. Register at https://dataspace.copernicus.eu (free)
-2. Create OAuth2 client (client_credentials grant)
-3. Copy Client ID + Secret → .env
-
-**Verify**:
-```env
-SENTINEL2_CLIENT_ID=<your-id>
-SENTINEL2_CLIENT_SECRET=<your-secret>
-```
-
-### P1-3: Rasterio Validation
-
-**After P1-2**, test:
-```python
-import rasterio; from osgeo import gdal
-print(f"Rasterio: {rasterio.__version__}")
-
-from backend.app.services.change_detection import detect_construction_changes
-# Test with real COG asset
-```
-
-### P1-4: Go Live
-
-Once all P1-1,2,3 complete, update .env:
-```env
-APP_MODE=live
-SENTINEL2_CLIENT_ID=...
-SENTINEL2_CLIENT_SECRET=...
-REDIS_URL=redis://localhost:6379/0
-```
-
----
-
-## 6.3 Batch 2 — Quality & Testing (Next Priority)
-
-After P1, focus on test coverage and CI:
-
-| Task | Priority | Time | Status |
-|------|----------|------|--------|
-| **P2-1** | pytest-cov + 80% | High | ✅ DONE (2026-03-28) |
-| **P2-2** | Circuit breaker tests | High | ✅ DONE (2026-03-28) |
-| **P2-3** | Async job tests | Medium | ✅ DONE (2026-03-28) |
-| **P2-4** | GitHub Actions CI | High | ✅ DONE (2026-03-28) |
-| **P2-5** | Rate limiting | Medium | ✅ DONE (2026-03-28) |
-
-### P2-1: pytest-cov Setup
-
-**Add to CI**:
-```bash
-python -m pytest tests/ --cov=backend/app --cov-fail-under=80
-```
-
-**Current test status**: 38/38 passing (verified in HANDOVER Phase 3)
+All four routers registered exactly once in `app/main.py`. No duplicate registrations. All Phase 5 exit criteria met. Milestone 5 marked COMPLETE in `docs/worldview-transformation-plan/MILESTONES.md`.
 
 ---
 
@@ -325,37 +233,37 @@ python -m pytest tests/ --cov=backend/app --cov-fail-under=80
 
 ### P1 — Critical (blocks production use)
 
-| ID | Task | Status | Notes |
-|---|---|---|---|
-| P1-1 | Obtain Sentinel-2 credentials | ⏳ TODO | Register at https://dataspace.copernicus.eu; set `SENTINEL2_CLIENT_ID` + `SENTINEL2_CLIENT_SECRET` |
-| P1-2 | Provision Redis | ⏳ TODO | `docker compose up redis` locally; managed Redis (e.g. Redis Cloud) for production |
-| P1-3 | Validate rasterio on target host | ⏳ TODO | Dockerfile installs `libgdal32`; confirm GDAL version matches the distribution's apt repo |
-| P1-4 | Set `APP_MODE=live` in production `.env` | ⏳ TODO | Surfaces errors when no live provider resolves instead of silently returning demo data |
-| P1-5 | Restrict CORS `allow_origins` | ✅ DONE (2026-03-28) | Changed from `["*"]` to configurable `ALLOWED_ORIGINS` env var; defaults to localhost |
-| P1-6 | Add authentication / API key middleware | ✅ DONE (2026-03-28) | Three auth methods: Bearer header, ?api_key query, api_key cookie; applied to POST/DELETE endpoints |
+| ID | Task | Notes |
+|---|---|---|
+| P1-1 | Obtain Sentinel-2 credentials | Register at https://dataspace.copernicus.eu; set `SENTINEL2_CLIENT_ID` + `SENTINEL2_CLIENT_SECRET` |
+| P1-2 | Provision Redis | `docker compose up redis` locally; managed Redis (e.g. Redis Cloud) for production |
+| P1-3 | Validate rasterio on target host | Dockerfile installs `libgdal32`; confirm GDAL version matches the distribution's apt repo |
+| P1-4 | Set `APP_MODE=live` in production `.env` | Surfaces errors when no live provider resolves instead of silently returning demo data |
+| P1-5 | Restrict CORS `allow_origins` | Change `allow_origins=["*"]` in `main.py` to the specific frontend domain |
+| P1-6 | Add authentication / API key middleware | No auth currently on any endpoint — must be secured before exposing to the internet |
 
 ### P2 — Important
 
-| ID | Task | Status | Notes |
-|---|---|---|---|
-| P2-1 | Add pytest-cov and 80 % threshold to CI | ✅ DONE (2026-03-28) | Created `pytest.ini` with coverage config |
-| P2-2 | Test circuit breaker state transitions | ✅ DONE (2026-03-28) | 12/12 tests passing: CLOSED→OPEN (threshold=3); OPEN→HALF-OPEN (timeout=1s); per-provider isolation |
-| P2-3 | Test async job dispatch + poll cycle | ✅ DONE (2026-03-28) | 19/19 tests passing: Job creation; state transitions; serialization; polling simulation |
-| P2-4 | GitHub Actions CI workflow | ✅ DONE (2026-03-28) | `.github/workflows/ci.yml` created — pytest + coverage + ruff + bandit + Docker build on push |
-| P2-5 | Rate-limit `/api/analyze` | ✅ DONE (2026-03-28) | 14/14 tests passing: slowapi rate limiter (5/min analyze, 10/min search, 20/min jobs); HTTP 429 handler |
+| ID | Task | Notes |
+|---|---|---|
+| P2-1 | Add pytest-cov and 80 % threshold to CI | `pytest --cov=backend/app --cov-fail-under=80` |
+| P2-2 | Test circuit breaker state transitions | Unit test: CLOSED→OPEN after N failures; OPEN→HALF-OPEN after timeout |
+| P2-3 | Test async job dispatch + poll cycle | Integration test: `async_execution=True` → `job_id` → poll until `completed` |
+| P2-4 | GitHub Actions CI workflow | `.github/workflows/ci.yml` — pytest + ruff + Docker build on every push |
+| P2-5 | Rate-limit `/api/analyze` | Add `slowapi` or CDN-level rate limiting |
 
 ### P3 — Nice to have
 
-| ID | Task | Status | Notes |
-|---|---|---|---|
-| P3-1 | Commercial provider stub | ⏳ TODO | `MaxarProvider` or `PlanetProvider` extending `SatelliteProvider` |
-| P3-2 | WebSocket live progress | ⏳ TODO | Replace 3 s polling with `ws://…/api/jobs/{id}/stream` |
-| P3-3 | Persist job history to PostgreSQL | ⏳ TODO | Replace in-memory `JobManager` fallback with SQLAlchemy + pg |
-| P3-4 | Multi-worker circuit breaker | ⏳ TODO | Move `CircuitBreaker` state from process memory to Redis |
-| P3-5 | Actual satellite thumbnails | ⏳ TODO | Generate real scene thumbnails instead of static demo PNGs |
-| P3-6 | `add_rate_limit` middleware | ⏳ TODO | Protect all mutation endpoints |
-| P3-7 | Refresh `docs/API.md` | ✅ DONE (commit fe58f32) | Complete endpoint specification with auth examples |
-| P3-8 | Refresh `docs/ARCHITECTURE.md` | ✅ DONE (commit dcab5d4) | Full v2.0 system design + request lifecycle |
+| ID | Task | Notes |
+|---|---|---|
+| P3-1 | Commercial provider stub | `MaxarProvider` or `PlanetProvider` extending `SatelliteProvider` |
+| P3-2 | WebSocket live progress | Replace 3 s polling with `ws://…/api/jobs/{id}/stream` |
+| P3-3 | Persist job history to PostgreSQL | Replace in-memory `JobManager` fallback with SQLAlchemy + pg |
+| P3-4 | Multi-worker circuit breaker | Move `CircuitBreaker` state from process memory to Redis |
+| P3-5 | Actual satellite thumbnails | Generate real scene thumbnails instead of static demo PNGs |
+| P3-6 | `add_rate_limit` middleware | Protect all mutation endpoints |
+| P3-7 | Refresh `docs/API.md` | Still references `demo-fusion` provider name from original demo |
+| P3-8 | Refresh `docs/ARCHITECTURE.md` | Still describes demo-only architecture |
 
 ---
 
@@ -388,275 +296,6 @@ python -m pytest tests/ --cov=backend/app --cov-fail-under=80
 }
 ```
 
----
-
-## 8. Execution Roadmap — Team Tasking
-
-### 8.1 Batch 1A — Security (P1-5 & P1-6) ✅ COMPLETE
-
-**Completed:** 2026-03-28 by Principal Engineer (Copilot)
-
-| Task | Status | Details |
-|------|--------|---------|
-| P1-5 CORS Hardening | ✅ | CORSMiddleware restricted from `["*"]` to configurable `ALLOWED_ORIGINS` (env var + `get_cors_origins()` method in config.py) |
-| P1-6 API Key Auth | ✅ | Three-method key validation (Bearer header, query param, cookie) via `verify_api_key()` dependency; applied to POST `/analyze`, POST `/search`, DELETE `/jobs/{id}/cancel` |
-| `.env.example` | ✅ | Documented `ALLOWED_ORIGINS` and `API_KEY` with examples |
-| Git commits | ✅ | Pushed to main branch (commits b64c2a9, 7e0af65) |
-
-**Key files modified:** `backend/app/config.py`, `backend/app/main.py`, `backend/app/dependencies.py`, `backend/app/routers/analyze.py`, `backend/app/routers/search.py`, `backend/app/routers/jobs.py`, `.env.example`
-
-**Verification:** All endpoints tested locally; requests without valid API_KEY now rejected with 403 Forbidden.
-
----
-
-### 8.2 Batch 1B — Infrastructure (P1-1, P1-2, P1-3, P1-4)
-
-**Orchestration:** Assign to AI subagents in order; each task depends on previous.
-
-#### P1-2: Redis Integration (EXECUTE FIRST) ✅ COMPLETE
-
-**Scope:** Enable Redis for caching + Celery job queue; ensure graceful fallback when Redis unavailable.
-
-**Current state:** Dual-layer cache (Redis primary, `TTLCache` fallback) is code-complete; 12/12 unit tests passing.
-
-**Completed:** 2026-03-28
-
-**Test Coverage:**
-- ✅ `test_memory_cache_set_get` — Basic get/set operations
-- ✅ `test_memory_cache_miss_returns_none` — Cache misses
-- ✅ `test_memory_cache_delete` — Key deletion  
-- ✅ `test_hit_rate_stats` — Hit/miss metrics tracking
-- ✅ `test_is_healthy_memory` — Health checker
-- ✅ `test_redis_fallback_on_invalid_url` — Graceful fallback
-- ✅ `test_cache_client_verifies_redis_connection_timeout` — 3-second timeout prevents hanging
-- ✅ `test_cache_client_json_serialization` — Datetime handling
-- ✅ `test_cache_stats_returns_backend_info` — Backend identification (redis vs memory)
-- ✅ `test_cache_ttl_respects_custom_value` — Custom TTL override
-- ✅ `test_cache_handles_set_errors_gracefully` — Error handling
-- ✅ `test_cache_is_healthy_checks_backend` — Backend health checks
-
-**Files modified:**
-- `tests/unit/test_cache.py` — Extended with 6 new Redis integration tests
-- Commit: `a2951c6` — feat(P1-2): Redis integration unit tests
-
-**Key Implementation Details:**
-- `CacheClient.__init__` — Tries Redis first with `socket_connect_timeout=3`
-- Falls back to `cachetools.TTLCache` (in-memory) if Redis unavailable
-- `is_healthy()` — Returns `True` for available backend (Redis OR in-memory)
-- `stats()` — Identifies backend type: `"redis"` or `"memory"`
-- `set/get/delete` — Work identically regardless of backend
-
-**Production Deployment Instructions:**
-
-Option A: Docker Compose (local dev)
-```bash
-docker compose up -d redis
-# Waits for health check: redis-cli ping → PONG
-```
-
-Option B: Standalone Docker
-```bash
-docker run --name redis-demo -p 6379:6379 -d redis:7-alpine
-redis-cli -h localhost ping  # Should print: PONG
-```
-
-Option C: Managed Redis (production)
-- Redis Cloud: https://redis.com/redis-cloud (free tier available)
-- AWS ElastiCache: https://aws.amazon.com/elasticache/redis/
-- Azure Cache for Redis: https://azure.microsoft.com/services/cache/
-
-**Configuration (.env):**
-```
-REDIS_URL=redis://localhost:6379/0
-# If empty, automatically falls back to in-memory TTLCache
-```
-
-**Next Steps:**
-- P1-1 (Sentinel-2) can execute in parallel
-- P1-3 (Rasterio) depends on P1-2 ✓ (now ready)
-- P1-4 (APP_MODE) depends on all above
-
----
-
-#### P1-1: Sentinel-2 Integration (EXECUTE AFTER P1-2)
-
-**Scope:** Enable live Sentinel-2 STAC scene search via Copernicus Data Space; validate credentials.
-
-**Current state:** `Sentinel2StacProvider.search_scenes()` is fully implemented; requires OAuth2 credentials in `.env`.
-
-**Steps:**
-
-1. **Create Copernicus Data Space account:**
-   - https://dataspace.copernicus.eu/
-   - Register + confirm email
-   - Generate API key (or use username/password)
-
-2. **Set credentials in `.env`:**
-   ```
-   CDSE_OAUTH_URL=https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token
-   CDSE_CLIENT_ID=<your_id>
-   CDSE_CLIENT_SECRET=<your_secret>
-   ```
-
-3. **Test OAuth2 token acquisition:**
-   - Add unit test in `tests/unit/test_sentinel2_provider.py`:
-     - `test_sentinel2_oauth_token_fetch()` — call `_get_token()`, verify JWT in response
-     - Mock HTTP calls with `respx` library
-   - Run: `pytest tests/unit/test_sentinel2_provider.py::test_sentinel2_oauth_token_fetch -v`
-
-4. **Test live scene search:**
-   - Add integration test in `tests/integration/test_sentinel2_live.py`:
-     - Use fixed test AOI (London, 10×10 km)
-     - `test_sentinel2_scene_search_live()` — call `search_scenes()`, verify ≥1 result
-     - Expect `SceneMetadata` with non-empty `image_url`, `cloud_cover < 100`
-   - Run: `pytest tests/integration/test_sentinel2_live.py -v`
-
-5. **Update CircuitBreaker:**
-   - Wire provider state into `/api/health` response.
-   - Add test: `test_circuit_breaker_tracks_provider_state()` — verify CLOSED, OPEN, HALF-OPEN transitions logged.
-
-**Dependencies:** P1-2 (Redis).  
-**Estimated time:** 60 minutes.  
-**Success criteria:** `curl -s http://localhost:8000/api/providers | jq '.sentinel2.state'` returns `"available"`.
-
----
-
-#### P1-3: Rasterio GDAL Integration (EXECUTE AFTER P1-1)
-
-**Scope:** Validate rasterio GDAL pipeline; enable change detection on COGs (Cloud Optimized GeoTIFFs).
-
-**Current state:** `ChangeDetectionService.run_change_detection()` uses rasterio to stream remote TIFF files and compute NDVI; graceful fallback when rasterio unavailable.
-
-**Steps:**
-
-1. **Verify GDAL installation:**
-   ```bash
-   python -c "import rasterio; print(rasterio.__version__)"
-   ```
-   - If missing, reinstall: `pip install --no-cache-dir gdal rasterio` (may require GDAL system package on Linux/Mac).
-
-2. **Test COG reading:**
-   - Use public Sentinel-2 scene: `s3://sentinel-cogs/tile/2021/S2L2A_MTL_20210825T110631_S2A_TL_20210825T110631_N0301_COGS/`
-   - Add unit test in `tests/unit/test_change_detection.py`:
-     - `test_read_cog_without_download()` — open remote TIFF, verify metadata, read 256×256 window
-   - Run: `pytest tests/unit/test_change_detection.py::test_read_cog_without_download -v`
-
-3. **Test NDVI pipeline end-to-end:**
-   - Use 2 Sentinel-2 scenes (before/after date pair)
-   - Add integration test in `tests/integration/test_change_detection_rasterio.py`:
-     - `test_ndvi_pipeline()` — compute (NIR − RED) / (NIR + RED) for both, detect changes > threshold
-     - Verify output is GeoJSON (polygon geometries + properties with max_ndvi_diff)
-   - Run: `pytest tests/integration/test_change_detection_rasterio.py -v`
-
-4. **Update `/api/analyze` response:**
-   - Verify `is_demo=false` when rasterio available (live provider).
-   - Add test: `test_analyze_live_provider_has_real_changes()` — geo-validate change polygons.
-
-**Dependencies:** P1-1 (Sentinel-2 credentials for live test data).  
-**Estimated time:** 45 minutes.  
-**Success criteria:** `POST /api/analyze` with live Sentinel-2 returns real change polygons (not demo data).
-
----
-
-#### P1-4: APP_MODE Feature Flag (EXECUTE AFTER P1-3)
-
-**Scope:** Add `APP_MODE` environment variable to toggle between `demo`, `staging`, and `production` mode; ensure correct provider fallback chain per mode.
-
-**Current state:** Demo mode is always active; live providers are configured but not gated by mode.
-
-**Steps:**
-
-1. **Update `config.py`:**
-   ```python
-   from enum import Enum
-   
-   class AppMode(str, Enum):
-       DEMO = "demo"
-       STAGING = "staging"
-       PRODUCTION = "production"
-   
-   class AppSettings(BaseSettings):
-       app_mode: AppMode = AppMode.STAGING  # default
-       # ...
-   ```
-
-2. **Update `providers/registry.py`:**
-   - `PROVIDER_PRIORITY` dict changes per mode:
-     - **demo:** `[demo]` (DemoProvider only, always available)
-     - **staging:** `[demo, sentinel2, landsat]` (live providers, fallback to demo)
-     - **production:** `[sentinel2, landsat]` (no fallback; fail fast if unavailable)
-   - Wire registry initialization to read `settings.app_mode`.
-
-3. **Update `/api/health` response:**
-   ```json
-   {
-     "mode": "staging",
-     "demo_available": true,
-     "providers": {
-       "sentinel2": {"state": "available"},
-       "landsat": {"state": "open_circuit"},
-       "demo": {"state": "available"}
-     }
-   }
-   ```
-
-4. **Update `.env.example`:**
-   ```
-   APP_MODE=staging  # demo | staging | production
-   ```
-
-5. **Test mode switching:**
-   - Add unit test in `tests/unit/test_app_mode.py`:
-     - `test_registry_respects_app_mode_demo()` — verify provider list in demo mode
-     - `test_registry_respects_app_mode_production()` — verify no fallback in production
-   - Run: `pytest tests/unit/test_app_mode.py -v`
-
-6. **Update `.github/workflows/ci.yml`:**
-   - Run tests in all 3 modes (matrix: `app_mode: [demo, staging, production]`).
-
-**Dependencies:** P1-2, P1-1, P1-3 (all infrastructure complete).  
-**Estimated time:** 30 minutes.  
-**Success criteria:** `APP_MODE=production curl -s http://localhost:8000/api/health | jq .mode` returns `"production"`.
-
----
-
-### 8.3 Batch 2 — Quality (P2-1 through P2-5)
-
-**Orchestration:** Sequential or parallel; each task improves test coverage or observability.
-
-| Task | Subagent | Estimated | Blocker |
-|------|----------|-----------|---------|
-| P2-1: pytest-cov CI gate | QA | 20 min | None |
-| P2-2: CircuitBreaker unit tests | QA | 30 min | None |
-| P2-3: Async job dispatch tests | QA | 25 min | P1-2 (Redis) |
-| P2-4: GitHub Actions CI | DevOps | 45 min | None |
-| P2-5: Rate limiting | Backend | 30 min | None |
-
-**Total time (parallel):** ~90 minutes (QA + DevOps + Backend working in parallel).
-
----
-
-### 8.4 Batch 3 — Documentation (P3-7, P3-8)
-
-| Task | Subagent | Estimated | Notes |
-|-------|----------|-----------|-------|
-| P3-7: Refresh API.md | Docs | 30 min | Update provider names, add P1-5/P1-6 examples |
-| P3-8: Refresh ARCH.md | Docs | 45 min | Describe full fallback chain, circuit breaker state machine |
-
----
-
-## 9. Next Steps
-
-1. **Principal engineer reviews roadmap** — ensure all steps are clear; adjust dependencies.
-2. **Assign Batch 1B tasks to infrastructure subagents** — P1-2 first (Redis), then P1-1, P1-3, P1-4 in order.
-3. **Assign Batch 2 tasks to QA/DevOps** — can run in parallel once Batch 1B complete.
-4. **Monitor git commits** — all work should be feature-branched, tested, and merged to `main` via PR.
-5. **Update this roadmap** — mark tasks ✅ as they complete.
-
----
-
-**End of handover.**
-
 `provider`: `auto` | `demo` | `sentinel2` | `landsat`
 `processing_mode`: `fast` | `balanced` | `thorough`
 
@@ -685,7 +324,7 @@ See `.env.example` for the full annotated list. Key variables:
 ```bash
 python -m venv .venv && .venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn backend.app.main:app --reload
+uvicorn app.main:app --reload
 # http://127.0.0.1:8000
 ```
 
@@ -695,10 +334,10 @@ uvicorn backend.app.main:app --reload
 docker run -p 6379:6379 redis:7-alpine             # Terminal 1
 
 $env:REDIS_URL = "redis://localhost:6379/0"
-uvicorn backend.app.main:app --reload               # Terminal 2
+uvicorn app.main:app --reload               # Terminal 2
 
 $env:REDIS_URL = "redis://localhost:6379/0"
-celery -A backend.app.workers.celery_app.celery_app worker --loglevel=info --pool=solo  # Terminal 3
+celery -A app.workers.celery_app.celery_app worker --loglevel=info --pool=solo  # Terminal 3
 ```
 
 ### Docker Compose (full stack)
@@ -750,8 +389,113 @@ python -m pytest tests/ -v
 
 | Resource | URL |
 |---|---|
-| GitHub repository | https://github.com/magedfarag/construction-monitor-demo |
+| GitHub repository | https://github.com/magedfarag/argus-intel |
 | Copernicus CDSE registration | https://dataspace.copernicus.eu |
 | Copernicus STAC API | https://catalogue.dataspace.copernicus.eu/stac/v1 |
 | USGS LandsatLook STAC | https://landsatlook.usgs.gov/stac-server |
 | FastAPI Swagger UI (local) | http://localhost:8000/docs |
+
+---
+
+## 13. Phase 0 Stabilization — Status (2026-04-04)
+
+**Verdict:** PHASE 0 SUBSTANTIALLY COMPLETE — one deferred item (globe vitest smoke test blocked by missing vitest install)
+
+### What was fixed
+
+| Area | Fix |
+|---|---|
+| `app/workers/tasks.py` | Annotated 4 demo-only ingestion shortcuts: GDELT, OpenSky, and AISStream pollers normalize events but discard them (no EventStore write); `enforce_telemetry_retention` operates on in-memory store only |
+| `app/workers/tasks.py` | `TelemetryStore.upsert()` → `ingest_batch()` interface mismatch corrected in `poll_rapidapi_ais` and `poll_vessel_data` |
+| `tests/unit/test_cache.py` | Cache test design contract aligned with the real `CacheClient` interface |
+| `.github/workflows/ci.yml` | Frontend `typecheck` job added; catches Globe/API-contract type regressions in CI |
+| `frontend/src/components/GlobeView/GlobeView.tsx` | Fixed `bbox`/`geometry` contract, `last_known_position` → `last_known_lon`/`last_known_lat` split, removed unused `baseStyle` prop |
+
+### What is deferred to Phase 1
+
+| Item | Phase 1 Track |
+|---|---|
+| GDELT / OpenSky / AISStream pollers → EventStore unified write path | Track C |
+| EventStore / TelemetryStore schema and contract freeze | Track A |
+| Globe vitest smoke test (blocked: vitest not yet installed) | Track A |
+
+### Baseline health (2026-04-04)
+
+- **Unit tests:** 856 passing, 0 failing
+- **Frontend typecheck:** `tsc --noEmit` exits clean
+- **CI:** typecheck + backend unit tests gated on every push
+
+---
+
+## 14. Phase 6 — Hardening and Release (2026-04-04)
+
+**Status:** COMPLETE — all four tracks delivered.
+
+### Track A — Auth and Governance
+
+| Deliverable | Location |
+|---|---|
+| HMAC-SHA256 token auth, 3-tier RBAC | `app/dependencies.py` |
+| `AuditLoggingMiddleware` (zero request-path latency) | `app/audit_log.py` |
+| 28 unit tests for auth (tamper detection, role hierarchy, bypass modes) | `tests/unit/test_auth_rbac.py` |
+| 22 integration tests for auth gates and audit fields | `tests/integration/test_auth_audit.py` |
+| Data retention policy by source family | `docs/DATA_RETENTION_POLICY.md` |
+
+### Track B — Performance and Cost Controls
+
+Track B (rate limiting, caching, budgets) was pre-implemented during earlier phases:
+- `app/resilience/rate_limiter.py` — slowapi integration (5/10/20 req/min per endpoint)
+- `app/cache/client.py` — Redis primary + TTLCache fallback
+- In-process circuit breaker per provider
+
+### Track C — Observability and Reliability
+
+| Deliverable | Location |
+|---|---|
+| In-process metrics registry (counters, histograms, gauges) | `app/metrics.py` |
+| Connector health endpoint | `GET /api/v1/health/connectors` |
+| Metrics snapshot endpoint | `GET /api/v1/health/metrics` |
+| 8 Prometheus alerting rules | `docs/ALERTING_RULES.md` |
+| 6 incident response runbooks | `docs/RUNBOOK.md` §7 |
+| Disaster recovery documentation | `docs/DISASTER_RECOVERY.md` |
+
+### Track D — Release Readiness (this wave)
+
+| Deliverable | Location |
+|---|---|
+| Refreshed `docs/ARCHITECTURE.md` (v6.0) | `docs/ARCHITECTURE.md` |
+| Complete API route table (85+ endpoints) | `docs/API.md` |
+| Updated `README.md` (current feature set, auth, docs index) | `README.md` |
+| Release checklist (6 categories, manual-verify format) | `docs/RELEASE_CHECKLIST.md` |
+| Deployment candidate notes (limitations, next steps) | `docs/DEPLOYMENT_CANDIDATE.md` |
+| Final regression pass: 1428 passed, 11 skipped, 0 failed | — |
+| Frontend typecheck: clean (0 errors) | — |
+
+### Current test count
+
+| Scope | Count |
+|---|---|
+| Backend tests passing | 1428 |
+| Backend tests skipped (pre-existing: Celery/Redis CI, sentinel2/thumbnails) | 11 |
+| Backend tests failing | 0 |
+| Frontend tests | 14 (all passing, as of Milestone 5) |
+
+### Known limitations (before production use)
+
+| # | Limitation | Severity |
+|---|---|---|
+| L1 | All V2 stores are in-memory — no persistence across restarts | Critical |
+| L2 | Auth uses HMAC self-signed tokens — no external IdP | High |
+| L3 | All connectors are stubs — no live external API calls activated by default | High |
+| L4 | Rate limiting is per-worker in-process — no Redis coordination for multi-worker | Medium |
+| L5 | 3D scene orbit paths use flat-earth approximations — not WGS-84 accurate | Low |
+| L6 | Audit `user_id` is SHA-256 prefix — no central identity mapping | Low |
+
+### Recommended next steps
+
+1. **Postgres persistence**: Wire `EventStore`, `InvestigationService`, `AbsenceAnalyticsService` to PostGIS (Alembic migrations present in `alembic/`)
+2. **Redis caching**: Replace per-worker rate limiter and circuit breaker state with shared Redis
+3. **External identity provider**: Replace HMAC tokens with OAuth2 / OIDC (e.g. Keycloak, Auth0)
+4. **Live connector activation**: Provide `AISSTREAM_API_KEY`, `OPENSKY_USERNAME`/`PASSWORD`, Sentinel-2/Landsat credentials
+5. **WGS-84 orbit paths**: Replace flat-earth TLE approximation in `src/api/orbits.py`
+6. **CI coverage gate**: Add `pytest --cov=app --cov-fail-under=85` to `.github/workflows/ci.yml`

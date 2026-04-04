@@ -1,4 +1,4 @@
-"""Write all documentation files for the construction-monitor-demo project."""
+"""Write all documentation files for the argus-intel project."""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -10,7 +10,7 @@ HANDOVER = ROOT / "HANDOVER.md"
 HANDOVER.write_text(r"""# Construction Activity Monitor — Project Handover
 
 **Date:** 2026-03-28
-**Repository:** https://github.com/magedfarag/construction-monitor-demo
+**Repository:** https://github.com/magedfarag/argus-intel
 **Branch:** `main`
 **Test status:** 38 / 38 passing
 
@@ -36,7 +36,7 @@ three services: `redis`, `api`, `worker`.
 ## 2. Repository Layout
 
 ```
-construction-monitor-demo/
+argus-intel/
 ├── backend/app/
 │   ├── main.py                   FastAPI app + lifespan DI wiring
 │   ├── config.py                 Flat AppSettings (pydantic-settings)
@@ -194,7 +194,7 @@ requested provider
 ### Phase 2 — Git + GitHub
 - [x] `.gitignore` created
 - [x] Initial commit: 102 files, 16 260 insertions
-- [x] GitHub repository created: https://github.com/magedfarag/construction-monitor-demo
+- [x] GitHub repository created: https://github.com/magedfarag/argus-intel
 - [x] Default branch: `main`
 
 ### Phase 3 — Quality
@@ -316,7 +316,7 @@ See `.env.example` for the full annotated list. Key variables:
 ```bash
 python -m venv .venv && .venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn backend.app.main:app --reload
+uvicorn app.main:app --reload
 # http://127.0.0.1:8000
 ```
 
@@ -326,10 +326,10 @@ uvicorn backend.app.main:app --reload
 docker run -p 6379:6379 redis:7-alpine             # Terminal 1
 
 $env:REDIS_URL = "redis://localhost:6379/0"
-uvicorn backend.app.main:app --reload               # Terminal 2
+uvicorn app.main:app --reload               # Terminal 2
 
 $env:REDIS_URL = "redis://localhost:6379/0"
-celery -A backend.app.workers.celery_app.celery_app worker --loglevel=info --pool=solo  # Terminal 3
+celery -A app.workers.celery_app.celery_app worker --loglevel=info --pool=solo  # Terminal 3
 ```
 
 ### Docker Compose (full stack)
@@ -381,7 +381,7 @@ python -m pytest tests/ -v
 
 | Resource | URL |
 |---|---|
-| GitHub repository | https://github.com/magedfarag/construction-monitor-demo |
+| GitHub repository | https://github.com/magedfarag/argus-intel |
 | Copernicus CDSE registration | https://dataspace.copernicus.eu |
 | Copernicus STAC API | https://catalogue.dataspace.copernicus.eu/stac/v1 |
 | USGS LandsatLook STAC | https://landsatlook.usgs.gov/stac-server |
@@ -408,8 +408,8 @@ print("HANDOVER.md written")
 
 ```bash
 # Clone and enter directory
-git clone https://github.com/magedfarag/construction-monitor-demo
-cd construction-monitor-demo
+git clone https://github.com/magedfarag/argus-intel
+cd argus-intel
 
 # Create virtual environment
 python -m venv .venv
@@ -420,7 +420,7 @@ python -m venv .venv
 pip install -r requirements.txt
 
 # Run with auto-reload
-uvicorn backend.app.main:app --reload
+uvicorn app.main:app --reload
 
 # Open http://127.0.0.1:8000
 ```
@@ -439,11 +439,11 @@ docker run --name redis-dev -p 6379:6379 -d redis:7-alpine
 # Terminal 2 — API server
 $env:REDIS_URL = "redis://localhost:6379/0"
 $env:APP_MODE  = "auto"
-uvicorn backend.app.main:app --reload
+uvicorn app.main:app --reload
 
 # Terminal 3 — Celery worker
 $env:REDIS_URL = "redis://localhost:6379/0"
-celery -A backend.app.workers.celery_app.celery_app worker `
+celery -A app.workers.celery_app.celery_app worker `
     --loglevel=info --pool=solo --concurrency=2
 ```
 

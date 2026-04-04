@@ -1,0 +1,77 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: 🗺
+      - heading "GEOINT Platform" [level=1] [ref=e7]
+      - generic [ref=e8]: Construction Activity Monitor
+    - textbox "API key for authenticated endpoints" [ref=e10]:
+      - /placeholder: API Key (optional)
+  - generic [ref=e11]:
+    - navigation [ref=e12]:
+      - button "AOIs" [ref=e13] [cursor=pointer]
+      - button "Layers" [ref=e14] [cursor=pointer]
+      - button "Events" [ref=e15] [cursor=pointer]
+      - button "Playback" [ref=e16] [cursor=pointer]
+      - button "Analytics" [ref=e17] [cursor=pointer]
+      - button "Export" [ref=e18] [cursor=pointer]
+      - button "Compare" [ref=e19] [cursor=pointer]
+      - button "Health" [ref=e20] [cursor=pointer]
+    - generic [ref=e212]:
+      - heading "Layers" [level=3] [ref=e213]
+      - generic [ref=e214] [cursor=pointer]:
+        - checkbox "AOI Boundaries" [checked] [ref=e215]
+        - text: AOI Boundaries
+      - generic [ref=e217] [cursor=pointer]:
+        - checkbox "Imagery Footprints" [checked] [ref=e218]
+        - text: Imagery Footprints
+      - generic [ref=e220] [cursor=pointer]:
+        - checkbox "Events" [checked] [ref=e221]
+        - text: Events
+      - generic [ref=e223] [cursor=pointer]:
+        - checkbox "GDELT Context" [checked] [active] [ref=e224]
+        - text: GDELT Context
+      - generic [ref=e226] [cursor=pointer]:
+        - checkbox "Maritime (AIS)" [ref=e227]
+        - text: Maritime (AIS)
+      - generic [ref=e229] [cursor=pointer]:
+        - checkbox "Aviation (ADS-B)" [ref=e230]
+        - text: Aviation (ADS-B)
+      - generic [ref=e232]:
+        - generic [ref=e233]: "Imagery opacity: 10%"
+        - slider [ref=e234]: "0.1"
+    - generic [ref=e31]:
+      - generic [ref=e235]:
+        - button "2D" [ref=e236] [cursor=pointer]
+        - button "🌐 3D" [ref=e237] [cursor=pointer]
+      - generic [ref=e238]:
+        - button "⬜ BBox" [ref=e239] [cursor=pointer]
+        - button "⬡ Polygon" [ref=e240] [cursor=pointer]
+      - generic [ref=e241]:
+        - generic [ref=e242]: Imagery opacity
+        - 'slider "Imagery opacity: 10%" [ref=e243]': "0.1"
+        - generic [ref=e244]: 10%
+      - generic [ref=e246]:
+        - region "Map" [ref=e247]
+        - generic:
+          - generic [ref=e248]:
+            - button "Zoom in" [ref=e249] [cursor=pointer]
+            - button "Zoom out" [ref=e251] [cursor=pointer]
+            - button "Drag to rotate map, click to reset north" [ref=e253]
+          - generic [ref=e255]: 300 km
+          - group [ref=e256]:
+            - generic "Toggle attribution" [ref=e257] [cursor=pointer]
+            - link "MapLibre" [ref=e259] [cursor=pointer]:
+              - /url: https://maplibre.org/
+  - generic [ref=e58]:
+    - generic [ref=e59]:
+      - heading "Timeline" [level=3] [ref=e60]
+      - button "▼" [ref=e61] [cursor=pointer]
+    - generic [ref=e62]:
+      - button "24h" [ref=e63] [cursor=pointer]
+      - button "7d" [ref=e64] [cursor=pointer]
+      - button "30d" [ref=e65] [cursor=pointer]
+    - generic [ref=e66]:
+      - textbox [ref=e67]: 2026-03-05T05:17
+      - generic [ref=e68]: –
+      - textbox [ref=e69]: 2026-04-04T05:17
+    - paragraph [ref=e70]: No events in range

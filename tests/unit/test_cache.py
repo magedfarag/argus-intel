@@ -1,6 +1,6 @@
 """Unit tests for CacheClient."""
 from __future__ import annotations
-from backend.app.cache.client import CacheClient
+from app.cache.client import CacheClient
 
 def test_memory_cache_set_get():
     c = CacheClient(redis_url="", ttl_seconds=10, max_entries=16)
@@ -24,7 +24,9 @@ def test_hit_rate_stats():
     assert s["hits"] == 1 and s["misses"] == 1 and s["hit_rate"] == 0.5
 
 def test_is_healthy_memory():
-    assert CacheClient(redis_url="", ttl_seconds=10, max_entries=4).is_healthy() is True
+    # In-memory fallback is a degraded state per design — is_healthy returns False
+    # to signal to the health endpoint that Redis persistence is unavailable.
+    assert CacheClient(redis_url="", ttl_seconds=10, max_entries=4).is_healthy() is False
 
 def test_redis_fallback_on_invalid_url():
     c = CacheClient(redis_url="redis://invalid.local:9999/0", ttl_seconds=10, max_entries=4)
@@ -108,13 +110,17 @@ def test_cache_handles_set_errors_gracefully():
 
 
 def test_cache_is_healthy_checks_backend():
-    """Verify is_healthy() returns True for available backends."""
-    memory_cache = CacheClient(redis_url="", ttl_seconds=10)
-    assert memory_cache.is_healthy() is True
+    """Verify is_healthy() returns False when Redis is not reachable.
 
-    # Invalid Redis should still have memory fallback
+    In-memory fallback is a degraded state per design — the health endpoint
+    should report Redis as unavailable so operators know persistence is lost.
+    """
+    memory_cache = CacheClient(redis_url="", ttl_seconds=10)
+    assert memory_cache.is_healthy() is False
+
+    # Invalid Redis falls back to memory — still degraded (no Redis persistence)
     invalid_cache = CacheClient(redis_url="redis://invalid:9999/0", ttl_seconds=10)
-    assert invalid_cache.is_healthy() is True  # Fallback makes it healthy
+    assert invalid_cache.is_healthy() is False
 
 
 def test_cache_from_settings_class_method():

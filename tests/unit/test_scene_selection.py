@@ -1,8 +1,8 @@
 """Unit tests for scene_selection service."""
 from __future__ import annotations
 from datetime import datetime, timedelta
-from backend.app.models.scene import SceneMetadata
-from backend.app.services.scene_selection import rank_scenes, select_scene_pair
+from app.models.scene import SceneMetadata
+from app.services.scene_selection import rank_scenes, select_scene_pair
 
 def _s(sid, cloud=5.0, days_ago=0):
     return SceneMetadata(scene_id=sid, provider="sentinel2", satellite="S2",

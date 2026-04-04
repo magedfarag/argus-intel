@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 
-from backend.app.resilience.rate_limiter import (
+from app.resilience.rate_limiter import (
     limiter,
     rate_limit_error_handler,
     ANALYZE_RATE_LIMIT,

@@ -2,7 +2,7 @@
 from __future__ import annotations
 from datetime import date
 import pytest
-from backend.app.providers.demo import DemoProvider, _polygon_area_km2, SCENARIOS, MIN_AREA_KM2, MAX_AREA_KM2
+from app.providers.demo import DemoProvider, _polygon_area_km2, SCENARIOS, MIN_AREA_KM2, MAX_AREA_KM2
 
 RING = [[30.0, 50.0], [30.1, 50.0], [30.1, 50.1], [30.0, 50.1], [30.0, 50.0]]
 

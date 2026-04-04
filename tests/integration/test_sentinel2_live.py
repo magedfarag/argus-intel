@@ -9,9 +9,9 @@ Tests use a fixed London AOI (10×10 km) and verify ≥1 live scene returned.
 from __future__ import annotations
 import os
 import pytest
-from backend.app.config import AppSettings
-from backend.app.providers.sentinel2 import Sentinel2Provider
-from backend.app.providers.base import ProviderUnavailableError
+from app.config import AppSettings
+from app.providers.sentinel2 import Sentinel2Provider
+from app.providers.base import ProviderUnavailableError
 
 # Skip entire module if credentials missing
 sentinel2_configured = bool(

@@ -1,10 +1,10 @@
 """Unit tests for AppSettings."""
 from __future__ import annotations
-from backend.app.config import AppSettings, get_settings
+from app.config import AppMode, AppSettings, get_settings
 
 def test_defaults_are_safe():
     s = AppSettings()
-    assert s.app_mode == "auto"
+    assert s.app_mode == AppMode.STAGING
     assert s.sentinel2_client_id == ""
     assert s.cache_ttl_seconds == 3600
 

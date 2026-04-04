@@ -1,13 +1,13 @@
-# Construction Activity Monitor Demo — Guidelines
+# ARGUS — Multi-Domain Surveillance Intelligence — Guidelines
 
 ## Architecture
 
-Single FastAPI service (`backend/app/main.py`) that:
-- Serves the static frontend from `backend/app/static/`
+Single FastAPI service (`app/main.py`) that:
+- Serves the static frontend from `app/static/`
 - Exposes `GET /api/health`, `GET /api/config`, `POST /api/analyze`
 - Returns curated deterministic results — **no live imagery**
 
-Provider stubs live in `backend/app/providers.py`. Each extends `BaseImageryProvider` and implements `search_scenes()`. The demo ignores them; they document the real integration contract.
+Provider stubs live in `app/providers/`. Each extends `SatelliteProvider` and implements `search_imagery()`. The demo ignores them; they document the real integration contract.
 
 See [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) and [docs/API.md](../docs/API.md) for full details.
 
@@ -18,7 +18,7 @@ See [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) and [docs/API.md](../docs/AP
 pip install -r requirements.txt
 
 # Run (auto-reload)
-uvicorn backend.app.main:app --reload
+uvicorn app.main:app --reload
 ```
 
 Windows shortcut: `run_demo.bat` (creates `.venv`, installs, starts server).

@@ -43,3 +43,14 @@ Thumbs.db
 # Rasterio temp
 tmp/
 temp/
+
+# Nested repo clone (broken submodule artifact)
+argus-intel/
+
+# Session / orchestration artifacts
+SESSION_SUMMARY.md
+debug_test*.py
+node_modules
+
+# Playwright MCP session artifacts
+.playwright-mcp/

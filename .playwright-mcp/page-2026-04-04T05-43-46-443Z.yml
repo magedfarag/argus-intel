@@ -1,0 +1,103 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: 🗺
+        - heading "GEOINT Platform" [level=1] [ref=e7]
+        - generic [ref=e8]: Construction Activity Monitor
+      - textbox "API key for authenticated endpoints" [ref=e10]:
+        - /placeholder: API Key (optional)
+    - generic [ref=e11]:
+      - navigation [ref=e12]:
+        - button "AOIs" [active] [ref=e13] [cursor=pointer]
+        - button "Layers" [ref=e14] [cursor=pointer]
+        - button "Events" [ref=e15] [cursor=pointer]
+        - button "Playback" [ref=e16] [cursor=pointer]
+        - button "Analytics" [ref=e17] [cursor=pointer]
+        - button "Export" [ref=e18] [cursor=pointer]
+        - button "Compare" [ref=e19] [cursor=pointer]
+        - button "Health" [ref=e20] [cursor=pointer]
+      - generic [ref=e304]:
+        - heading "Areas of Interest" [level=3] [ref=e305]
+        - generic [ref=e306]:
+          - button "⬜ BBox" [ref=e307] [cursor=pointer]
+          - button "⬡ Polygon" [ref=e308] [cursor=pointer]
+        - list [ref=e309]:
+          - listitem [ref=e310] [cursor=pointer]:
+            - generic [ref=e311]: Strait of Hormuz
+            - button "✕" [ref=e312]
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - button "2D" [ref=e33] [cursor=pointer]
+          - button "🌐 3D" [ref=e34] [cursor=pointer]
+        - generic [ref=e35]:
+          - button "⬜ BBox" [ref=e36] [cursor=pointer]
+          - button "⬡ Polygon" [ref=e37] [cursor=pointer]
+        - generic [ref=e38]:
+          - generic [ref=e39]: Imagery opacity
+          - 'slider "Imagery opacity: 10%" [ref=e40]': "0.1"
+          - generic [ref=e41]: 10%
+        - generic [ref=e43]:
+          - region "Map" [ref=e44]
+          - generic:
+            - generic [ref=e45]:
+              - button "Zoom in" [ref=e46] [cursor=pointer]
+              - button "Zoom out" [ref=e48] [cursor=pointer]
+              - button "Drag to rotate map, click to reset north" [ref=e50]
+            - generic [ref=e52]: 100 km
+            - group [ref=e53]:
+              - generic "Toggle attribution" [ref=e54] [cursor=pointer]
+    - generic [ref=e58]:
+      - generic [ref=e59]:
+        - heading "Timeline" [level=3] [ref=e60]
+        - button "▼" [ref=e61] [cursor=pointer]
+      - generic [ref=e62]:
+        - button "24h" [ref=e63] [cursor=pointer]
+        - button "7d" [ref=e64] [cursor=pointer]
+        - button "30d" [ref=e65] [cursor=pointer]
+      - generic [ref=e66]:
+        - textbox [ref=e67]: 2026-03-05T05:43
+        - generic [ref=e68]: –
+        - textbox [ref=e69]: 2026-04-04T05:43
+      - application [ref=e84]:
+        - generic [ref=e225]:
+          - generic [ref=e226]:
+            - generic [ref=e228]: 03/06
+            - generic [ref=e230]: 03/07
+            - generic [ref=e232]: 03/10
+            - generic [ref=e234]: 03/10
+            - generic [ref=e236]: 03/11
+            - generic [ref=e238]: 03/11
+            - generic [ref=e240]: 03/13
+            - generic [ref=e242]: 03/14
+            - generic [ref=e244]: 03/16
+            - generic [ref=e246]: 03/19
+            - generic [ref=e248]: 03/22
+            - generic [ref=e250]: 03/24
+            - generic [ref=e252]: 03/24
+            - generic [ref=e254]: 03/25
+            - generic [ref=e256]: 03/25
+            - generic [ref=e258]: 03/26
+            - generic [ref=e260]: 03/28
+            - generic [ref=e262]: 03/31
+            - generic [ref=e264]: 04/01
+            - generic [ref=e266]: 04/02
+            - generic [ref=e268]: 04/03
+            - generic [ref=e270]: 04/03
+            - generic [ref=e272]: 04/03
+            - generic [ref=e274]: 04/03
+            - generic [ref=e276]: 04/03
+            - generic [ref=e278]: 04/04
+            - generic [ref=e280]: 04/04
+            - generic [ref=e282]: 04/04
+            - generic [ref=e284]: 04/04
+            - generic [ref=e286]: 04/04
+            - generic [ref=e288]: 04/04
+            - generic [ref=e290]: 04/04
+            - generic [ref=e292]: 04/04
+          - generic [ref=e293]:
+            - generic [ref=e295]: "0"
+            - generic [ref=e297]: "25"
+            - generic [ref=e299]: "50"
+            - generic [ref=e301]: "100"
+  - generic [ref=e302]: "0"

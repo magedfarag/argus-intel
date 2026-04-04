@@ -1,0 +1,96 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: 🗺
+        - heading "GEOINT Platform" [level=1] [ref=e7]
+        - generic [ref=e8]: Construction Activity Monitor
+      - textbox "API key for authenticated endpoints" [ref=e10]:
+        - /placeholder: API Key (optional)
+    - generic [ref=e11]:
+      - navigation [ref=e12]:
+        - button "AOIs" [ref=e13] [cursor=pointer]
+        - button "Layers" [ref=e14] [cursor=pointer]
+        - button "Events" [ref=e15] [cursor=pointer]
+        - button "Playback" [ref=e16] [cursor=pointer]
+        - button "Analytics" [ref=e17] [cursor=pointer]
+        - button "Export" [ref=e18] [cursor=pointer]
+        - button "Compare" [ref=e19] [cursor=pointer]
+        - button "Health" [ref=e20] [cursor=pointer]
+      - generic [ref=e595]:
+        - heading "Playback" [level=3] [ref=e596]
+        - button "Load Frames" [ref=e597] [cursor=pointer]
+        - generic [ref=e598]:
+          - button "⏮" [ref=e599] [cursor=pointer]
+          - button "⏸" [ref=e600] [cursor=pointer]
+          - button "⏭" [ref=e601] [cursor=pointer]
+          - combobox [ref=e602]:
+            - option "0.5×"
+            - option "1×"
+            - option "2×"
+            - option "4×" [selected]
+        - slider [ref=e603]: "285"
+        - paragraph [ref=e604]:
+          - text: Frame 286 / 500 · 04/04 03:23
+          - generic [ref=e605]: 413 late
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - button "2D" [ref=e33] [cursor=pointer]
+          - button "🌐 3D" [ref=e34] [cursor=pointer]
+        - generic [ref=e35]:
+          - button "⬜ BBox" [ref=e36] [cursor=pointer]
+          - button "⬡ Polygon" [ref=e37] [cursor=pointer]
+        - generic [ref=e38]:
+          - generic [ref=e39]: Imagery opacity
+          - 'slider "Imagery opacity: 10%" [ref=e40]': "0.1"
+          - generic [ref=e41]: 10%
+        - generic [ref=e43]:
+          - region "Map" [active] [ref=e606]
+          - generic:
+            - generic [ref=e607]:
+              - button "Zoom in" [ref=e608] [cursor=pointer]
+              - button "Zoom out" [ref=e610] [cursor=pointer]
+              - button "Drag to rotate map, click to reset north" [ref=e612]
+            - generic [ref=e614]: 20 km
+            - group [ref=e615]:
+              - generic "Toggle attribution" [ref=e616] [cursor=pointer]
+              - link "MapLibre" [ref=e618] [cursor=pointer]:
+                - /url: https://maplibre.org/
+    - generic [ref=e58]:
+      - generic [ref=e59]:
+        - heading "Timeline" [level=3] [ref=e60]
+        - button "▼" [ref=e61] [cursor=pointer]
+      - generic [ref=e62]:
+        - button "24h" [ref=e63] [cursor=pointer]
+        - button "7d" [ref=e64] [cursor=pointer]
+        - button "30d" [ref=e65] [cursor=pointer]
+      - generic [ref=e66]:
+        - textbox [ref=e67]: 2026-03-05T05:43
+        - generic [ref=e68]: –
+        - textbox [ref=e69]: 2026-04-04T05:43
+      - application [ref=e84]:
+        - generic [ref=e225]:
+          - generic [ref=e226]:
+            - generic [ref=e562]: 03/06
+            - generic [ref=e564]: 03/10
+            - generic [ref=e566]: 03/11
+            - generic [ref=e568]: 03/13
+            - generic [ref=e570]: 03/16
+            - generic [ref=e572]: 03/22
+            - generic [ref=e574]: 03/24
+            - generic [ref=e576]: 03/25
+            - generic [ref=e578]: 03/28
+            - generic [ref=e580]: 04/01
+            - generic [ref=e582]: 04/03
+            - generic [ref=e584]: 04/03
+            - generic [ref=e586]: 04/03
+            - generic [ref=e588]: 04/04
+            - generic [ref=e590]: 04/04
+            - generic [ref=e592]: 04/04
+            - generic [ref=e594]: 04/04
+          - generic [ref=e293]:
+            - generic [ref=e295]: "0"
+            - generic [ref=e297]: "25"
+            - generic [ref=e299]: "50"
+            - generic [ref=e301]: "100"
+  - generic [ref=e302]: "0"

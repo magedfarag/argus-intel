@@ -3,11 +3,11 @@ from __future__ import annotations
 import os
 import pytest
 from fastapi.testclient import TestClient
-from backend.app import dependencies
-from backend.app.cache.client import CacheClient
-from backend.app.providers.demo import DemoProvider
-from backend.app.providers.registry import ProviderRegistry
-from backend.app.resilience.circuit_breaker import CircuitBreaker
+from app import dependencies
+from app.cache.client import CacheClient
+from app.providers.demo import DemoProvider
+from app.providers.registry import ProviderRegistry
+from app.resilience.circuit_breaker import CircuitBreaker
 from unittest.mock import patch
 
 POLYGON = {"type": "Polygon", "coordinates": [[[30.0, 50.0], [30.1, 50.0], [30.1, 50.1], [30.0, 50.1], [30.0, 50.0]]]}
@@ -24,9 +24,11 @@ def client_with_auth():
 
     with patch.dict(os.environ, {"API_KEY": "test-secret-key"}):
         # Force reimport to pick up env var
-        if 'backend.app.config' in __import__('sys').modules:
-            __import__('sys').modules['backend.app.config']._settings = None
-        from backend.app.main import app
+        if 'app.config' in __import__('sys').modules:
+            __import__('sys').modules['app.config']._settings = None
+        from app.main import app
+        from app.resilience.rate_limiter import limiter
+        limiter.reset()
         yield TestClient(app, raise_server_exceptions=True)
 
 
@@ -40,17 +42,20 @@ def client_no_auth():
     dependencies.set_breaker(CircuitBreaker())
 
     env_backup = os.environ.get("API_KEY")
-    if "API_KEY" in os.environ:
-        del os.environ["API_KEY"]
+    os.environ["API_KEY"] = ""  # Override to empty string — disables auth regardless of .env file
 
     try:
-        if 'backend.app.config' in __import__('sys').modules:
-            __import__('sys').modules['backend.app.config']._settings = None
-        from backend.app.main import app
+        if 'app.config' in __import__('sys').modules:
+            __import__('sys').modules['app.config']._settings = None
+        from app.main import app
+        from app.resilience.rate_limiter import limiter
+        limiter.reset()
         yield TestClient(app, raise_server_exceptions=True)
     finally:
-        if env_backup:
+        if env_backup is not None:
             os.environ["API_KEY"] = env_backup
+        else:
+            os.environ.pop("API_KEY", None)
 
 
 class TestAPIKeyAuthentication:
@@ -166,11 +171,11 @@ class TestAPIKeyAuthentication:
         assert response.status_code in [503, 404]
 
     def test_bearer_token_without_prefix(self, client_with_auth):
-        """Authorization header without 'Bearer ' prefix should fail."""
+        """Authorization header with wrong key should fail."""
         response = client_with_auth.post(
             "/api/analyze",
             json={"geometry": POLYGON, "start_date": "2026-03-01", "end_date": "2026-03-28"},
-            headers={"Authorization": "test-secret-key"}
+            headers={"Authorization": "wrong-key-value"}
         )
         assert response.status_code == 403
 

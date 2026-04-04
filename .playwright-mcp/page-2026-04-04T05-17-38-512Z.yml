@@ -1,0 +1,172 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: 🗺
+      - heading "GEOINT Platform" [level=1] [ref=e7]
+      - generic [ref=e8]: Construction Activity Monitor
+    - textbox "API key for authenticated endpoints" [ref=e10]:
+      - /placeholder: API Key (optional)
+  - generic [ref=e11]:
+    - navigation [ref=e12]:
+      - button "AOIs" [ref=e13] [cursor=pointer]
+      - button "Layers" [ref=e14] [cursor=pointer]
+      - button "Events" [ref=e15] [cursor=pointer]
+      - button "Playback" [ref=e16] [cursor=pointer]
+      - button "Analytics" [ref=e17] [cursor=pointer]
+      - button "Export" [ref=e18] [cursor=pointer]
+      - button "Compare" [ref=e19] [cursor=pointer]
+      - button "Health" [active] [ref=e20] [cursor=pointer]
+    - generic [ref=e71]:
+      - generic [ref=e72]:
+        - generic [ref=e73]:
+          - heading "System Health" [level=2] [ref=e74]
+          - generic [ref=e75]: Updated 8:17:38 AM · auto-refresh 30s
+        - button "↺ Refresh" [ref=e76] [cursor=pointer]
+      - generic [ref=e77]:
+        - generic "OK" [ref=e78]
+        - generic [ref=e79]: All systems operational
+      - generic [ref=e80]:
+        - generic [ref=e81]:
+          - heading "Infrastructure" [level=4] [ref=e82]
+          - generic [ref=e83]:
+            - generic "OK" [ref=e84]
+            - generic [ref=e85]: Redis / Cache
+            - generic [ref=e86]: 0% hit rate
+            - generic [ref=e87]: ok
+          - generic [ref=e88]:
+            - generic "OK" [ref=e89]
+            - generic [ref=e90]: Celery Worker
+            - generic [ref=e91]: async task queue
+            - generic [ref=e92]: ok
+          - generic [ref=e93]:
+            - generic "OK" [ref=e94]
+            - generic [ref=e95]: PostgreSQL
+            - generic [ref=e96]: persistent storage
+            - generic [ref=e97]: ok
+          - generic [ref=e98]:
+            - generic "OK" [ref=e99]
+            - generic [ref=e100]: Object Storage
+            - generic [ref=e101]: S3 / MinIO
+            - generic [ref=e102]: ok
+          - generic [ref=e103]:
+            - generic "OK" [ref=e104]
+            - generic [ref=e105]: Job Manager
+            - generic [ref=e106]: job persistence
+            - generic [ref=e107]: redis+postgresql
+          - generic [ref=e108]:
+            - generic "OK" [ref=e109]
+            - generic [ref=e110]: App Mode
+            - generic [ref=e111]: provider behaviour
+            - generic [ref=e112]: production
+        - generic [ref=e113]:
+          - heading "Satellite Providers" [level=4] [ref=e114]
+          - generic [ref=e115]:
+            - generic "OK" [ref=e116]
+            - generic [ref=e117]: Demo (synthetic data)
+            - generic [ref=e118]: 10 m
+            - generic [ref=e119]: available
+          - generic [ref=e120]:
+            - generic "OK" [ref=e121]
+            - generic [ref=e122]: Sentinel-2 (Element84 Earth Search)
+            - generic [ref=e123]: 10 m
+            - generic [ref=e124]: available
+          - generic [ref=e125]:
+            - generic "OK" [ref=e126]
+            - generic [ref=e127]: Landsat (USGS LandsatLook)
+            - generic [ref=e128]: 30 m
+            - generic [ref=e129]: available
+      - generic [ref=e130]:
+        - generic [ref=e131]:
+          - heading "Data Connectors" [level=4] [ref=e132]
+          - generic [ref=e133]: 15 req/h · 1 err/h
+        - generic [ref=e134]:
+          - generic [ref=e135]:
+            - generic [ref=e136]:
+              - generic "OK" [ref=e137]
+              - generic [ref=e138]: Earth Search (Element 84)
+              - generic [ref=e139]: fresh
+            - generic [ref=e140]:
+              - generic [ref=e141]: imagery_catalog
+              - generic [ref=e142]: 2 min ago
+            - generic [ref=e143]:
+              - generic [ref=e144]: 2 req/h
+              - generic [ref=e145]: 0 total err
+          - generic [ref=e146]:
+            - generic [ref=e147]:
+              - generic "OK" [ref=e148]
+              - generic [ref=e149]: Planetary Computer (Microsoft)
+              - generic [ref=e150]: fresh
+            - generic [ref=e151]:
+              - generic [ref=e152]: imagery_catalog
+              - generic [ref=e153]: 2 min ago
+            - generic [ref=e154]:
+              - generic [ref=e155]: 2 req/h
+              - generic [ref=e156]: 0 total err
+          - generic [ref=e157]:
+            - generic [ref=e158]:
+              - generic "OK" [ref=e159]
+              - generic [ref=e160]: Sentinel-2 (Copernicus Data Space)
+              - generic [ref=e161]: fresh
+            - generic [ref=e162]:
+              - generic [ref=e163]: imagery_catalog
+              - generic [ref=e164]: 2 min ago
+            - generic [ref=e165]:
+              - generic [ref=e166]: 3 req/h
+              - generic [ref=e167]: 1 total err
+          - generic [ref=e168]:
+            - generic [ref=e169]:
+              - generic "OK" [ref=e170]
+              - generic [ref=e171]: Landsat (USGS LandsatLook)
+              - generic [ref=e172]: fresh
+            - generic [ref=e173]:
+              - generic [ref=e174]: imagery_catalog
+              - generic [ref=e175]: 2 min ago
+            - generic [ref=e176]:
+              - generic [ref=e177]: 2 req/h
+              - generic [ref=e178]: 0 total err
+          - generic [ref=e179]:
+            - generic [ref=e180]:
+              - generic "OK" [ref=e181]
+              - generic [ref=e182]: GDELT (Global Database of Events, Language, and Tone)
+              - generic [ref=e183]: fresh
+            - generic [ref=e184]:
+              - generic [ref=e185]: context_feed
+              - generic [ref=e186]: 2 min ago
+            - generic [ref=e187]:
+              - generic [ref=e188]: 2 req/h
+              - generic [ref=e189]: 0 total err
+          - generic [ref=e190]:
+            - generic [ref=e191]:
+              - generic "OK" [ref=e192]
+              - generic [ref=e193]: AISStream.io Maritime Positions
+              - generic [ref=e194]: fresh
+            - generic [ref=e195]:
+              - generic [ref=e196]: telemetry
+              - generic [ref=e197]: 2 min ago
+            - generic [ref=e198]:
+              - generic [ref=e199]: 2 req/h
+              - generic [ref=e200]: 0 total err
+          - generic [ref=e201]:
+            - generic [ref=e202]:
+              - generic "OK" [ref=e203]
+              - generic [ref=e204]: OpenSky Network Aircraft Positions
+              - generic [ref=e205]: fresh
+            - generic [ref=e206]:
+              - generic [ref=e207]: telemetry
+              - generic [ref=e208]: 2 min ago
+            - generic [ref=e209]:
+              - generic [ref=e210]: 2 req/h
+              - generic [ref=e211]: 0 total err
+  - generic [ref=e58]:
+    - generic [ref=e59]:
+      - heading "Timeline" [level=3] [ref=e60]
+      - button "▼" [ref=e61] [cursor=pointer]
+    - generic [ref=e62]:
+      - button "24h" [ref=e63] [cursor=pointer]
+      - button "7d" [ref=e64] [cursor=pointer]
+      - button "30d" [ref=e65] [cursor=pointer]
+    - generic [ref=e66]:
+      - textbox [ref=e67]: 2026-03-05T05:17
+      - generic [ref=e68]: –
+      - textbox [ref=e69]: 2026-04-04T05:17
+    - paragraph [ref=e70]: No events in range

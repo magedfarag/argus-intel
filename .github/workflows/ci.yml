@@ -2,7 +2,7 @@ name: CI — Tests & Code Quality
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, "feature/**"]
   pull_request:
     branches: [main, develop]
 
@@ -11,8 +11,12 @@ env:
 
 jobs:
   test:
-    name: Test (Unit + Integration)
+    name: Test (${{ matrix.app_mode }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app_mode: [demo, staging, production]
     services:
       redis:
         image: redis:7-alpine
@@ -31,32 +35,58 @@ jobs:
           cache: pip
       - run: pip install -r requirements-dev.txt
       - name: Lint with ruff (non-blocking)
-        run: ruff check backend/ tests/ || true
+        run: ruff check app/ src/ tests/ || true
       - name: Tests — Unit
+        env:
+          APP_MODE: ${{ matrix.app_mode }}
         run: python -m pytest tests/unit/ -v --tb=short
       - name: Tests — Integration
         env:
+          APP_MODE: ${{ matrix.app_mode }}
           REDIS_URL: redis://localhost:6379/0
         run: python -m pytest tests/integration/ -v --tb=short
       - name: Coverage Report
+        env:
+          APP_MODE: ${{ matrix.app_mode }}
         run: >
-          python -m pytest tests/ 
-          --cov=backend/app 
-          --cov-report=term-missing 
-          --cov-report=html 
-          -v
+          python -m pytest tests/unit/
+          --cov=app
+          --cov=src
+          --cov-report=term-missing
+          --cov-report=html:htmlcov/${{ matrix.app_mode }}
+          -q
       - name: Check Coverage Threshold (>20%)
+        env:
+          APP_MODE: ${{ matrix.app_mode }}
         run: >
-          python -m pytest tests/ 
-          --cov=backend/app 
-          --cov-fail-under=20 
+          python -m pytest tests/unit/
+          --cov=app
+          --cov=src
+          --cov-fail-under=20
           -q
       - name: Upload Coverage (HTML)
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: coverage-report
-          path: htmlcov/
+          name: coverage-report-${{ matrix.app_mode }}
+          path: htmlcov/${{ matrix.app_mode }}/
+
+  typecheck:
+    name: Frontend TypeCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install pnpm
+        run: npm install -g pnpm
+      - name: Install frontend deps
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+      - name: TypeScript typecheck
+        working-directory: frontend
+        run: npx tsc --noEmit
 
   security:
     name: Security Checks
@@ -68,7 +98,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: pip install bandit safety
       - name: Check for secrets (bandit)
-        run: bandit -r backend/ -ll || true
+        run: bandit -r app/ src/ -ll || true
       - name: Check dependency vulnerabilities (safety)
         run: safety check || true
 
@@ -83,4 +113,4 @@ jobs:
         with:
           context: .
           push: false
-          tags: construction-monitor-demo:latest
+          tags: argus-intel:latest

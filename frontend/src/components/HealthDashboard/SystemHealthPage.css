@@ -1,0 +1,276 @@
+/* SystemHealthPage — scoped styles using .sh- prefix */
+
+.sh-page {
+  padding: 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+.sh-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.sh-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 0.2rem;
+  color: var(--text-primary);
+}
+
+.sh-refresh-time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* ── Banner ──────────────────────────────────────────────────── */
+.sh-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.875rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.sh-banner-text {
+  flex: 1;
+}
+
+/* ── Status dot ──────────────────────────────────────────────── */
+.sh-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Status badge ────────────────────────────────────────────── */
+.sh-badge {
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+}
+
+/* ── Cards (sections) ────────────────────────────────────────── */
+.sh-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sh-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem;
+}
+
+@media (max-width: 640px) {
+  .sh-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Section titles ──────────────────────────────────────────── */
+.sh-section-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 0 0 0.5rem;
+}
+
+/* ── Row (infra / provider item) ─────────────────────────────── */
+.sh-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
+}
+
+.sh-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.sh-row-label {
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.sh-row-sub {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.sh-row-spacer {
+  flex: 1;
+}
+
+.sh-row-detail {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Fetch error strip ───────────────────────────────────────── */
+.sh-fetch-errors {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.sh-fetch-error {
+  font-size: 0.72rem;
+  color: var(--accent-amber);
+  padding: 0.35rem 0.75rem;
+  background: rgba(245, 158, 11, 0.08);
+  border-radius: 4px;
+  border-left: 2px solid var(--accent-amber);
+}
+
+/* ── Alerts ──────────────────────────────────────────────────── */
+.sh-alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.sh-alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  background: var(--bg-primary);
+  border-radius: 5px;
+  border-left: 3px solid transparent;
+  font-size: 0.78rem;
+}
+
+.sh-alert-msg {
+  flex: 1;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+/* ── Connectors ──────────────────────────────────────────────── */
+.sh-connectors-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.2rem;
+}
+
+.sh-cb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.2rem;
+}
+
+.sh-connector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.6rem;
+}
+
+.sh-connector-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.sh-connector-top {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sh-connector-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  flex: 1;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sh-connector-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sh-tag {
+  font-size: 0.6rem;
+  background: rgba(100, 116, 139, 0.15);
+  color: var(--text-muted);
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sh-connector-errors {
+  font-size: 0.68rem;
+  color: var(--accent-red);
+  line-height: 1.35;
+}
+
+.sh-error-msg {
+  color: var(--text-muted);
+}
+
+.sh-connector-stats {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-top: 0.1rem;
+}
+
+/* ── Misc ────────────────────────────────────────────────────── */
+.sh-empty {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 0.5rem 0;
+  margin: 0;
+}
+
+.sh-loading {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
