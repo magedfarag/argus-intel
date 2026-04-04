@@ -42,8 +42,7 @@ def client_no_auth():
     dependencies.set_breaker(CircuitBreaker())
 
     env_backup = os.environ.get("API_KEY")
-    if "API_KEY" in os.environ:
-        del os.environ["API_KEY"]
+    os.environ["API_KEY"] = ""  # Override to empty string — disables auth regardless of .env file
 
     try:
         if 'app.config' in __import__('sys').modules:
@@ -53,8 +52,10 @@ def client_no_auth():
         limiter.reset()
         yield TestClient(app, raise_server_exceptions=True)
     finally:
-        if env_backup:
+        if env_backup is not None:
             os.environ["API_KEY"] = env_backup
+        else:
+            os.environ.pop("API_KEY", None)
 
 
 class TestAPIKeyAuthentication:

@@ -309,6 +309,40 @@ class AppSettings(BaseSettings):
     def object_storage_is_configured(self) -> bool:
         return bool(self.object_storage_endpoint and self.object_storage_access_key)
 
+    # ── RapidAPI AIS ──────────────────────────────────────────────────────────
+    rapid_api_key: str = Field(
+        default="", description="RapidAPI subscription key (shared by maritime APIs)"
+    )
+    rapid_api_host: str = Field(
+        default="ais-hub.p.rapidapi.com",
+        description="X-RapidAPI-Host header for the generic AIS endpoint",
+    )
+    rapid_api_poll_interval: int = Field(
+        default=300, description="Polling interval in seconds for RapidAPI AIS"
+    )
+    rapid_api_south: float = Field(default=24.5, description="Default bbox south latitude")
+    rapid_api_west: float = Field(default=55.5, description="Default bbox west longitude")
+    rapid_api_north: float = Field(default=27.5, description="Default bbox north latitude")
+    rapid_api_east: float = Field(default=60.5, description="Default bbox east longitude")
+
+    # ── VesselData API (vessel-data.p.rapidapi.com) ───────────────────────────
+    vessel_data_api_key: str = Field(
+        default="", description="RapidAPI key for vessel-data.p.rapidapi.com"
+    )
+    vessel_data_poll_interval: int = Field(
+        default=60, description="Polling interval in seconds for VesselData"
+    )
+    vessel_data_south: float = Field(default=24.5, description="Default bbox south latitude")
+    vessel_data_west: float = Field(default=55.5, description="Default bbox west longitude")
+    vessel_data_north: float = Field(default=27.5, description="Default bbox north latitude")
+    vessel_data_east: float = Field(default=60.5, description="Default bbox east longitude")
+
+    def rapid_api_is_configured(self) -> bool:
+        return bool(self.rapid_api_key)
+
+    def vessel_data_is_configured(self) -> bool:
+        return bool(self.vessel_data_api_key)
+
 
 @dataclass(frozen=True)
 class Sentinel2Config:

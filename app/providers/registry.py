@@ -45,16 +45,31 @@ class ProviderRegistry:
     def available_providers(self) -> List[SatelliteProvider]:
         return [p for p in self._providers.values() if self.is_available(p.provider_name)]
 
-    def select_provider(self, name: str) -> Optional[SatelliteProvider]:
-        """Select a provider by name; return None if unavailable."""
+    def select_provider(self, name: str, mode: Optional[AppMode] = None) -> Optional[SatelliteProvider]:
+        """Select a provider by name; return None if unavailable.
+
+        When *mode* is supplied:
+        - PRODUCTION: demo is never returned (returns None instead)
+        - DEMO: always returns the demo provider directly
+        - STAGING/None: no restriction on demo
+        """
+        from app.config import AppMode
         if name == "auto":
-            # Prefer sentinel2, then landsat, then demo
-            for pref in ("sentinel2", "landsat", "demo"):
+            if mode == AppMode.DEMO:
+                return self._providers.get("demo")
+            # Prefer live providers first
+            for pref in ("sentinel2", "landsat", "maxar", "planet"):
                 if self.is_available(pref):
                     return self._providers[pref]
+            # Only offer demo as auto-fallback in non-production modes
+            if mode != AppMode.PRODUCTION and self.is_available("demo"):
+                return self._providers["demo"]
             return None
         p = self._providers.get(name)
         if p and self.is_available(name):
+            # In production mode, demo is never a valid resolved provider
+            if mode == AppMode.PRODUCTION and p.provider_name == "demo":
+                return None
             return p
         return None
 

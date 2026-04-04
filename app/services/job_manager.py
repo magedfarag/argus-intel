@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from app.models.jobs import Job, JobState
@@ -91,7 +91,7 @@ class JobManager:
         job.state      = state
         job.result     = result
         job.error      = error
-        job.updated_at = datetime.utcnow()
+        job.updated_at = datetime.now(timezone.utc)
         self._save(job)
 
     def _save(self, job: Job) -> None:

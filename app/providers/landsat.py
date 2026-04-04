@@ -1,6 +1,6 @@
 from __future__ import annotations
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 import httpx
 from app.config import AppSettings
@@ -85,7 +85,7 @@ class LandsatProvider(SatelliteProvider):
         try:
             acquired_at = datetime.fromisoformat(acquired_raw.replace("Z", "+00:00"))
         except (ValueError, AttributeError):
-            acquired_at = datetime.utcnow()
+            acquired_at = datetime.now(timezone.utc)
         cloud_cover = float(props.get("eo:cloud_cover", 0.0))
         raw_assets = item.get("assets", {})
         band_map = {

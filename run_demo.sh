@@ -5,4 +5,4 @@ if [ ! -d ".venv" ]; then
 fi
 source .venv/bin/activate
 pip install -r requirements.txt
-exec uvicorn backend.app.main:app --reload
+exec uvicorn app.main:app --reload

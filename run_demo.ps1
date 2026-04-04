@@ -9,4 +9,4 @@ if (-not (Test-Path .venv)) {
 }
 & .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-uvicorn backend.app.main:app --reload
+uvicorn app.main:app --reload

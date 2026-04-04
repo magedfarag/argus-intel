@@ -57,6 +57,8 @@ try:
             "poll_gdelt_context":           {"queue": "default"},
             "poll_opensky_positions":       {"queue": "default"},
             "poll_aisstream_positions":     {"queue": "default"},
+            "poll_rapidapi_ais":            {"queue": "default"},
+            "poll_vessel_data":             {"queue": "default"},
             "enforce_telemetry_retention":  {"queue": "low"},
             "run_export_task":              {"queue": "low"},
         },
@@ -76,6 +78,16 @@ try:
             "poll-aisstream-every-30s": {
                 "task": "poll_aisstream_positions",
                 "schedule": 30.0,   # 30 seconds — bounded by AIS WS collect_timeout_s
+                "options": {"queue": "default"},
+            },
+            "poll-rapidapi-ais": {
+                "task": "poll_rapidapi_ais",
+                "schedule": float(settings.rapid_api_poll_interval),
+                "options": {"queue": "default"},
+            },
+            "poll-vessel-data": {
+                "task": "poll_vessel_data",
+                "schedule": float(settings.vessel_data_poll_interval),
                 "options": {"queue": "default"},
             },
             "enforce-telemetry-retention-every-hour": {

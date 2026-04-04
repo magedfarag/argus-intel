@@ -11,7 +11,7 @@ Auth: API key + OAuth2 client credentials
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 from app.config import AppSettings
@@ -129,7 +129,7 @@ class MaxarProvider(SatelliteProvider):
         try:
             acquired_at = datetime.fromisoformat(acquired_raw.replace("Z", "+00:00"))
         except (ValueError, AttributeError):
-            acquired_at = datetime.utcnow()
+            acquired_at = datetime.now(timezone.utc)
         cloud_cover = float(props.get("eo:cloud_cover", 0.0))
         raw_assets = item.get("assets", {})
         assets = {k: v.get("href", "") for k, v in raw_assets.items() if v.get("href")}

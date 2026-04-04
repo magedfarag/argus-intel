@@ -208,6 +208,107 @@ try:
             "errors": errors,
         }
 
+    @celery_app.task(name="poll_rapidapi_ais")
+    def poll_rapidapi_ais() -> Dict[str, Any]:
+        """Poll vessel positions via a configurable RapidAPI AIS endpoint.
+
+        Uses the bbox defined by RAPID_API_SOUTH/WEST/NORTH/EAST when no AOIs
+        are stored, otherwise queries per-AOI.  Writes results into the
+        in-memory TelemetryStore.
+        Returns: {polled_at, aoi_count, ship_count, errors}.
+        """
+        from datetime import datetime, timezone
+
+        from app.config import get_settings
+        from src.connectors.rapidapi_ais import RapidApiAisConnector
+        from src.services.telemetry_store import TelemetryStore
+        from src.services.source_health import get_health_service
+
+        settings = get_settings()
+        polled_at = datetime.now(timezone.utc).isoformat()
+        connector = RapidApiAisConnector(
+            api_key=settings.rapid_api_key,
+            host=settings.rapid_api_host,
+            south=settings.rapid_api_south,
+            west=settings.rapid_api_west,
+            north=settings.rapid_api_north,
+            east=settings.rapid_api_east,
+        )
+        if not settings.rapid_api_is_configured():
+            log.debug("poll_rapidapi_ais: RAPID_API_KEY not configured, skipping")
+            return {"polled_at": polled_at, "aoi_count": 0, "ship_count": 0, "errors": 0}
+
+        store = TelemetryStore()
+        ship_count = 0
+        errors = 0
+
+        try:
+            records = connector.fetch()
+            events = connector.normalize_all(records)
+            for ev in events:
+                store.upsert(ev)
+            ship_count += len(events)
+            get_health_service().record_success(
+                "rapidapi-ais", "RapidAPI AIS", "rapidapi"
+            )
+        except Exception as exc:  # noqa: BLE001
+            log.warning("poll_rapidapi_ais: fetch failed — %s", exc)
+            get_health_service().record_error("rapidapi-ais", str(exc))
+            errors += 1
+
+        log.info("poll_rapidapi_ais: %d ship events (%d errors)", ship_count, errors)
+        return {"polled_at": polled_at, "aoi_count": 1, "ship_count": ship_count, "errors": errors}
+
+    @celery_app.task(name="poll_vessel_data")
+    def poll_vessel_data() -> Dict[str, Any]:
+        """Poll vessel positions from vessel-data.p.rapidapi.com.
+
+        Uses the centre+radius derived from VESSEL_DATA_SOUTH/WEST/NORTH/EAST.
+        Writes results into the in-memory TelemetryStore.
+        Returns: {polled_at, aoi_count, ship_count, errors}.
+        """
+        from datetime import datetime, timezone
+
+        from app.config import get_settings
+        from src.connectors.vessel_data import VesselDataConnector
+        from src.services.telemetry_store import TelemetryStore
+        from src.services.source_health import get_health_service
+
+        settings = get_settings()
+        polled_at = datetime.now(timezone.utc).isoformat()
+        connector = VesselDataConnector(
+            api_key=settings.vessel_data_api_key,
+            south=settings.vessel_data_south,
+            west=settings.vessel_data_west,
+            north=settings.vessel_data_north,
+            east=settings.vessel_data_east,
+        )
+
+        if not settings.vessel_data_is_configured():
+            log.debug("poll_vessel_data: VESSEL_DATA_API_KEY not configured, skipping")
+            return {"polled_at": polled_at, "aoi_count": 0, "ship_count": 0, "errors": 0}
+
+        store = TelemetryStore()
+        ship_count = 0
+        errors = 0
+
+        try:
+            records = connector.fetch()
+            events = connector.normalize_all(records)
+            for ev in events:
+                store.upsert(ev)
+            ship_count += len(events)
+            get_health_service().record_success(
+                "vessel-data", "VesselData", "rapidapi"
+            )
+        except Exception as exc:  # noqa: BLE001
+            log.warning("poll_vessel_data: fetch failed — %s", exc)
+            get_health_service().record_error("vessel-data", str(exc))
+            errors += 1
+
+        log.info("poll_vessel_data: %d ship events (%d errors)", ship_count, errors)
+        return {"polled_at": polled_at, "aoi_count": 1, "ship_count": ship_count, "errors": errors}
+
     @celery_app.task(name="enforce_telemetry_retention")
     def enforce_telemetry_retention() -> Dict[str, Any]:
         """P5-4.4: Automated data retention enforcement task.
@@ -255,6 +356,12 @@ except (ImportError, Exception) as exc:
         raise RuntimeError("Celery is not configured")
 
     def poll_aisstream_positions(*args, **kwargs):  # type: ignore[misc]
+        raise RuntimeError("Celery is not configured")
+
+    def poll_rapidapi_ais(*args, **kwargs):  # type: ignore[misc]
+        raise RuntimeError("Celery is not configured")
+
+    def poll_vessel_data(*args, **kwargs):  # type: ignore[misc]
         raise RuntimeError("Celery is not configured")
 
     def enforce_telemetry_retention(*args, **kwargs):  # type: ignore[misc]

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 log = logging.getLogger(__name__)
@@ -49,8 +49,8 @@ if SQLALCHEMY_AVAILABLE and Base is not None:
         request_data = Column(Text, nullable=True)
         result       = Column(Text, nullable=True)
         error        = Column(Text, nullable=True)
-        created_at   = Column(DateTime, nullable=False, default=datetime.utcnow)
-        updated_at   = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+        created_at   = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+        updated_at   = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class PostgresJobStore:
@@ -75,8 +75,8 @@ class PostgresJobStore:
                     request_data=json.dumps(data.get("request_data"), default=str) if data.get("request_data") else None,
                     result=json.dumps(data.get("result"), default=str) if data.get("result") else None,
                     error=data.get("error"),
-                    created_at=datetime.fromisoformat(data["created_at"]) if isinstance(data.get("created_at"), str) else data.get("created_at", datetime.utcnow()),
-                    updated_at=datetime.fromisoformat(data["updated_at"]) if isinstance(data.get("updated_at"), str) else data.get("updated_at", datetime.utcnow()),
+                    created_at=datetime.fromisoformat(data["created_at"]) if isinstance(data.get("created_at"), str) else data.get("created_at", datetime.now(timezone.utc)),
+                    updated_at=datetime.fromisoformat(data["updated_at"]) if isinstance(data.get("updated_at"), str) else data.get("updated_at", datetime.now(timezone.utc)),
                 )
                 session.add(row)
             else:
@@ -87,7 +87,7 @@ class PostgresJobStore:
                     row.error = data["error"]
                 if data.get("request_data") and not row.request_data:
                     row.request_data = json.dumps(data["request_data"], default=str)
-                row.updated_at = datetime.fromisoformat(data["updated_at"]) if isinstance(data.get("updated_at"), str) else datetime.utcnow()
+                row.updated_at = datetime.fromisoformat(data["updated_at"]) if isinstance(data.get("updated_at"), str) else datetime.now(timezone.utc)
             session.commit()
 
     def load(self, job_id: str) -> Optional[Dict[str, Any]]:

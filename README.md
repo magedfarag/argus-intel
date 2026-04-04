@@ -6,7 +6,7 @@ user-defined area of interest. Falls back to curated demo data when live
 credentials are absent.
 
 **Repository:** https://github.com/magedfarag/construction-monitor-demo  
-**Tests:** 38 / 38 passing  
+**Tests:** 777 / 791 passing (14 pre-existing skips: Celery/Redis in CI, sentinel2/thumbnails/websocket)  
 **Stack:** Python 3.11+ · FastAPI · Pydantic v2 · Celery + Redis · rasterio · Leaflet
 
 ---
@@ -18,7 +18,7 @@ credentials are absent.
 ```bash
 python -m venv .venv && .venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn backend.app.main:app --reload
+uvicorn app.main:app --reload
 # Open http://127.0.0.1:8000
 ```
 
@@ -75,7 +75,7 @@ See [docs/PROVIDERS.md](docs/PROVIDERS.md) for credential setup.
 ## Project structure
 
 ```
-backend/app/
+app/
   main.py          FastAPI app + DI lifespan
   config.py        Flat AppSettings (pydantic-settings, .env-backed)
   providers/       Sentinel-2, Landsat, Demo, Registry, Base ABC
@@ -86,10 +86,17 @@ backend/app/
   routers/         7 routers, 13 endpoints
   workers/         Celery app + run_analysis_task
   static/          index.html, app.js, styles.css
+src/
+  connectors/      STAC, GDELT, AIS, OpenSky, Earth Search, Planetary Computer
+  api/             V2 routers: aois, events, exports, imagery, playback, analytics
+  models/          CanonicalEvent, pilot AOIs, playback, compare, parquet
+  services/        EventStore, AOI store, playback, export, change analytics
+  storage/         PostGIS ORM + Alembic migration base
+  normalization/   Pipeline + deduplication
 tests/
   conftest.py      Session-scoped shared fixtures
-  unit/            config, cache, demo provider, scene selection
-  integration/     All API endpoints
+  unit/            config, cache, demo provider, scene selection, all V2 modules
+  integration/     All API endpoints (V1 + V2)
 docs/
   DEPLOYMENT.md    Running in Docker, env vars, production checklist
   PROVIDERS.md     Credential setup for each provider

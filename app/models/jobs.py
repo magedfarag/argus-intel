@@ -1,6 +1,6 @@
 """Async job state models."""
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, Optional
 
@@ -22,8 +22,8 @@ class Job:
         self.request_data = request_data
         self.result: Optional[Dict[str, Any]] = None
         self.error: Optional[str] = None
-        self.created_at   = datetime.utcnow()
-        self.updated_at   = datetime.utcnow()
+        self.created_at   = datetime.now(timezone.utc)
+        self.updated_at   = datetime.now(timezone.utc)
 
     def to_dict(self) -> Dict[str, Any]:
         return {

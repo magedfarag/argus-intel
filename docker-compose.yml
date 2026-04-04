@@ -9,6 +9,21 @@ services:
       interval: 5s
       retries: 5
 
+  db:
+    image: postgis/postgis:16-3.4-alpine
+    ports: ["5432:5432"]
+    environment:
+      POSTGRES_DB: geoint
+      POSTGRES_USER: geoint
+      POSTGRES_PASSWORD: geoint
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geoint -d geoint"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   api:
     build: .
     ports: ["8000:8000"]
@@ -16,10 +31,14 @@ services:
     environment:
       REDIS_URL: "redis://redis:6379/0"
       OBJECT_STORAGE_ENDPOINT: "http://minio:9000"
+      OBJECT_STORAGE_BUCKET: "raw"
+      DATABASE_URL: "postgresql+psycopg2://geoint:geoint@db:5432/geoint"
     depends_on:
       redis:
         condition: service_healthy
       minio:
+        condition: service_healthy
+      db:
         condition: service_healthy
     volumes:
       - .:/app:ro
@@ -27,16 +46,37 @@ services:
   worker:
     build: .
     command: >
-      celery -A backend.app.workers.celery_app.celery_app worker
+      celery -A app.workers.celery_app.celery_app worker
       --loglevel=info --pool=solo --concurrency=2
     env_file: .env
     environment:
       REDIS_URL: "redis://redis:6379/0"
       OBJECT_STORAGE_ENDPOINT: "http://minio:9000"
+      OBJECT_STORAGE_BUCKET: "raw"
+      DATABASE_URL: "postgresql+psycopg2://geoint:geoint@db:5432/geoint"
     depends_on:
       redis:
         condition: service_healthy
       minio:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+
+  beat:
+    build: .
+    command: >
+      celery -A app.workers.celery_app.celery_app beat
+      --loglevel=info --schedule=/tmp/celerybeat-schedule
+    env_file: .env
+    environment:
+      REDIS_URL: "redis://redis:6379/0"
+      OBJECT_STORAGE_ENDPOINT: "http://minio:9000"
+      OBJECT_STORAGE_BUCKET: "raw"
+      DATABASE_URL: "postgresql+psycopg2://geoint:geoint@db:5432/geoint"
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
         condition: service_healthy
 
   # P0-4.5: MinIO object storage — bucket structure: raw/, exports/, thumbnails/, artifacts/
@@ -76,3 +116,4 @@ services:
 
 volumes:
   minio-data:
+  postgres-data:

@@ -15,6 +15,7 @@ os.environ["SENTINEL2_CLIENT_SECRET"] = ""
 os.environ["MAXAR_API_KEY"] = ""
 os.environ["PLANET_API_KEY"] = ""
 os.environ["DATABASE_URL"] = ""
+os.environ["API_KEY"] = ""  # Disable auth in tests unless explicitly patched
 
 from app import dependencies
 from app.cache.client import CacheClient

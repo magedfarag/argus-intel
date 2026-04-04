@@ -35,7 +35,7 @@ python -m venv .venv
 pip install -r requirements.txt
 
 # Run with auto-reload (hot changes)
-uvicorn backend.app.main:app --reload
+uvicorn app.main:app --reload
 
 # Open http://127.0.0.1:8000
 ```
@@ -63,12 +63,12 @@ $env:REDIS_URL = "redis://localhost:6379/0"
 $env:APP_MODE = "auto"
 $env:LOG_FORMAT = "text"  # Human-readable logs
 
-uvicorn backend.app.main:app --reload
+uvicorn app.main:app --reload
 
 # Terminal 3: Celery worker (background tasks)
 $env:REDIS_URL = "redis://localhost:6379/0"
 
-celery -A backend.app.workers.celery_app.celery_app worker `
+celery -A app.workers.celery_app.celery_app worker `
     --loglevel=info `
     --pool=solo `
     --concurrency=2 `
@@ -335,7 +335,7 @@ spec:
       containers:
       - name: worker
         image: myregistry.azurecr.io/construction-monitor:v2.0.0
-        command: ["celery", "-A", "backend.app.workers.celery_app.celery_app", "worker", "--loglevel=info"]
+        command: ["celery", "-A", "app.workers.celery_app.celery_app", "worker", "--loglevel=info"]
         env:
         - name: REDIS_URL
           value: "redis://redis:6379/0"

@@ -11,7 +11,7 @@ Auth: API key (Basic auth or Bearer token)
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 from app.config import AppSettings
@@ -146,7 +146,7 @@ class PlanetProvider(SatelliteProvider):
         try:
             acquired_at = datetime.fromisoformat(acquired_raw.replace("Z", "+00:00"))
         except (ValueError, AttributeError):
-            acquired_at = datetime.utcnow()
+            acquired_at = datetime.now(timezone.utc)
         cloud_cover = float(props.get("cloud_cover", 0.0)) * 100.0  # Planet uses 0-1
         raw_assets = item.get("assets", {})
         assets = {}

@@ -4,4 +4,4 @@ if not exist .venv (
 )
 call .venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn backend.app.main:app --reload
+uvicorn app.main:app --reload

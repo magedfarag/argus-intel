@@ -15,10 +15,8 @@ RUN apt-get update -qq && \
 FROM python:3.12-slim AS runtime
 
 RUN apt-get update -qq && \
-    apt-get install -y --no-install-recommends libgdal35 && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* || \
-    (apt-get install -y --no-install-recommends libgdal-dev && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*)
+    apt-get install -y --no-install-recommends libgdal-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /install /usr/local
 
@@ -34,4 +32,4 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     APP_MODE=auto
 
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

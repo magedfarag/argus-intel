@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import math
 import uuid
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 from app.models.scene import SceneMetadata
@@ -143,7 +143,7 @@ class DemoProvider(SatelliteProvider):
             scene_id=scene_id,
             provider="demo",
             satellite="Sentinel-2 (synthetic)",
-            acquired_at=datetime.utcnow(),
+            acquired_at=datetime.now(timezone.utc),
             cloud_cover=0.0,
             bbox=[-180, -90, 180, 90],
         )

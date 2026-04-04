@@ -1009,7 +1009,7 @@ python -m pytest tests/ --cov=backend/app --cov-fail-under=80
 | `.env.example` | ✅ | Documented `ALLOWED_ORIGINS` and `API_KEY` with examples |
 | Git commits | ✅ | Pushed to main branch (commits b64c2a9, 7e0af65) |
 
-**Key files modified:** `backend/app/config.py`, `backend/app/main.py`, `backend/app/dependencies.py`, `backend/app/routers/analyze.py`, `backend/app/routers/search.py`, `backend/app/routers/jobs.py`, `.env.example`
+**Key files modified:** `app/config.py`, `app/main.py`, `app/dependencies.py`, `app/routers/analyze.py`, `app/routers/search.py`, `app/routers/jobs.py`, `.env.example`
 
 **Verification:** All endpoints tested locally; requests without valid API_KEY now rejected with 403 Forbidden.
 
@@ -1291,7 +1291,7 @@ See `.env.example` for the full annotated list. Key variables:
 ```bash
 python -m venv .venv && .venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn backend.app.main:app --reload
+uvicorn app.main:app --reload
 # http://127.0.0.1:8000
 ```
 
@@ -1301,10 +1301,10 @@ uvicorn backend.app.main:app --reload
 docker run -p 6379:6379 redis:7-alpine             # Terminal 1
 
 $env:REDIS_URL = "redis://localhost:6379/0"
-uvicorn backend.app.main:app --reload               # Terminal 2
+uvicorn app.main:app --reload               # Terminal 2
 
 $env:REDIS_URL = "redis://localhost:6379/0"
-celery -A backend.app.workers.celery_app.celery_app worker --loglevel=info --pool=solo  # Terminal 3
+celery -A app.workers.celery_app.celery_app worker --loglevel=info --pool=solo  # Terminal 3
 ```
 
 ### Docker Compose (full stack)

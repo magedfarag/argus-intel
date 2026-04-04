@@ -1,9 +1,9 @@
 """AnalysisService — orchestrates provider search, scene selection, and detection.
 
-Fallback chain:
-  requested provider
-  → if unavailable: try alternate live provider
-  → if all live providers fail: DemoProvider + is_demo=True warning
+Provider resolution strategy (controlled by APP_MODE):
+  DEMO:       always DemoProvider, is_demo=True
+  STAGING:    requested → priority chain → DemoProvider fallback (is_demo=True)
+  PRODUCTION: requested → priority chain → ProviderUnavailableError (fail-fast, no demo)
 """
 from __future__ import annotations
 
