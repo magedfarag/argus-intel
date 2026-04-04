@@ -91,7 +91,10 @@ export function PlaybackPanel({ aoiId, startTime, endTime, onFrameChange }: Prop
           />
           <p className="muted">
             Frame {frameIdx + 1} / {playback.frames.length}
-            {currentFrame && <> · {format(new Date(currentFrame.event_time), "MM/dd HH:mm")}</>}
+            {currentFrame && (() => {
+              const d = new Date(currentFrame.event.event_time);
+              return isNaN(d.getTime()) ? null : <> · {format(d, "MM/dd HH:mm")}</>;
+            })()}
             {playback.late_arrival_count > 0 && (
               <span className="badge badge-warn"> {playback.late_arrival_count} late</span>
             )}

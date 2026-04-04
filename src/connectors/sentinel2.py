@@ -27,8 +27,8 @@ from src.models.canonical_event import CanonicalEvent, LicenseRecord
 
 logger = logging.getLogger(__name__)
 
-_COLLECTION = "SENTINEL-2"
-_STAC_URL = "https://catalogue.dataspace.copernicus.eu/stac/v1"
+_COLLECTION = "sentinel-2-l2a"
+_STAC_URL = "https://catalogue.dataspace.copernicus.eu/stac"
 _TOKEN_URL = (
     "https://identity.dataspace.copernicus.eu/auth/realms/CDSE"
     "/protocol/openid-connect/token"

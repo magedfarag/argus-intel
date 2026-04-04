@@ -70,6 +70,6 @@ def sentinel2_settings() -> AppSettings:
         sentinel2_client_id="test_client_id",
         sentinel2_client_secret="test_client_secret",
         sentinel2_token_url="https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token",
-        sentinel2_stac_url="https://catalogue.dataspace.copernicus.eu/stac/v1",
+        sentinel2_stac_url="https://catalogue.dataspace.copernicus.eu/stac",
         http_timeout_seconds=10,
     )

@@ -46,14 +46,17 @@ export function MapView({
   const mapRef = useRef<MaplibreMap | null>(null);
   const drawCoordsRef = useRef<[number, number][]>([]);
   const deckOverlayRef = useRef<MapboxOverlay | null>(null);
+  // Track when the MapLibre style finishes loading so data-dependent effects
+  // can safely add sources/layers without bailing out on isStyleLoaded().
+  const [styleLoaded, setStyleLoaded] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: "https://demotiles.maplibre.org/style.json",
-      center: [45.0, 25.0], // Middle East
-      zoom: 4,
+      center: [56.1, 26.2], // Strait of Hormuz
+      zoom: 8,
     });
     mapRef.current = map;
     map.addControl(new maplibregl.NavigationControl(), "top-right");
@@ -64,6 +67,9 @@ export function MapView({
     map.addControl(overlay as unknown as maplibregl.IControl);
     deckOverlayRef.current = overlay;
 
+    // Signal that all base layers are ready, so data-dependent effects can add sources
+    map.on("load", () => setStyleLoaded(true));
+
     // P3-3.7: hide TripsLayer at low zoom (graceful degradation)
     map.on("zoom", () => {
       if (overlay && map.getZoom() < TRACKS_MIN_ZOOM) {
@@ -72,6 +78,7 @@ export function MapView({
     });
 
     return () => {
+      setStyleLoaded(false);
       try { map.removeControl(overlay as unknown as maplibregl.IControl); } catch (_) { /* ignore */ }
       deckOverlayRef.current = null;
       map.remove();
@@ -82,7 +89,7 @@ export function MapView({
   // Update AOI layer
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map || !styleLoaded) return;
     const src = map.getSource("aois") as maplibregl.GeoJSONSource | undefined;
     const fc: GeoJSON.FeatureCollection = {
       type: "FeatureCollection",
@@ -114,12 +121,12 @@ export function MapView({
         if (id) onAoiClick?.(id);
       });
     }
-  }, [aois, selectedAoiId, onAoiClick]);
+  }, [aois, selectedAoiId, onAoiClick, styleLoaded]);
 
   // Update imagery footprints layer (P1-3.9, P2-3.3 opacity)
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map || !styleLoaded) return;
     const src = map.getSource("imagery") as maplibregl.GeoJSONSource | undefined;
     const fc: GeoJSON.FeatureCollection = {
       type: "FeatureCollection",
@@ -150,12 +157,12 @@ export function MapView({
         paint: { "line-color": "#4caf50", "line-width": 1, "line-dasharray": [2, 2] },
       });
     }
-  }, [imageryItems, showImageryLayer, imageryOpacity]);
+  }, [imageryItems, showImageryLayer, imageryOpacity, styleLoaded]);
 
   // Update event markers layer (P1-4.6)
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map || !styleLoaded) return;
     const src = map.getSource("events") as maplibregl.GeoJSONSource | undefined;
     const fc: GeoJSON.FeatureCollection = {
       type: "FeatureCollection",
@@ -184,12 +191,12 @@ export function MapView({
         }
       });
     }
-  }, [events, showEventLayer, onEventClick]);
+  }, [events, showEventLayer, onEventClick, styleLoaded]);
 
   // P2-1.5: GDELT contextual event cluster layer (purple theme)
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map || !styleLoaded) return;
     const src = map.getSource("gdelt") as maplibregl.GeoJSONSource | undefined;
     const fc: GeoJSON.FeatureCollection = {
       type: "FeatureCollection",
@@ -235,7 +242,7 @@ export function MapView({
         paint: { "circle-radius": 5, "circle-color": "#9c27b0", "circle-stroke-color": "#fff", "circle-stroke-width": 1 },
       });
     }
-  }, [gdeltEvents, showGdeltLayer]);
+  }, [gdeltEvents, showGdeltLayer, styleLoaded]);
 
   // P3-3.2/3.3: deck.gl TripsLayer — maritime (cyan) and aviation (orange) tracks
   useEffect(() => {
@@ -256,12 +263,13 @@ export function MapView({
       layers.push(new TripsLayer({
         id: "ships-trips",
         data: shipTrips,
-        getPath: (d: Trip) => d.waypoints as unknown as [number, number][],
+        getPath: (d: Trip) => d.waypoints.map(w => [w[0], w[1]]) as [number, number][],
         getTimestamps: (d: Trip) => d.waypoints.map(w => w[2]),
         getColor: [0, 188, 212] as [number, number, number],
         opacity: 0.8,
-        widthMinPixels: 2,
-        rounded: true,
+        widthMinPixels: 3,
+        capRounded: true,
+        jointRounded: true,
         trailLength: tl,
         currentTime: t,
       }));
@@ -270,18 +278,19 @@ export function MapView({
       layers.push(new TripsLayer({
         id: "aircraft-trips",
         data: aircraftTrips,
-        getPath: (d: Trip) => d.waypoints as unknown as [number, number][],
+        getPath: (d: Trip) => d.waypoints.map(w => [w[0], w[1]]) as [number, number][],
         getTimestamps: (d: Trip) => d.waypoints.map(w => w[2]),
         getColor: [255, 87, 34] as [number, number, number],
         opacity: 0.8,
-        widthMinPixels: 2,
-        rounded: true,
+        widthMinPixels: 3,
+        capRounded: true,
+        jointRounded: true,
         trailLength: tl,
         currentTime: t,
       }));
     }
     overlay.setProps({ layers });
-  }, [trips, currentTime, trailLength, showShipsLayer, showAircraftLayer]);
+  }, [trips, currentTime, trailLength, showShipsLayer, showAircraftLayer, styleLoaded]);
 
   // ── Draw interaction handler with live preview ───────────────────────────
   const [drawCoords, setDrawCoords] = useState<[number, number][]>([]);
@@ -339,7 +348,7 @@ export function MapView({
   // Update preview when drawCoords change
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map || !styleLoaded) return;
     if (drawMode === "none" || drawCoords.length === 0) {
       clearDrawPreview(map);
       return;

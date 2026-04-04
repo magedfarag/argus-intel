@@ -135,6 +135,17 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
     _set_playback_store(_shared_store)
     _set_analytics_store(_shared_store)
 
+    # Seed the in-memory stores with synthetic demo data so the UI has
+    # ship tracks, flight tracks, GDELT context, imagery, and an AOI on first load.
+    try:
+        from src.services.demo_seeder import seed_event_store as _seed, seed_aoi_store as _seed_aoi
+        from src.api.aois import _store as _aoi_store
+        _demo_aoi_id = _seed_aoi(_aoi_store)
+        _seed_count = _seed(_shared_store, aoi_id=_demo_aoi_id)
+        _log.getLogger(__name__).info("Demo seeder: AOI %s + %d events ingested", _demo_aoi_id, _seed_count)
+    except Exception as _seed_exc:
+        _log.getLogger(__name__).warning("Demo seeder failed: %s", _seed_exc)
+
     # PostGIS / SQLAlchemy engine (P0-4) — initialise when DATABASE_URL is set
     if settings.database_url:
         try:
@@ -163,6 +174,7 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         targets = {
             "earth-search": "https://earth-search.aws.element84.com/v1/",
             "planetary-computer": "https://planetarycomputer.microsoft.com/api/stac/v1/",
+            "cdse-sentinel2": "https://catalogue.dataspace.copernicus.eu/stac/collections/sentinel-2-l2a",
             "usgs-landsat": "https://landsatlook.usgs.gov/stac-server/",
             "gdelt-doc": "https://api.gdeltproject.org/api/v2/doc/doc?query=test&mode=artlist&maxrecords=1&format=json",
             "opensky": "https://opensky-network.org/api/states/all?lamin=0&lamax=1&lomin=0&lomax=1",

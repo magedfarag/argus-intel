@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { MapView } from "./components/Map/MapView";
@@ -16,6 +16,7 @@ import { useImagerySearch } from "./hooks/useImagery";
 import { useEventSearch } from "./hooks/useEvents";
 import { useTracks } from "./hooks/useTracks";
 import { useAois } from "./hooks/useAois";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 import { subDays } from "date-fns";
 import type { CanonicalEvent } from "./api/types";
 import "./App.css";
@@ -24,18 +25,18 @@ const qc = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 3
 
 function AppShell() {
   const { apiKey, setApiKey } = useAuth();
-  const [selectedAoiId, setSelectedAoiId] = useState<string | null>(null);
+  const [selectedAoiId, setSelectedAoiId] = useLocalStorage<string | null>("selectedAoiId", null);
   const [drawMode, setDrawMode] = useState<"none" | "polygon" | "bbox">("none");
   const [pendingGeometry, setPendingGeometry] = useState<GeoJSON.Geometry | null>(null);
   const [startTime, setStartTime] = useState<string>(subDays(new Date(), 30).toISOString());
   const [endTime, setEndTime] = useState<string>(new Date().toISOString());
   const [selectedEvent, setSelectedEvent] = useState<CanonicalEvent | null>(null);
-  const [activePanel, setActivePanel] = useState<string>("aoi");
+  const [activePanel, setActivePanel] = useLocalStorage<string>("activePanel", "aoi");
   // P2-5.3: 2D/3D view-mode toggle
-  const [viewMode, setViewMode] = useState<"2d" | "3d">("2d");
-  const [layers, setLayers] = useState({
+  const [viewMode, setViewMode] = useLocalStorage<"2d" | "3d">("viewMode", "2d");
+  const [layers, setLayers] = useLocalStorage("layers", {
     showAois: true, showImagery: true, showEvents: true,
-    showGdelt: false, showShips: false, showAircraft: false,
+    showGdelt: true, showShips: true, showAircraft: true,
     trackDensity: 1.0,
     // P2-3.3: imagery footprint opacity
     imageryOpacity: 0.1,
@@ -44,6 +45,13 @@ function AppShell() {
   // P2-5.2: fetch all AOIs to render on globe
   const aoiQuery = useAois();
   const aois = aoiQuery.data ?? [];
+
+  // Auto-select first AOI when available and nothing is selected
+  useEffect(() => {
+    if (!selectedAoiId && aois.length > 0) {
+      setSelectedAoiId(aois[0].id);
+    }
+  }, [aois, selectedAoiId]);
 
   const selectedAoi = aois.find(a => a.id === selectedAoiId);
   const imagerySearch = useImagerySearch(selectedAoi ? {
@@ -78,6 +86,8 @@ function AppShell() {
 
   // currentTime for TripsLayer — end of selected window (static replay)
   const tracksCurrentTime = Date.parse(endTime) / 1000;
+  // trailLength covers the entire selected time range so all tracks are visible
+  const tracksTrailLength = Math.max(300, (Date.parse(endTime) - Date.parse(startTime)) / 1000);
 
   const PANELS = [
     { key: "aoi", label: "AOIs" }, { key: "layers", label: "Layers" },
@@ -207,9 +217,9 @@ function AppShell() {
 
           {viewMode === "2d" ? (
             <MapView
-              aois={[]}
+              aois={aois}
               imageryItems={imagerySearch.data ?? []}
-              events={[]}
+              events={gdeltSearch.data ?? []}
               drawMode={drawMode}
               selectedAoiId={selectedAoiId}
               onAoiClick={setSelectedAoiId}
@@ -222,6 +232,7 @@ function AppShell() {
               imageryOpacity={layers.imageryOpacity}
               trips={visibleTracks}
               currentTime={tracksCurrentTime}
+              trailLength={tracksTrailLength}
               showShipsLayer={layers.showShips}
               showAircraftLayer={layers.showAircraft}
             />
@@ -231,8 +242,11 @@ function AppShell() {
               aois={aois}
               events={gdeltSearch.data ?? []}
               gdeltEvents={gdeltSearch.data ?? []}
+              trips={visibleTracks}
               showEventLayer={layers.showEvents}
               showGdeltLayer={layers.showGdelt}
+              showShipsLayer={layers.showShips}
+              showAircraftLayer={layers.showAircraft}
             />
           )}
             </>

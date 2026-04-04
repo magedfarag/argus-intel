@@ -1,183 +1,201 @@
-// P2-5.1: Integrate globe.gl as secondary 3D view mode
-// P2-5.2: Render AOIs and event clusters on globe
-import { useEffect, useRef } from "react";
+// P2-5: Globe-projection view using MapLibre GL.
+// Replaces globe.gl (static JPEG texture → blurry on zoom) with MapLibre's
+// native globe projection which streams vector tiles at full resolution at
+// every zoom level — identical to the 2D view but rendered as a 3D sphere.
+import { useEffect, useRef, useState } from "react";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { MapboxOverlay } from "@deck.gl/mapbox";
+import { TripsLayer } from "@deck.gl/geo-layers";
 import type { Aoi, CanonicalEvent } from "../../api/types";
+import type { Trip } from "../../hooks/useTracks";
 
 interface Props {
   aois: Aoi[];
   events: CanonicalEvent[];
   gdeltEvents?: CanonicalEvent[];
+  trips?: Trip[];
   showEventLayer?: boolean;
   showGdeltLayer?: boolean;
+  showShipsLayer?: boolean;
+  showAircraftLayer?: boolean;
 }
 
-// Centroid of a GeoJSON polygon's outer ring
-function polygonCentroid(coords: number[][][]): [number, number] {
-  const ring = coords[0];
-  let lngSum = 0, latSum = 0;
-  for (const [lng, lat] of ring) { lngSum += lng; latSum += lat; }
-  return [lngSum / ring.length, latSum / ring.length];
+function toFeatureCollection(features: GeoJSON.Feature[]): GeoJSON.FeatureCollection {
+  return { type: "FeatureCollection", features };
 }
 
-export function GlobeView({ aois, events, gdeltEvents = [], showEventLayer = true, showGdeltLayer = false }: Props) {
+export function GlobeView({
+  aois, events, gdeltEvents = [], trips = [],
+  showEventLayer = true, showGdeltLayer = false,
+  showShipsLayer = true, showAircraftLayer = true,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const globeRef = useRef<any>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const deckRef = useRef<MapboxOverlay | null>(null);
+  const [styleLoaded, setStyleLoaded] = useState(false);
 
-  // P2-5.1: initialise globe.gl on mount
+  // Initialise MapLibre with globe projection
   useEffect(() => {
     if (!containerRef.current) return;
-    let cancelled = false;
 
-    import("globe.gl").then(({ default: Globe }) => {
-      if (cancelled || !containerRef.current) return;
+    const map = new maplibregl.Map({
+      container: containerRef.current,
+      style: "https://demotiles.maplibre.org/style.json",
+      center: [56.1, 26.2], // Strait of Hormuz
+      zoom: 3,
+    });
+    mapRef.current = map;
 
-      const globe = Globe({ animateIn: true })(containerRef.current);
+    map.addControl(new maplibregl.NavigationControl(), "top-right");
+    map.addControl(new maplibregl.ScaleControl(), "bottom-left");
 
-      globe
-        .globeImageUrl("//unpkg.com/three-globe/example/img/earth-night.jpg")
-        .backgroundImageUrl("//unpkg.com/three-globe/example/img/night-sky.png")
-        .backgroundColor("#0f172a")
-        .width(containerRef.current.clientWidth || 800)
-        .height(containerRef.current.clientHeight || 600)
-        .showAtmosphere(true)
-        .atmosphereColor("#1e6fce")
-        .atmosphereAltitude(0.25);
+    const overlay = new MapboxOverlay({ layers: [] });
+    map.addControl(overlay as unknown as maplibregl.IControl);
+    deckRef.current = overlay;
 
-      // Start centred on Middle East
-      globe.pointOfView({ lat: 25, lng: 45, altitude: 1.8 });
-
-      globeRef.current = globe;
-    }).catch(err => {
-      console.error("globe.gl failed to load:", err);
+    map.on("load", () => {
+      // setProjection requires the style to be loaded — must be inside "load"
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (map as any).setProjection({ type: "globe" });
+      setStyleLoaded(true);
     });
 
     return () => {
-      cancelled = true;
-      if (globeRef.current) {
-        try { globeRef.current._destructor(); } catch (_) { /* ignore */ }
-        globeRef.current = null;
-      }
+      setStyleLoaded(false);
+      deckRef.current = null;
+      map.remove();
+      mapRef.current = null;
     };
   }, []);
 
-  // P2-5.2: render AOI polygons on globe
+  // AOI fill + border
   useEffect(() => {
-    const globe = globeRef.current;
-    if (!globe) return;
+    const map = mapRef.current;
+    if (!map || !styleLoaded) return;
 
-    const polygonFeatures = aois
-      .filter(a => a.geometry.type === "Polygon" || a.geometry.type === "MultiPolygon")
-      .map(a => ({
-        type: "Feature" as const,
-        geometry: a.geometry,
-        properties: { name: a.name, id: a.id },
-      }));
+    if (map.getLayer("g-aoi-fill")) map.removeLayer("g-aoi-fill");
+    if (map.getLayer("g-aoi-line")) map.removeLayer("g-aoi-line");
+    if (map.getSource("g-aois")) map.removeSource("g-aois");
 
-    globe
-      .polygonsData(polygonFeatures)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .polygonCapColor(() => "rgba(33, 150, 243, 0.25)")
-      .polygonSideColor(() => "rgba(33, 150, 243, 0.4)")
-      .polygonStrokeColor(() => "#2196f3")
-      .polygonAltitude(0.005)
-      .polygonLabel(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (d: any) => `<div class="globe-tooltip">${d.properties?.name ?? "AOI"}</div>`
-      );
-  }, [aois]);
+    map.addSource("g-aois", {
+      type: "geojson",
+      data: toFeatureCollection(
+        aois
+          .filter(a => a.geometry.type === "Polygon" || a.geometry.type === "MultiPolygon")
+          .map(a => ({ type: "Feature" as const, geometry: a.geometry, properties: { name: a.name } }))
+      ),
+    });
+    map.addLayer({ id: "g-aoi-fill", type: "fill", source: "g-aois", paint: { "fill-color": "#3b82f6", "fill-opacity": 0.18 } });
+    map.addLayer({ id: "g-aoi-line", type: "line", source: "g-aois", paint: { "line-color": "#60a5fa", "line-width": 2 } });
+  }, [aois, styleLoaded]);
 
-  // P2-5.2: render event clusters as points on globe
+  // AOI name labels
   useEffect(() => {
-    const globe = globeRef.current;
-    if (!globe) return;
+    const map = mapRef.current;
+    if (!map || !styleLoaded) return;
 
-    const pointData: { lat: number; lng: number; color: string; label: string; radius: number }[] = [];
+    if (map.getLayer("g-aoi-labels")) map.removeLayer("g-aoi-labels");
+    if (map.getSource("g-aoi-label-pts")) map.removeSource("g-aoi-label-pts");
 
-    if (showEventLayer) {
-      for (const evt of events) {
-        if (evt.geometry?.type === "Point") {
-          const [lng, lat] = evt.geometry.coordinates as [number, number];
-          pointData.push({
-            lat, lng,
-            color: "#f59e0b",
-            label: `${evt.event_type} — ${new Date(evt.event_time).toLocaleDateString()}`,
-            radius: 0.4,
-          });
-        }
-      }
-    }
-
-    if (showGdeltLayer) {
-      for (const evt of gdeltEvents) {
-        if (evt.geometry?.type === "Point") {
-          const [lng, lat] = evt.geometry.coordinates as [number, number];
-          pointData.push({
-            lat, lng,
-            color: "#9c27b0",
-            label: `GDELT: ${new Date(evt.event_time).toLocaleDateString()}`,
-            radius: 0.3,
-          });
-        }
-      }
-    }
-
-    globe
-      .pointsData(pointData)
-      .pointLat("lat")
-      .pointLng("lng")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .pointColor((d: any) => d.color)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .pointRadius((d: any) => d.radius)
-      .pointAltitude(0.01)
-      .pointResolution(6)
-      .pointLabel("label");
-  }, [events, gdeltEvents, showEventLayer, showGdeltLayer]);
-
-  // AOI label markers (centroids)
-  useEffect(() => {
-    const globe = globeRef.current;
-    if (!globe) return;
-
-    const labels = aois
+    const pts = aois
       .filter(a => a.geometry.type === "Polygon")
       .map(a => {
-        const [lng, lat] = polygonCentroid(a.geometry.coordinates as number[][][]);
-        return { lat, lng, text: a.name };
+        const ring = (a.geometry.coordinates as number[][][])[0];
+        const lng = ring.reduce((s, c) => s + c[0], 0) / ring.length;
+        const lat = ring.reduce((s, c) => s + c[1], 0) / ring.length;
+        return { type: "Feature" as const, geometry: { type: "Point" as const, coordinates: [lng, lat] }, properties: { name: a.name } };
       });
 
-    globe
-      .labelsData(labels)
-      .labelLat("lat")
-      .labelLng("lng")
-      .labelText("text")
-      .labelSize(1.4)
-      .labelDotRadius(0.4)
-      .labelColor(() => "#e2e8f0")
-      .labelResolution(2)
-      .labelAltitude(0.01);
-  }, [aois]);
-
-  // Handle container resize
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => {
-      const g = globeRef.current;
-      if (g) {
-        g.width(el.clientWidth).height(el.clientHeight);
-      }
+    map.addSource("g-aoi-label-pts", { type: "geojson", data: toFeatureCollection(pts) });
+    map.addLayer({
+      id: "g-aoi-labels", type: "symbol", source: "g-aoi-label-pts",
+      layout: { "text-field": ["get", "name"], "text-size": 13, "text-anchor": "bottom", "text-offset": [0, -0.5] },
+      paint: { "text-color": "#f1f5f9", "text-halo-color": "#1e3a5f", "text-halo-width": 2 },
     });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+  }, [aois, styleLoaded]);
+
+  // Event circles (amber)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !styleLoaded) return;
+
+    if (map.getLayer("g-events")) map.removeLayer("g-events");
+    if (map.getSource("g-events")) map.removeSource("g-events");
+
+    const features = showEventLayer
+      ? events
+          .filter(e => e.geometry?.type === "Point")
+          .map(e => ({
+            type: "Feature" as const,
+            geometry: e.geometry as GeoJSON.Point,
+            properties: { label: e.event_type.replace(/_/g, " ") + " · " + new Date(e.event_time).toLocaleDateString() },
+          }))
+      : [];
+
+    map.addSource("g-events", { type: "geojson", data: toFeatureCollection(features) });
+    map.addLayer({
+      id: "g-events", type: "circle", source: "g-events",
+      paint: { "circle-radius": 5, "circle-color": "#f59e0b", "circle-stroke-width": 1.5, "circle-stroke-color": "#fff" },
+    });
+  }, [events, showEventLayer, styleLoaded]);
+
+  // GDELT circles (purple)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !styleLoaded) return;
+
+    if (map.getLayer("g-gdelt")) map.removeLayer("g-gdelt");
+    if (map.getSource("g-gdelt")) map.removeSource("g-gdelt");
+
+    const features = showGdeltLayer
+      ? gdeltEvents
+          .filter(e => e.geometry?.type === "Point")
+          .map(e => ({
+            type: "Feature" as const,
+            geometry: e.geometry as GeoJSON.Point,
+            properties: {},
+          }))
+      : [];
+
+    map.addSource("g-gdelt", { type: "geojson", data: toFeatureCollection(features) });
+    map.addLayer({
+      id: "g-gdelt", type: "circle", source: "g-gdelt",
+      paint: { "circle-radius": 4, "circle-color": "#c084fc", "circle-stroke-width": 1, "circle-stroke-color": "#fff" },
+    });
+  }, [gdeltEvents, showGdeltLayer, styleLoaded]);
+
+  // Ship / aircraft tracks via deck.gl TripsLayer
+  useEffect(() => {
+    const overlay = deckRef.current;
+    if (!overlay) return;
+
+    const filtered = trips.filter(t => t.type === "ship" ? showShipsLayer : showAircraftLayer);
+    const trailLength = 86400 * 35; // show full 35-day window
+    const currentTime = Date.now() / 1000;
+
+    overlay.setProps({
+      layers: [
+        new TripsLayer({
+          id: "g-trips",
+          data: filtered,
+          getPath: d => d.waypoints.map(w => [w[0], w[1]] as [number, number]),
+          getTimestamps: d => d.waypoints.map(w => w[2]),
+          getColor: d => d.type === "ship" ? [34, 211, 238, 220] : [251, 146, 60, 220],
+          currentTime,
+          trailLength,
+          widthMinPixels: 2,
+        }),
+      ],
+    });
+  }, [trips, showShipsLayer, showAircraftLayer]);
 
   return (
     <div
       ref={containerRef}
-      style={{ width: "100%", height: "100%", background: "#0f172a" }}
+      style={{ width: "100%", height: "100%" }}
       data-testid="globe-container"
     />
   );
 }
+

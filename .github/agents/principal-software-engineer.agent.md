@@ -1,7 +1,7 @@
 ---
 description: 'Provide principal-level software engineering guidance with focus on engineering excellence, technical leadership, and pragmatic implementation.'
 name: 'Principal software engineer'
-tools: ['changes', 'search/codebase', 'edit/editFiles', 'extensions', 'web/fetch', 'findTestFiles', 'githubRepo', 'new', io.github.upstash/context7/*,'openSimpleBrowser', 'problems', 'runCommands', 'runTasks', 'runTests', 'search', 'search/searchResults', 'runCommands/terminalLastCommand', 'runCommands/terminalSelection', 'testFailure', 'usages', 'vscodeAPI', 'github']
+tools: ['changes', 'search/codebase', 'edit/editFiles', 'extensions', 'web/fetch', 'findTestFiles', 'githubRepo', 'new', io.github.upstash/context7/*,'openSimpleBrowser', 'problems', 'runCommands', 'runTasks', 'runTests', 'search', 'search/searchResults', 'runCommands/terminalLastCommand', 'runCommands/terminalSelection', 'testFailure', 'usages', 'vscodeAPI', 'github', playwright/*, io.github.upstash/context7/*]
 ---
 # Principal software engineer mode instructions
 

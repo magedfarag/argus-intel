@@ -88,8 +88,32 @@ export const eventsApi = {
 
 // ── Imagery ──────────────────────────────────────────────────────────────────
 export const imageryApi = {
-  search: (body: ImagerySearchRequest) =>
-    request<ImageryItem[]>('/api/v1/imagery/search', { method: 'POST', body: JSON.stringify(body) }),
+  search: async (body: ImagerySearchRequest): Promise<ImageryItem[]> => {
+    // Backend returns { total_items, items: ImageryItemSummary[], connector_summaries }
+    // Frontend expects ImageryItem[] — unwrap and transform field names.
+    interface BackendItem {
+      event_id: string;
+      source: string;
+      connector_id: string;
+      event_time: string;
+      cloud_cover_pct?: number;
+      geometry: unknown;
+      scene_url?: string;
+      [k: string]: unknown;
+    }
+    const res = await request<{ items: BackendItem[] }>('/api/v1/imagery/search', {
+      method: 'POST', body: JSON.stringify(body),
+    });
+    return (res.items ?? []).map(i => ({
+      item_id: i.event_id,
+      collection: i.source ?? i.connector_id,
+      provider: i.connector_id,
+      datetime: i.event_time,
+      cloud_cover: i.cloud_cover_pct,
+      geometry: i.geometry as ImageryItem['geometry'],
+      thumbnail_url: i.scene_url,
+    }));
+  },
   providers: () => request<ProviderStatus[]>('/api/v1/imagery/providers'),
 };
 
@@ -110,7 +134,7 @@ export const analyticsApi = {
   review: (candidateId: string, decision: ReviewDecision, notes?: string, analystId?: string) =>
     request<ChangeCandidate>(`/api/v1/analytics/change-detection/${candidateId}/review`, {
       method: 'PUT',
-      body: JSON.stringify({ decision, notes, analyst_id: analystId }),
+      body: JSON.stringify({ disposition: decision, notes, analyst_id: analystId }),
     }),
   reviewQueue: (aoiId?: string) =>
     request<ChangeCandidate[]>(`/api/v1/analytics/review${aoiId ? `?aoi_id=${aoiId}` : ''}`),

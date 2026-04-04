@@ -41,7 +41,7 @@ export function TimelinePanel({ aoiId, startTime, endTime, onRangeChange }: Prop
     return acc;
   }, {});
   const rows = Object.values(chartData);
-  const sources = [...new Set(buckets.map(b => b.source))];
+  const sources = [...new Set(buckets.map(b => b.source))].filter(Boolean);
 
   return (
     <div className={`panel timeline-panel ${expanded ? "" : "timeline-panel--collapsed"}`} data-testid="timeline-panel">

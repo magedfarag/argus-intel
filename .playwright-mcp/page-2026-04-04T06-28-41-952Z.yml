@@ -1,0 +1,60 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: 🗺
+      - heading "GEOINT Platform" [level=1] [ref=e7]
+      - generic [ref=e8]: Construction Activity Monitor
+    - textbox "API key for authenticated endpoints" [ref=e10]:
+      - /placeholder: API Key (optional)
+  - generic [ref=e11]:
+    - navigation [ref=e12]:
+      - button "AOIs" [ref=e13] [cursor=pointer]
+      - button "Layers" [ref=e14] [cursor=pointer]
+      - button "Events" [ref=e15] [cursor=pointer]
+      - button "Playback" [ref=e16] [cursor=pointer]
+      - button "Analytics" [ref=e17] [cursor=pointer]
+      - button "Export" [ref=e18] [cursor=pointer]
+      - button "Compare" [ref=e19] [cursor=pointer]
+      - button "Health" [ref=e20] [cursor=pointer]
+    - generic [ref=e22]:
+      - heading "Layers" [level=3] [ref=e23]
+      - generic [ref=e24] [cursor=pointer]:
+        - checkbox "AOI Boundaries" [checked] [ref=e25]
+        - text: AOI Boundaries
+      - generic [ref=e27] [cursor=pointer]:
+        - checkbox "Imagery Footprints" [checked] [ref=e28]
+        - text: Imagery Footprints
+      - generic [ref=e30] [cursor=pointer]:
+        - checkbox "Events" [checked] [ref=e31]
+        - text: Events
+      - generic [ref=e33] [cursor=pointer]:
+        - checkbox "GDELT Context" [checked] [ref=e34]
+        - text: GDELT Context
+      - generic [ref=e36] [cursor=pointer]:
+        - checkbox "Maritime (AIS)" [checked] [ref=e37]
+        - text: Maritime (AIS)
+      - generic [ref=e39] [cursor=pointer]:
+        - checkbox "Aviation (ADS-B)" [checked] [ref=e40]
+        - text: Aviation (ADS-B)
+      - generic [ref=e42]:
+        - generic [ref=e43]: "Track density: 100%"
+        - slider [ref=e44]: "1"
+      - generic [ref=e45]:
+        - generic [ref=e46]: "Imagery opacity: 10%"
+        - slider [ref=e47]: "0.1"
+    - generic [ref=e49]:
+      - button "2D" [ref=e50] [cursor=pointer]
+      - button "🌐 3D" [ref=e51] [cursor=pointer]
+  - generic [ref=e54]:
+    - generic [ref=e55]:
+      - heading "Timeline" [level=3] [ref=e56]
+      - button "▼" [ref=e57] [cursor=pointer]
+    - generic [ref=e58]:
+      - button "24h" [ref=e59] [cursor=pointer]
+      - button "7d" [ref=e60] [cursor=pointer]
+      - button "30d" [ref=e61] [cursor=pointer]
+    - generic [ref=e62]:
+      - textbox [ref=e63]: 2026-03-05T06:28
+      - generic [ref=e64]: –
+      - textbox [ref=e65]: 2026-04-04T06:28
+    - paragraph [ref=e66]: Loading…

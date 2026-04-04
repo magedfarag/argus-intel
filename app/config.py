@@ -80,7 +80,7 @@ class AppSettings(BaseSettings):
         default="https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token"
     )
     sentinel2_stac_url: str = Field(
-        default="https://catalogue.dataspace.copernicus.eu/stac/v1"
+        default="https://catalogue.dataspace.copernicus.eu/stac"
     )
 
     # ── Landsat (USGS LandsatLook STAC) ──────────────────────────────────────
