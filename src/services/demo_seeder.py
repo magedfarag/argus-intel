@@ -54,31 +54,39 @@ def _point(lon: float, lat: float) -> dict:
 
 _SHIP_ROUTES = [
     # ── Inbound routes (Gulf of Oman → Persian Gulf, north channel) ──────────
+    # All inbound routes must be at lat > 26.5 when lon is in [56.1, 56.7] to
+    # clear the Musandam Peninsula.  The "corner" waypoint at ~(56.75, 26.45)
+    # positions the vessel north of the peninsula BEFORE the interpolation
+    # enters the critical longitude band.
     {
         "mmsi": "211330000", "name": "EVER GRACE", "ship_type": 70,
         "dest": "Bandar Abbas", "speed_kn": 13.5,
         "route": [
-            (57.15, 25.70), (56.90, 26.00), (56.55, 26.32),
-            (56.15, 26.48), (55.75, 26.55), (55.35, 26.65), (55.05, 26.80),
+            (57.15, 25.70), (56.98, 25.92), (56.82, 26.18),
+            (56.75, 26.45), (56.68, 26.55), (56.35, 26.62),
+            (55.95, 26.62), (55.55, 26.65), (55.05, 26.80),
         ],
     },
     {
         "mmsi": "636017432", "name": "STELLA MARINER", "ship_type": 70,
         "dest": "Jebel Ali", "speed_kn": 12.0,
         "route": [
-            (57.30, 25.52), (57.00, 25.82), (56.65, 26.18),
-            (56.30, 26.40), (55.90, 26.50), (55.50, 26.62), (55.10, 26.83),
+            (57.30, 25.52), (57.08, 25.78), (56.88, 26.05),
+            (56.78, 26.35), (56.72, 26.52), (56.42, 26.60),
+            (55.98, 26.58), (55.58, 26.63), (55.10, 26.83),
         ],
     },
     {
         "mmsi": "352456000", "name": "HORMUZ CARRIER", "ship_type": 70,
         "dest": "Abu Dhabi", "speed_kn": 11.5,
         "route": [
-            (57.05, 26.08), (56.72, 26.28), (56.42, 26.43),
-            (56.05, 26.53), (55.65, 26.60), (55.25, 26.73),
+            (57.05, 26.08), (56.88, 26.22), (56.78, 26.42),
+            (56.70, 26.55), (56.38, 26.62), (56.05, 26.65),
+            (55.65, 26.62), (55.25, 26.73),
         ],
     },
     # ── Outbound routes (Persian Gulf → Gulf of Oman, south channel) ─────────
+    # All outbound routes must be at lat < 26.1 when lon is in [56.1, 56.7].
     {
         "mmsi": "477123400", "name": "PACIFIC VOYAGER", "ship_type": 80,
         "dest": "Fujairah", "speed_kn": 14.0,
@@ -121,6 +129,36 @@ _SHIP_ROUTES = [
             (56.48, 25.38), (56.28, 25.55), (56.10, 25.80), (55.88, 26.08),
         ],
     },
+    # ── Additional vessels for richer demo ───────────────────────────────────
+    {
+        # VLCC tanker, outbound loaded, slow — south outbound lane
+        "mmsi": "466001000", "name": "AL ZUBARA", "ship_type": 80,
+        "dest": "Ras Laffan", "speed_kn": 11.0,
+        "route": [
+            (55.05, 26.55), (55.32, 26.32), (55.65, 26.08),
+            (56.02, 25.88), (56.42, 25.62), (56.82, 25.35), (57.22, 25.05),
+        ],
+    },
+    {
+        # LPG carrier, inbound toward Bandar Abbas — north channel
+        "mmsi": "422002000", "name": "JAHAN HEROES", "ship_type": 70,
+        "dest": "Bandar Abbas", "speed_kn": 12.5,
+        "route": [
+            (57.38, 25.48), (57.15, 25.75), (56.95, 26.02),
+            (56.80, 26.30), (56.72, 26.52), (56.45, 26.62),
+            (56.10, 26.72), (55.72, 26.88), (55.42, 27.02),
+        ],
+    },
+    {
+        # Container feeder, inbound toward Dubai — north channel via Qeshm narrows
+        "mmsi": "371002000", "name": "KHOR DUBAI", "ship_type": 70,
+        "dest": "Jebel Ali", "speed_kn": 13.0,
+        "route": [
+            (57.42, 25.62), (57.18, 25.88), (56.95, 26.15),
+            (56.78, 26.38), (56.70, 26.55), (56.38, 26.65),
+            (55.95, 26.68), (55.52, 26.72), (55.12, 26.85),
+        ],
+    },
 ]
 
 
@@ -128,8 +166,8 @@ def _interp_route(
     waypoints: list[tuple[float, float]],
     n_points: int,
     rng: random.Random,
-    jitter_lon: float = 0.004,
-    jitter_lat: float = 0.003,
+    jitter_lon: float = 0.001,
+    jitter_lat: float = 0.001,
 ) -> list[tuple[float, float]]:
     """Linearly interpolate n_points along a list of (lon, lat) waypoints."""
     # Build cumulative segment lengths (simple flat-earth approximation)
@@ -163,8 +201,8 @@ def _interp_route(
 def _ship_events() -> list[CanonicalEvent]:
     events: list[CanonicalEvent] = []
     rng = random.Random(42)
-    n_pos = 60       # position reports per vessel
-    window_h = 12    # hours covered
+    n_pos = 90       # position reports per vessel
+    window_h = 30    # hours covered
 
     for ship in _SHIP_ROUTES:
         base_time = _NOW - timedelta(hours=window_h)

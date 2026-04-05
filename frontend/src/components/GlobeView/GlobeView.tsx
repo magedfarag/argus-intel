@@ -21,7 +21,7 @@ import type { RenderMode } from "../../types/renderModes";
 import { RENDER_MODE_CONFIGS } from "../../types/renderModes";
 
 /** Globe always uses vector tiles — raster styles break the globe projection */
-const GLOBE_STYLE_URL = "https://demotiles.maplibre.org/style.json";
+const GLOBE_STYLE_URL = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 
 // -- Helper: current position, heading, speed for each entity
 function computeEntityPositions(trips: Trip[], t: number): GeoJSON.FeatureCollection {
@@ -224,16 +224,19 @@ export function GlobeView({
         const demUrl = (import.meta.env.VITE_DEM_TILES_URL as string | undefined)
           ?? "https://demotiles.maplibre.org/terrain-tiles/tiles.json";
         map.addSource("dem", { type: "raster-dem", url: demUrl, tileSize: 256 });
-        map.setTerrain({ source: "dem", exaggeration: 1.2 });
+        map.setTerrain({ source: "dem", exaggeration: 1.5 });
         map.addLayer({
           id: "terrain-hillshade",
           type: "hillshade",
           source: "dem",
-          paint: { "hillshade-shadow-color": "#122A2A", "hillshade-intensity": 0.5 },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          paint: { "hillshade-shadow-color": "#122A2A", "hillshade-intensity": 0.5 } as any,
         });
       }
 
       setStyleLoaded(true);
+      // Expose map instance for Playwright demo recording (dev / demo mode only)
+      (window as any).__argusMap = map;
 
       // P6-7: God's Eye entry animation — descend from orbit to Hormuz
       if (!godsEyeFiredRef.current) {
@@ -255,6 +258,7 @@ export function GlobeView({
     return () => {
       setStyleLoaded(false);
       deckRef.current = null;
+      delete (window as any).__argusMap;
       map.remove();
       mapRef.current = null;
     };
@@ -292,7 +296,7 @@ export function GlobeView({
       data: toFeatureCollection(
         aois
           .filter(a => a.geometry.type === "Polygon" || a.geometry.type === "MultiPolygon")
-          .map(a => ({ type: "Feature" as const, geometry: a.geometry, properties: { name: a.name } }))
+          .map(a => ({ type: "Feature" as const, geometry: a.geometry as unknown as GeoJSON.Geometry, properties: { name: a.name } }))
       ),
     });
     map.addLayer({ id: "g-aoi-fill", type: "fill", source: "g-aois", paint: { "fill-color": "#3b82f6", "fill-opacity": 0.18 } });
@@ -428,16 +432,16 @@ export function GlobeView({
     if (shipTrips.length) {
       layers.push(new TripsLayer({
         id: "g-ships-glow", data: shipTrips,
-        getPath: d => d.waypoints.map(w => [w[0], w[1]] as [number, number]),
-        getTimestamps: d => d.waypoints.map(w => w[2]),
+        getPath: d => d.waypoints.map((w: [number, number, number]) => [w[0], w[1]] as [number, number]),
+        getTimestamps: d => d.waypoints.map((w: [number, number, number]) => w[2]),
         getColor: [0, 229, 255] as [number, number, number], opacity: 0.18,
         widthMinPixels: 14, capRounded: true, jointRounded: true,
         trailLength, currentTime: t,
       }));
       layers.push(new TripsLayer({
         id: "g-ships-trips", data: shipTrips,
-        getPath: d => d.waypoints.map(w => [w[0], w[1]] as [number, number]),
-        getTimestamps: d => d.waypoints.map(w => w[2]),
+        getPath: d => d.waypoints.map((w: [number, number, number]) => [w[0], w[1]] as [number, number]),
+        getTimestamps: d => d.waypoints.map((w: [number, number, number]) => w[2]),
         getColor: [0, 229, 255] as [number, number, number], opacity: 0.9,
         widthMinPixels: 3, capRounded: true, jointRounded: true,
         trailLength, currentTime: t,
@@ -446,16 +450,16 @@ export function GlobeView({
     if (aircraftTrips.length) {
       layers.push(new TripsLayer({
         id: "g-aircraft-glow", data: aircraftTrips,
-        getPath: d => d.waypoints.map(w => [w[0], w[1]] as [number, number]),
-        getTimestamps: d => d.waypoints.map(w => w[2]),
+        getPath: d => d.waypoints.map((w: [number, number, number]) => [w[0], w[1]] as [number, number]),
+        getTimestamps: d => d.waypoints.map((w: [number, number, number]) => w[2]),
         getColor: [255, 100, 50] as [number, number, number], opacity: 0.18,
         widthMinPixels: 14, capRounded: true, jointRounded: true,
         trailLength, currentTime: t,
       }));
       layers.push(new TripsLayer({
         id: "g-aircraft-trips", data: aircraftTrips,
-        getPath: d => d.waypoints.map(w => [w[0], w[1]] as [number, number]),
-        getTimestamps: d => d.waypoints.map(w => w[2]),
+        getPath: d => d.waypoints.map((w: [number, number, number]) => [w[0], w[1]] as [number, number]),
+        getTimestamps: d => d.waypoints.map((w: [number, number, number]) => w[2]),
         getColor: [255, 100, 50] as [number, number, number], opacity: 0.9,
         widthMinPixels: 3, capRounded: true, jointRounded: true,
         trailLength, currentTime: t,
@@ -806,10 +810,16 @@ export function GlobeView({
   const renderModeConfig = RENDER_MODE_CONFIGS[renderMode];
 
   return (
-    <div style={{ width: "100%", height: "100%", position: "relative" }} data-testid="globe-container">
+    <div style={{ width: "100%", height: "100%", position: "relative", background: "#000000" }} data-testid="globe-container">
       <div
         ref={containerRef}
-        style={{ width: "100%", height: "100%", filter: renderModeConfig.cssFilter }}
+        className="globe-canvas-container"
+        style={{
+          width: "100%",
+          height: "100%",
+          filter: renderModeConfig.cssFilter,
+          boxShadow: "0 0 120px 40px rgba(0, 212, 255, 0.08), inset 0 0 60px rgba(0, 0, 0, 0.4)",
+        }}
       />
       {renderMode !== "day" && renderModeConfig.tintColor != null && (
         <div

@@ -21,9 +21,6 @@ export function useTracks(
 ) {
   return useQuery<Trip[]>({
     queryKey: ["tracks", aoiId, startTime, endTime],
-    // Do not fire until an AOI is selected — an unscoped telemetry query can return
-    // a huge unfiltered result set and will 401 on protected deployments.
-    enabled: enabled && !!aoiId,
     queryFn: async () => {
       const response = await playbackApi.query({
         ...(aoiId ? { aoi_id: aoiId } : {}),
@@ -57,7 +54,9 @@ export function useTracks(
         entityType: data.type,
       }));
     },
-    enabled: enabled && !!(startTime && endTime),
+    // Do not fire until an AOI is selected — an unscoped telemetry query can return
+    // a huge unfiltered result set and will 401 on protected deployments.
+    enabled: enabled && !!aoiId && !!(startTime && endTime),
     staleTime: 30_000,
   });
 }

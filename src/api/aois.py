@@ -97,6 +97,7 @@ def update_aoi(aoi_id: str, patch: AOIUpdate, store: StoreDep) -> AOIResponse:
 @router.delete(
     "/{aoi_id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
     summary="Soft-delete an AOI",
 )
 def delete_aoi(aoi_id: str, store: StoreDep) -> None:
