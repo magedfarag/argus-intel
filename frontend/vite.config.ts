@@ -8,7 +8,9 @@ export default defineConfig(({ mode }) => {
   // the dev proxy — keeps the key out of the browser bundle entirely.
   const env = loadEnv(mode, process.cwd(), '')
   const apiKey = env.API_KEY ?? ''
-  const proxyHeaders = apiKey ? { Authorization: `Bearer ${apiKey}` } : {}
+  // Explicit type annotation avoids the `{ Authorization?: undefined }` union
+  // that breaks Vite's ProxyOptions header signature.
+  const proxyHeaders: Record<string, string> = apiKey ? { Authorization: `Bearer ${apiKey}` } : {}
 
   return {
     plugins: [react()],

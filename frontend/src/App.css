@@ -716,6 +716,42 @@ body {
   border: 1px solid var(--border); border-radius: 10px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.5);
 }
+.globe-intel-overlay--collapsed {
+  width: auto;
+  min-width: 0;
+}
+.globe-intel-overlay--expanded {
+  overflow: hidden;
+}
+.globe-intel-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  background: transparent;
+  border: 0;
+  color: var(--text-primary);
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: 0.08em;
+}
+.globe-intel-toggle:hover {
+  background: rgba(255,255,255,0.05);
+}
+.globe-intel-toggle-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.globe-intel-toggle-icon {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent-blue);
+}
 
 /* --- Chokepoint Metrics Bar --- */
 .choke-metrics-bar {

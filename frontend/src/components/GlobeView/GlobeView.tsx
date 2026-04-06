@@ -2,7 +2,7 @@
 // Replaces globe.gl (static JPEG texture → blurry on zoom) with MapLibre's
 // native globe projection which streams vector tiles at full resolution at
 // every zoom level — identical to the 2D view but rendered as a 3D sphere.
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -11,7 +11,7 @@ import { TripsLayer, Tile3DLayer } from "@deck.gl/geo-layers";
 import { PathLayer, ScatterplotLayer } from "@deck.gl/layers";
 import { useScenePerformance } from "../../hooks/useScenePerformance";
 import type { Aoi, CanonicalEvent } from "../../api/types";
-import type { Trip } from "../../hooks/useTracks";
+import type { Trip, TrackWaypoint } from "../../hooks/useTracks";
 import type { SatellitePass, AirspaceRestriction, GpsJammingEvent, StrikeEvent } from "../../types/operationalLayers";
 import type { DetectionOverlay } from "../../types/sensorFusion";
 import { chokepointsApi } from "../../api/client";
@@ -22,19 +22,45 @@ import { RENDER_MODE_CONFIGS } from "../../types/renderModes";
 
 /** Globe always uses vector tiles — raster styles break the globe projection */
 const GLOBE_STYLE_URL = "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json";
+const TRACK_LAYER_REFRESH_MS = 120;
+const ENTITY_SOURCE_REFRESH_MS = 180;
+
+interface TrackHead {
+  id: string;
+  entityType: Trip["entityType"];
+  lng: number;
+  lat: number;
+  altitudeM: number;
+  heading: number;
+  speedKts: number;
+  lastSeenUnix: number;
+}
+
+// -- Helper: binary search for the last waypoint index with timestamp <= t.
+// Waypoints are pre-sorted by timestamp (useTracks sorts them).
+// Replaces O(n) .filter() with O(log n) per trip — critical during animation.
+function lastWaypointIndex(waypoints: TrackWaypoint[], t: number): number {
+  let lo = 0, hi = waypoints.length - 1, best = -1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >>> 1;
+    if (waypoints[mid][2] <= t) { best = mid; lo = mid + 1; }
+    else { hi = mid - 1; }
+  }
+  return best;
+}
 
 // -- Helper: current position, heading, speed for each entity
-function computeEntityPositions(trips: Trip[], t: number): GeoJSON.FeatureCollection {
-  const features: GeoJSON.Feature[] = [];
+function getTrackHeads(trips: Trip[], t: number): TrackHead[] {
+  const heads: TrackHead[] = [];
   for (const trip of trips) {
-    const pts = trip.waypoints.filter(w => w[2] <= t);
-    if (!pts.length) continue;
-    const last = pts[pts.length - 1];
+    const idx = lastWaypointIndex(trip.waypoints, t);
+    if (idx < 0) continue;
+    const last = trip.waypoints[idx];
     if (t - last[2] > 86400) continue;
     let heading = 0;
     let speedKts = 0;
-    if (pts.length >= 2) {
-      const prev = pts[pts.length - 2];
+    if (idx >= 1) {
+      const prev = trip.waypoints[idx - 1];
       heading = (Math.atan2(last[0] - prev[0], last[1] - prev[1]) * 180 / Math.PI + 360) % 360;
       const dt = last[2] - prev[2];
       if (dt > 0) {
@@ -45,10 +71,34 @@ function computeEntityPositions(trips: Trip[], t: number): GeoJSON.FeatureCollec
         speedKts = Math.round((distKm / dt) * 3600 / 1.852 * 10) / 10;
       }
     }
+    heads.push({
+      id: trip.id,
+      entityType: trip.entityType,
+      lng: last[0],
+      lat: last[1],
+      altitudeM: last[3] ?? 0,
+      heading: Math.round(heading),
+      speedKts,
+      lastSeenUnix: last[2],
+    });
+  }
+  return heads;
+}
+
+function computeEntityPositions(trips: Trip[], t: number): GeoJSON.FeatureCollection {
+  const features: GeoJSON.Feature[] = [];
+  for (const head of getTrackHeads(trips, t)) {
     features.push({
       type: "Feature",
-      geometry: { type: "Point", coordinates: [last[0], last[1]] },
-      properties: { id: trip.id, entityType: trip.entityType, heading: Math.round(heading), speedKts, lastSeenUnix: last[2] },
+      geometry: { type: "Point", coordinates: [head.lng, head.lat] },
+      properties: {
+        id: head.id,
+        entityType: head.entityType,
+        heading: head.heading,
+        speedKts: head.speedKts,
+        lastSeenUnix: head.lastSeenUnix,
+        altitudeM: head.altitudeM,
+      },
     });
   }
   return { type: "FeatureCollection", features };
@@ -77,7 +127,7 @@ function makeArrowImageData(r: number, g: number, b: number): ImageData {
 // -- Build HTML string for entity click popup
 function buildEntityPopupHtml(
   id: string, entityType: string, heading: number,
-  speedKts: number, lastSeenUnix: number, lng: number, lat: number,
+  speedKts: number, lastSeenUnix: number, lng: number, lat: number, altitudeM = 0,
 ): string {
   const icon = entityType === "ship" ? "\u{1F6A2}" : "\u2708\uFE0F";
   const typeClass = entityType === "ship" ? "entity-popup-ship" : "entity-popup-aircraft";
@@ -93,6 +143,7 @@ function buildEntityPopupHtml(
     <div class="entity-popup-grid">
       <span class="ep-label">Heading</span><span class="ep-val">${heading}\u00B0</span>
       <span class="ep-label">Speed</span><span class="ep-val">${speedLabel}</span>
+      ${entityType === "aircraft" ? `<span class="ep-label">Altitude</span><span class="ep-val">${Math.round(altitudeM)} m</span>` : ""}
       <span class="ep-label">Position</span><span class="ep-val">${latStr} ${lngStr}</span>
       <span class="ep-label">Last seen</span><span class="ep-val">${lastSeen}</span>
     </div>
@@ -187,8 +238,23 @@ export function GlobeView({
   const buildingsLayerRef = useRef<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const detectionsLayerRef = useRef<any[]>([]);
+  const lastTrackLayerBuildMsRef = useRef<number>(0);
+  const lastEntitySourceUpdateMsRef = useRef<number>(0);
   // Capture showTerrainLayer at mount time — MapLibre terrain requires style reload to toggle
   const showTerrainAtMountRef = useRef(showTerrainLayer);
+
+  const shipTrips = useMemo(
+    () => (showShipsLayer ? trips.filter(tr => tr.entityType === "ship") : []),
+    [trips, showShipsLayer],
+  );
+  const aircraftTrips = useMemo(
+    () => (showAircraftLayer ? trips.filter(tr => tr.entityType === "aircraft") : []),
+    [trips, showAircraftLayer],
+  );
+  const activeTrips = useMemo(
+    () => [...shipTrips, ...aircraftTrips],
+    [shipTrips, aircraftTrips],
+  );
 
   // P6: fetch chokepoints + dark ships for overlay layers
   const { data: cpData } = useQuery({ queryKey: ["chokepoints"], queryFn: () => chokepointsApi.list(), staleTime: 60_000 });
@@ -442,71 +508,96 @@ export function GlobeView({
     const overlay = deckRef.current;
     if (!overlay) return;
     const t = currentTime ?? Date.now() / 1000;
-    const shipTrips    = trips.filter(tr => tr.entityType === "ship"     && showShipsLayer);
-    const aircraftTrips = trips.filter(tr => tr.entityType === "aircraft" && showAircraftLayer);
+
+    const nowMs = performance.now();
+    const shouldRebuildLayers =
+      tripsLayersRef.current.length === 0
+      || nowMs - lastTrackLayerBuildMsRef.current >= TRACK_LAYER_REFRESH_MS;
+
+    if (!shouldRebuildLayers) {
+      const updatedLayers = tripsLayersRef.current.map(layer => {
+        const id = String((layer as { id?: string }).id ?? "");
+        if (id.includes("-trips") || id.includes("-glow")) {
+          return layer.clone({ currentTime: t });
+        }
+        return layer;
+      });
+      tripsLayersRef.current = updatedLayers;
+      overlay.setProps({ layers: [...tripsLayersRef.current, ...orbitLayersRef.current, ...jammingLayersRef.current, ...buildingsLayerRef.current, ...detectionsLayerRef.current] });
+      return;
+    }
+
+    lastTrackLayerBuildMsRef.current = nowMs;
+    const shipHeads = getTrackHeads(shipTrips, t);
+    const aircraftHeads = getTrackHeads(aircraftTrips, t);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const layers: any[] = [];
     if (shipTrips.length) {
       // Ships rendered at sea level — paths sit on the water surface and track with entity icons.
       layers.push(new TripsLayer({
-        id: "g-ships-glow", data: shipTrips,
-        getPath: d => d.waypoints.map((w: [number, number, number]) => [w[0], w[1]] as [number, number]),
-        getTimestamps: d => d.waypoints.map((w: [number, number, number]) => w[2]),
-        getColor: [20, 186, 140] as [number, number, number], opacity: 0.18,
-        widthMinPixels: 5, capRounded: true, jointRounded: true,
-        trailLength, currentTime: t,
-      }));
-      layers.push(new TripsLayer({
         id: "g-ships-trips", data: shipTrips,
-        getPath: d => d.waypoints.map((w: [number, number, number]) => [w[0], w[1]] as [number, number]),
-        getTimestamps: d => d.waypoints.map((w: [number, number, number]) => w[2]),
+        getPath: (d: Trip) => d.waypoints.map((w: TrackWaypoint) => [w[0], w[1], 0] as [number, number, number]),
+        getTimestamps: (d: Trip) => d.waypoints.map((w: TrackWaypoint) => w[2]),
         getColor: [20, 186, 140] as [number, number, number], opacity: 0.9,
         widthMinPixels: 2, capRounded: true, jointRounded: true,
         trailLength, currentTime: t,
       }));
+      layers.push(new ScatterplotLayer<TrackHead>({
+        id: "g-ships-head-core",
+        data: shipHeads,
+        getPosition: (d) => [d.lng, d.lat, 0] as [number, number, number],
+        getRadius: 1_650,
+        getFillColor: [132, 255, 212, 240] as [number, number, number, number],
+        stroked: true,
+        getLineColor: [240, 255, 255, 220] as [number, number, number, number],
+        lineWidthMinPixels: 1,
+        radiusUnits: "meters",
+      }));
     }
     if (aircraftTrips.length) {
-      // Aircraft trails rendered at the same 2D ground coordinates as the MapLibre
-      // icon layer (which has no z-elevation).  This keeps the trail head visually
-      // locked to the directional icon at every pitch / zoom level.
-      // Visual separation from ship tracks comes from colour (orange vs teal).
-      layers.push(new TripsLayer({
-        id: "g-aircraft-glow", data: aircraftTrips,
-        getPath: d => d.waypoints.map((w: [number, number, number]) => [w[0], w[1]] as [number, number]),
-        getTimestamps: d => d.waypoints.map((w: [number, number, number]) => w[2]),
-        getColor: [255, 100, 50] as [number, number, number], opacity: 0.18,
-        widthMinPixels: 5, capRounded: true, jointRounded: true,
-        trailLength, currentTime: t,
-      }));
+      // Aircraft trails are rendered on-surface for operational clarity.
       layers.push(new TripsLayer({
         id: "g-aircraft-trips", data: aircraftTrips,
-        getPath: d => d.waypoints.map((w: [number, number, number]) => [w[0], w[1]] as [number, number]),
-        getTimestamps: d => d.waypoints.map((w: [number, number, number]) => w[2]),
+        getPath: (d: Trip) => d.waypoints.map((w: TrackWaypoint) => [w[0], w[1], 0] as [number, number, number]),
+        getTimestamps: (d: Trip) => d.waypoints.map((w: TrackWaypoint) => w[2]),
         getColor: [255, 100, 50] as [number, number, number], opacity: 0.9,
         widthMinPixels: 2, capRounded: true, jointRounded: true,
         trailLength, currentTime: t,
       }));
+      layers.push(new ScatterplotLayer<TrackHead>({
+        id: "g-aircraft-head-core",
+        data: aircraftHeads,
+        getPosition: (d) => [d.lng, d.lat, 0] as [number, number, number],
+        getRadius: 3_250,
+        getFillColor: [255, 231, 179, 250] as [number, number, number, number],
+        stroked: true,
+        getLineColor: [255, 255, 255, 230] as [number, number, number, number],
+        lineWidthMinPixels: 1.5,
+        radiusUnits: "meters",
+      }));
     }
     tripsLayersRef.current = layers;
     overlay.setProps({ layers: [...tripsLayersRef.current, ...orbitLayersRef.current, ...jammingLayersRef.current, ...buildingsLayerRef.current, ...detectionsLayerRef.current] });
-  }, [trips, showShipsLayer, showAircraftLayer, currentTime, trailLength]);
+  }, [shipTrips, aircraftTrips, currentTime, trailLength]);
 
   // Entity position arrows on the globe (directional icons at track head)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !styleLoaded) return;
     const t = currentTime ?? Date.now() / 1000;
-    const active = trips.filter(tr =>
-      tr.entityType === "ship" ? (showShipsLayer ?? true) : (showAircraftLayer ?? true)
-    );
-    const data = computeEntityPositions(active, t);
+    const nowMs = performance.now();
+    const shouldRefreshData =
+      nowMs - lastEntitySourceUpdateMsRef.current >= ENTITY_SOURCE_REFRESH_MS;
 
     if (!map.hasImage("ship-arrow"))     map.addImage("ship-arrow",     makeArrowImageData(255, 255, 255));
     if (!map.hasImage("aircraft-arrow")) map.addImage("aircraft-arrow", makeArrowImageData(255, 220, 50));
 
     const src = map.getSource("g-entity-positions") as maplibregl.GeoJSONSource | undefined;
     if (src) {
-      src.setData(data);
+      if (shouldRefreshData) {
+        src.setData(computeEntityPositions(activeTrips, t));
+        lastEntitySourceUpdateMsRef.current = nowMs;
+      }
       const shipsVis    = (showShipsLayer    ?? true) ? "visible" : "none";
       const aircraftVis = (showAircraftLayer ?? true) ? "visible" : "none";
       const haloVis     = ((showShipsLayer ?? true) || (showAircraftLayer ?? true)) ? "visible" : "none";
@@ -514,6 +605,8 @@ export function GlobeView({
       if (map.getLayer("g-entity-ships"))    map.setLayoutProperty("g-entity-ships",    "visibility", shipsVis);
       if (map.getLayer("g-entity-aircraft")) map.setLayoutProperty("g-entity-aircraft", "visibility", aircraftVis);
     } else {
+      const data = computeEntityPositions(activeTrips, t);
+      lastEntitySourceUpdateMsRef.current = nowMs;
       map.addSource("g-entity-positions", { type: "geojson", data });
       // Pulse halo ring behind the directional arrow
       map.addLayer({
@@ -552,7 +645,7 @@ export function GlobeView({
         },
       });
     }
-  }, [trips, currentTime, showShipsLayer, showAircraftLayer, styleLoaded]);
+  }, [activeTrips, currentTime, showShipsLayer, showAircraftLayer, styleLoaded]);
 
   // Entity interactions — click popup + hover cursors (re-attaches on style reload)
   useEffect(() => {
@@ -568,7 +661,7 @@ export function GlobeView({
         .setHTML(buildEntityPopupHtml(
           String(p.id ?? ""), String(p.entityType ?? ""),
           Number(p.heading ?? 0), Number(p.speedKts ?? 0),
-          Number(p.lastSeenUnix ?? 0), lng, lat,
+          Number(p.lastSeenUnix ?? 0), lng, lat, Number(p.altitudeM ?? 0),
         ))
         .addTo(map);
     };

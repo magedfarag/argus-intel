@@ -51,6 +51,15 @@ class AOIStore:
         with self._lock:
             return sum(1 for a in self._store.values() if not a.deleted)
 
+    def clear(self) -> None:
+        """Remove all AOIs from the in-memory store.
+
+        Used by demo startup reseeding to prevent stale AOI IDs from surviving
+        across lifespan restarts in the same interpreter.
+        """
+        with self._lock:
+            self._store.clear()
+
     def update(self, aoi_id: str, patch: AOIUpdate) -> AOIResponse | None:
         with self._lock:
             existing = self._store.get(aoi_id)

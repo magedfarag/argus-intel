@@ -62,6 +62,7 @@ export interface CanonicalEvent {
   source_type: SourceType;
   event_type: EventType;
   entity_id?: string;
+  altitude_m?: number;
   geometry?: GeoJsonGeometry;
   confidence?: number;
   quality_flags: string[];

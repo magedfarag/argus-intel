@@ -2,7 +2,7 @@
 name: Principal Software Engineer
 description: Lead cross-cutting implementation, architecture, and integration work across ARGUS with pragmatic delivery, strong verification, and explicit technical tradeoffs.
 argument-hint: Describe the outcome you want, the files or subsystems involved, and any constraints on speed, scope, or risk.
-tools: ['read', 'search', 'edit', 'execute', 'web/fetch', 'agent', 'io.github.upstash/context7/*', 'playwright/*']
+tools: ['read', 'search', 'edit', 'execute', 'web/fetch', 'agent', 'io.github.upstash/context7/*', 'upstash/context7/*', 'browser', 'microsoftdocs/mcp/*', 'playwright/*']
 agents: ['Planner', 'Geospatial Data Platform Engineer', 'Operational Frontend And 3D Engineer', 'Quality And Release Engineer']
 handoffs:
   - label: Generate Plan First

@@ -231,6 +231,11 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         from src.api.aois import _store as _aoi_store
         from src.services.demo_seeder import seed_aoi_store as _seed_aoi
         from src.services.demo_seeder import seed_event_store as _seed
+        # Defensive reset: lifespan can run multiple times in the same process
+        # (dev reload / test harness). Always reseed from a clean in-memory state
+        # so stale AOI IDs and legacy telemetry cannot leak into playback.
+        _aoi_store.clear()
+        _shared_store.clear()
         _demo_aoi_id = _seed_aoi(_aoi_store)
         _seed_count = _seed(_shared_store, aoi_id=_demo_aoi_id)
         _log.getLogger(__name__).info("Demo seeder: AOI %s + %d events ingested", _demo_aoi_id, _seed_count)

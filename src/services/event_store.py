@@ -36,6 +36,15 @@ class EventStore:
             for e in events:
                 self._events[e.event_id] = e
 
+    def clear(self) -> None:
+        """Remove all events from the in-memory store.
+
+        This is primarily used by demo startup reseeding to avoid carrying
+        stale telemetry across lifespan restarts in the same process.
+        """
+        with self._lock:
+            self._events.clear()
+
     def get(self, event_id: str) -> CanonicalEvent | None:
         with self._lock:
             return self._events.get(event_id)

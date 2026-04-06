@@ -1684,6 +1684,14 @@
         "documentation": {}
     },
     {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
         "label": "op",
         "importPath": "alembic",
         "description": "alembic",
@@ -3091,6 +3099,30 @@
     },
     {
         "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
         "importPath": "datetime",
         "description": "datetime",
         "isExtraImport": true,
@@ -5735,6 +5767,14 @@
         "isExtraImport": true,
         "importPath": "math",
         "description": "math",
+        "detail": "math",
+        "documentation": {}
+    },
+    {
+        "label": "isclose",
+        "importPath": "math",
+        "description": "math",
+        "isExtraImport": true,
         "detail": "math",
         "documentation": {}
     },
@@ -9201,6 +9241,14 @@
         "documentation": {}
     },
     {
+        "label": "defaultdict",
+        "importPath": "collections",
+        "description": "collections",
+        "isExtraImport": true,
+        "detail": "collections",
+        "documentation": {}
+    },
+    {
         "label": "BackgroundTask",
         "importPath": "starlette.background",
         "description": "starlette.background",
@@ -9681,6 +9729,23 @@
         "description": "app.providers.sentinel2",
         "isExtraImport": true,
         "detail": "app.providers.sentinel2",
+        "documentation": {}
+    },
+    {
+        "label": "requests",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "requests",
+        "description": "requests",
+        "detail": "requests",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
         "documentation": {}
     },
     {
@@ -11006,6 +11071,14 @@
     },
     {
         "label": "AOICreate",
+        "importPath": "src.models.aoi",
+        "description": "src.models.aoi",
+        "isExtraImport": true,
+        "detail": "src.models.aoi",
+        "documentation": {}
+    },
+    {
+        "label": "GeometryModel",
         "importPath": "src.models.aoi",
         "description": "src.models.aoi",
         "isExtraImport": true,
@@ -17107,6 +17180,30 @@
         "documentation": {}
     },
     {
+        "label": "Point",
+        "importPath": "shapely.geometry",
+        "description": "shapely.geometry",
+        "isExtraImport": true,
+        "detail": "shapely.geometry",
+        "documentation": {}
+    },
+    {
+        "label": "Polygon",
+        "importPath": "shapely.geometry",
+        "description": "shapely.geometry",
+        "isExtraImport": true,
+        "detail": "shapely.geometry",
+        "documentation": {}
+    },
+    {
+        "label": "demo_seeder",
+        "importPath": "src.services",
+        "description": "src.services",
+        "isExtraImport": true,
+        "detail": "src.services",
+        "documentation": {}
+    },
+    {
         "label": "NasaFirmsConnector",
         "importPath": "src.connectors.nasa_firms",
         "description": "src.connectors.nasa_firms",
@@ -19363,6 +19460,60 @@
         "description": "frontend.node_modules.flatted.python.flatted",
         "peekOfCode": "def stringify(value, *args, **kwargs):\n    known = _Known()\n    input = []\n    output = []\n    i = int(_index(known, input, value))\n    while i < len(input):\n        output.append(_transform(known, input, input[i]))\n        i += 1\n    return _json.dumps(output, *args, **kwargs)",
         "detail": "frontend.node_modules.flatted.python.flatted",
+        "documentation": {}
+    },
+    {
+        "label": "response",
+        "kind": 5,
+        "importPath": "scripts.check_store",
+        "description": "scripts.check_store",
+        "peekOfCode": "response = httpx.post(\n    \"http://127.0.0.1:8000/api/v1/playback/query\",\n    json={\n        \"start_time\": \"2026-03-01T00:00:00Z\",\n        \"end_time\": \"2026-04-01T23:59:59Z\",\n        \"limit\": 5000\n    },\n    timeout=10.0\n)\nprint(f\"Status: {response.status_code}\")",
+        "detail": "scripts.check_store",
+        "documentation": {}
+    },
+    {
+        "label": "now",
+        "kind": 5,
+        "importPath": "scripts.test_playback",
+        "description": "scripts.test_playback",
+        "peekOfCode": "now = datetime.now(UTC)\nstart_time = now - timedelta(hours=31)\nbody = {\n    \"aoi_id\": \"618bd4ea-9c30-4f7e-9f88-3c03199ab293\",\n    \"event_types\": [\"ship_position\"],\n    \"start_time\": start_time.isoformat(),\n    \"end_time\": now.isoformat(),\n    \"limit\": 5000\n}\nprint(\"Querying playback...\")",
+        "detail": "scripts.test_playback",
+        "documentation": {}
+    },
+    {
+        "label": "start_time",
+        "kind": 5,
+        "importPath": "scripts.test_playback",
+        "description": "scripts.test_playback",
+        "peekOfCode": "start_time = now - timedelta(hours=31)\nbody = {\n    \"aoi_id\": \"618bd4ea-9c30-4f7e-9f88-3c03199ab293\",\n    \"event_types\": [\"ship_position\"],\n    \"start_time\": start_time.isoformat(),\n    \"end_time\": now.isoformat(),\n    \"limit\": 5000\n}\nprint(\"Querying playback...\")\nresponse = requests.post(",
+        "detail": "scripts.test_playback",
+        "documentation": {}
+    },
+    {
+        "label": "body",
+        "kind": 5,
+        "importPath": "scripts.test_playback",
+        "description": "scripts.test_playback",
+        "peekOfCode": "body = {\n    \"aoi_id\": \"618bd4ea-9c30-4f7e-9f88-3c03199ab293\",\n    \"event_types\": [\"ship_position\"],\n    \"start_time\": start_time.isoformat(),\n    \"end_time\": now.isoformat(),\n    \"limit\": 5000\n}\nprint(\"Querying playback...\")\nresponse = requests.post(\n    \"http://127.0.0.1:8000/api/v1/playback/query\",",
+        "detail": "scripts.test_playback",
+        "documentation": {}
+    },
+    {
+        "label": "response",
+        "kind": 5,
+        "importPath": "scripts.test_playback",
+        "description": "scripts.test_playback",
+        "peekOfCode": "response = requests.post(\n    \"http://127.0.0.1:8000/api/v1/playback/query\",\n    json=body,\n    headers={\"Content-Type\": \"application/json\"}\n)\nprint(f\"Status: {response.status_code}\")\nif response.status_code == 200:\n    data = response.json()\n    print(f\"Total frames: {data['total_frames']}\")\n    print(f\"Sources: {data['sources_included']}\")",
+        "detail": "scripts.test_playback",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "scripts.validate_ships",
+        "description": "scripts.validate_ships",
+        "peekOfCode": "def main():\n    # Load playback response\n    data = json.loads(Path(\"playback_response.json\").read_text())\n    # Extract all events from frames\n    all_events = []\n    for frame in data['frames']:\n        all_events.extend(frame['events'])\n    print(f\"Total events: {len(all_events)}\")\n    print(f\"Total frames: {data['total_frames']}\")\n    # Filter for flagged MMSIs",
+        "detail": "scripts.validate_ships",
         "documentation": {}
     },
     {
@@ -23339,7 +23490,7 @@
         "kind": 2,
         "importPath": "src.services.demo_seeder",
         "description": "src.services.demo_seeder",
-        "peekOfCode": "def seed_aoi_store(store: AOIStore) -> str:\n    \"\"\"Create the Strait of Hormuz demo AOI. Returns the AOI id.\"\"\"\n    geometry = {\n        \"type\": \"Polygon\",\n        \"coordinates\": [[\n            [_LON_MIN, _LAT_MIN],\n            [_LON_MAX, _LAT_MIN],\n            [_LON_MAX, _LAT_MAX],\n            [_LON_MIN, _LAT_MAX],\n            [_LON_MIN, _LAT_MIN],",
+        "peekOfCode": "def seed_aoi_store(store: AOIStore) -> str:\n    \"\"\"Create the Strait of Hormuz demo AOI. Returns the AOI id.\"\"\"\n    geometry = GeometryModel(\n        type=\"Polygon\",\n        coordinates=[[ \n            [_LON_MIN, _LAT_MIN],\n            [_LON_MAX, _LAT_MIN],\n            [_LON_MAX, _LAT_MAX],\n            [_LON_MIN, _LAT_MAX],\n            [_LON_MIN, _LAT_MIN],",
         "detail": "src.services.demo_seeder",
         "documentation": {}
     },
@@ -23366,7 +23517,7 @@
         "kind": 5,
         "importPath": "src.services.demo_seeder",
         "description": "src.services.demo_seeder",
-        "peekOfCode": "_NORM = NormalizationRecord(normalized_by=\"demo-seeder\")\n_PROV = ProvenanceRecord(raw_source_ref=\"demo://seeder\")\n_LIC = LicenseRecord()\n_NOW = datetime.now(UTC)\ndef _eid(prefix: str, *parts: str) -> str:\n    h = hashlib.sha256(\":\".join(parts).encode()).hexdigest()[:16]\n    return f\"{prefix}-{h}\"\ndef _point(lon: float, lat: float) -> dict:\n    return {\"type\": \"Point\", \"coordinates\": [round(lon, 5), round(lat, 5)]}\n# ── Ship tracks ──────────────────────────────────────────────────────────────",
+        "peekOfCode": "_NORM = NormalizationRecord(normalized_by=\"demo-seeder\")\n_PROV = ProvenanceRecord(raw_source_ref=\"demo://seeder\")\n_LIC = LicenseRecord()\n_NOW = datetime.now(UTC)\ndef _eid(prefix: str, *parts: str) -> str:\n    h = hashlib.sha256(\":\".join(parts).encode()).hexdigest()[:16]\n    return f\"{prefix}-{h}\"\ndef _point(lon: float, lat: float) -> dict:\n    return {\"type\": \"Point\", \"coordinates\": [round(lon, 5), round(lat, 5)]}\ndef _rect_polygon(cx: float, cy: float, half_width: float, half_height: float) -> dict:",
         "detail": "src.services.demo_seeder",
         "documentation": {}
     },
@@ -23375,7 +23526,7 @@
         "kind": 5,
         "importPath": "src.services.demo_seeder",
         "description": "src.services.demo_seeder",
-        "peekOfCode": "_PROV = ProvenanceRecord(raw_source_ref=\"demo://seeder\")\n_LIC = LicenseRecord()\n_NOW = datetime.now(UTC)\ndef _eid(prefix: str, *parts: str) -> str:\n    h = hashlib.sha256(\":\".join(parts).encode()).hexdigest()[:16]\n    return f\"{prefix}-{h}\"\ndef _point(lon: float, lat: float) -> dict:\n    return {\"type\": \"Point\", \"coordinates\": [round(lon, 5), round(lat, 5)]}\n# ── Ship tracks ──────────────────────────────────────────────────────────────\n# Each route is a list of (lon, lat) waypoints that follow real maritime",
+        "peekOfCode": "_PROV = ProvenanceRecord(raw_source_ref=\"demo://seeder\")\n_LIC = LicenseRecord()\n_NOW = datetime.now(UTC)\ndef _eid(prefix: str, *parts: str) -> str:\n    h = hashlib.sha256(\":\".join(parts).encode()).hexdigest()[:16]\n    return f\"{prefix}-{h}\"\ndef _point(lon: float, lat: float) -> dict:\n    return {\"type\": \"Point\", \"coordinates\": [round(lon, 5), round(lat, 5)]}\ndef _rect_polygon(cx: float, cy: float, half_width: float, half_height: float) -> dict:\n    return {",
         "detail": "src.services.demo_seeder",
         "documentation": {}
     },
@@ -23384,7 +23535,7 @@
         "kind": 5,
         "importPath": "src.services.demo_seeder",
         "description": "src.services.demo_seeder",
-        "peekOfCode": "_LIC = LicenseRecord()\n_NOW = datetime.now(UTC)\ndef _eid(prefix: str, *parts: str) -> str:\n    h = hashlib.sha256(\":\".join(parts).encode()).hexdigest()[:16]\n    return f\"{prefix}-{h}\"\ndef _point(lon: float, lat: float) -> dict:\n    return {\"type\": \"Point\", \"coordinates\": [round(lon, 5), round(lat, 5)]}\n# ── Ship tracks ──────────────────────────────────────────────────────────────\n# Each route is a list of (lon, lat) waypoints that follow real maritime\n# channels in the Strait of Hormuz Traffic Separation Scheme (TSS).",
+        "peekOfCode": "_LIC = LicenseRecord()\n_NOW = datetime.now(UTC)\ndef _eid(prefix: str, *parts: str) -> str:\n    h = hashlib.sha256(\":\".join(parts).encode()).hexdigest()[:16]\n    return f\"{prefix}-{h}\"\ndef _point(lon: float, lat: float) -> dict:\n    return {\"type\": \"Point\", \"coordinates\": [round(lon, 5), round(lat, 5)]}\ndef _rect_polygon(cx: float, cy: float, half_width: float, half_height: float) -> dict:\n    return {\n        \"type\": \"Polygon\",",
         "detail": "src.services.demo_seeder",
         "documentation": {}
     },
@@ -23393,7 +23544,106 @@
         "kind": 5,
         "importPath": "src.services.demo_seeder",
         "description": "src.services.demo_seeder",
-        "peekOfCode": "_NOW = datetime.now(UTC)\ndef _eid(prefix: str, *parts: str) -> str:\n    h = hashlib.sha256(\":\".join(parts).encode()).hexdigest()[:16]\n    return f\"{prefix}-{h}\"\ndef _point(lon: float, lat: float) -> dict:\n    return {\"type\": \"Point\", \"coordinates\": [round(lon, 5), round(lat, 5)]}\n# ── Ship tracks ──────────────────────────────────────────────────────────────\n# Each route is a list of (lon, lat) waypoints that follow real maritime\n# channels in the Strait of Hormuz Traffic Separation Scheme (TSS).\n# Inbound lane (into Persian Gulf): north of Musandam Peninsula, ~26.35–26.55°N",
+        "peekOfCode": "_NOW = datetime.now(UTC)\ndef _eid(prefix: str, *parts: str) -> str:\n    h = hashlib.sha256(\":\".join(parts).encode()).hexdigest()[:16]\n    return f\"{prefix}-{h}\"\ndef _point(lon: float, lat: float) -> dict:\n    return {\"type\": \"Point\", \"coordinates\": [round(lon, 5), round(lat, 5)]}\ndef _rect_polygon(cx: float, cy: float, half_width: float, half_height: float) -> dict:\n    return {\n        \"type\": \"Polygon\",\n        \"coordinates\": [[",
+        "detail": "src.services.demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "_CRITICAL_STRAIT_LON_MIN",
+        "kind": 5,
+        "importPath": "src.services.demo_seeder",
+        "description": "src.services.demo_seeder",
+        "peekOfCode": "_CRITICAL_STRAIT_LON_MIN = 56.05\n_CRITICAL_STRAIT_LON_MAX = 56.78\n_NORTHBOUND_MIN_LAT = 26.44\n_SOUTHBOUND_MAX_LAT = 26.10\n_SOUTHBOUND_MUSANDAM_MAX_LAT = 25.62\n_SOUTHBOUND_MIN_LAT = 25.50\n_OMAN_COAST_MAX_LAT = 25.62\n_OMAN_COAST_MIN_LAT = 25.50\n_MUSANDAM_ROUNDING_MAX_LAT = 26.22\n_NORTHBOUND_EASTERN_MAX_LAT = 26.58",
+        "detail": "src.services.demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "_CRITICAL_STRAIT_LON_MAX",
+        "kind": 5,
+        "importPath": "src.services.demo_seeder",
+        "description": "src.services.demo_seeder",
+        "peekOfCode": "_CRITICAL_STRAIT_LON_MAX = 56.78\n_NORTHBOUND_MIN_LAT = 26.44\n_SOUTHBOUND_MAX_LAT = 26.10\n_SOUTHBOUND_MUSANDAM_MAX_LAT = 25.62\n_SOUTHBOUND_MIN_LAT = 25.50\n_OMAN_COAST_MAX_LAT = 25.62\n_OMAN_COAST_MIN_LAT = 25.50\n_MUSANDAM_ROUNDING_MAX_LAT = 26.22\n_NORTHBOUND_EASTERN_MAX_LAT = 26.58\n_AIRCRAFT_MIN_ALTITUDE_M = 4500.0",
+        "detail": "src.services.demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "_NORTHBOUND_MIN_LAT",
+        "kind": 5,
+        "importPath": "src.services.demo_seeder",
+        "description": "src.services.demo_seeder",
+        "peekOfCode": "_NORTHBOUND_MIN_LAT = 26.44\n_SOUTHBOUND_MAX_LAT = 26.10\n_SOUTHBOUND_MUSANDAM_MAX_LAT = 25.62\n_SOUTHBOUND_MIN_LAT = 25.50\n_OMAN_COAST_MAX_LAT = 25.62\n_OMAN_COAST_MIN_LAT = 25.50\n_MUSANDAM_ROUNDING_MAX_LAT = 26.22\n_NORTHBOUND_EASTERN_MAX_LAT = 26.58\n_AIRCRAFT_MIN_ALTITUDE_M = 4500.0\n_NORTHBOUND_TEMPLATE: list[tuple[float, float]] = [",
+        "detail": "src.services.demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "_SOUTHBOUND_MAX_LAT",
+        "kind": 5,
+        "importPath": "src.services.demo_seeder",
+        "description": "src.services.demo_seeder",
+        "peekOfCode": "_SOUTHBOUND_MAX_LAT = 26.10\n_SOUTHBOUND_MUSANDAM_MAX_LAT = 25.62\n_SOUTHBOUND_MIN_LAT = 25.50\n_OMAN_COAST_MAX_LAT = 25.62\n_OMAN_COAST_MIN_LAT = 25.50\n_MUSANDAM_ROUNDING_MAX_LAT = 26.22\n_NORTHBOUND_EASTERN_MAX_LAT = 26.58\n_AIRCRAFT_MIN_ALTITUDE_M = 4500.0\n_NORTHBOUND_TEMPLATE: list[tuple[float, float]] = [\n    (57.30, 26.52),",
+        "detail": "src.services.demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "_SOUTHBOUND_MUSANDAM_MAX_LAT",
+        "kind": 5,
+        "importPath": "src.services.demo_seeder",
+        "description": "src.services.demo_seeder",
+        "peekOfCode": "_SOUTHBOUND_MUSANDAM_MAX_LAT = 25.62\n_SOUTHBOUND_MIN_LAT = 25.50\n_OMAN_COAST_MAX_LAT = 25.62\n_OMAN_COAST_MIN_LAT = 25.50\n_MUSANDAM_ROUNDING_MAX_LAT = 26.22\n_NORTHBOUND_EASTERN_MAX_LAT = 26.58\n_AIRCRAFT_MIN_ALTITUDE_M = 4500.0\n_NORTHBOUND_TEMPLATE: list[tuple[float, float]] = [\n    (57.30, 26.52),\n    (57.02, 26.53),",
+        "detail": "src.services.demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "_SOUTHBOUND_MIN_LAT",
+        "kind": 5,
+        "importPath": "src.services.demo_seeder",
+        "description": "src.services.demo_seeder",
+        "peekOfCode": "_SOUTHBOUND_MIN_LAT = 25.50\n_OMAN_COAST_MAX_LAT = 25.62\n_OMAN_COAST_MIN_LAT = 25.50\n_MUSANDAM_ROUNDING_MAX_LAT = 26.22\n_NORTHBOUND_EASTERN_MAX_LAT = 26.58\n_AIRCRAFT_MIN_ALTITUDE_M = 4500.0\n_NORTHBOUND_TEMPLATE: list[tuple[float, float]] = [\n    (57.30, 26.52),\n    (57.02, 26.53),\n    (56.74, 26.54),",
+        "detail": "src.services.demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "_OMAN_COAST_MAX_LAT",
+        "kind": 5,
+        "importPath": "src.services.demo_seeder",
+        "description": "src.services.demo_seeder",
+        "peekOfCode": "_OMAN_COAST_MAX_LAT = 25.62\n_OMAN_COAST_MIN_LAT = 25.50\n_MUSANDAM_ROUNDING_MAX_LAT = 26.22\n_NORTHBOUND_EASTERN_MAX_LAT = 26.58\n_AIRCRAFT_MIN_ALTITUDE_M = 4500.0\n_NORTHBOUND_TEMPLATE: list[tuple[float, float]] = [\n    (57.30, 26.52),\n    (57.02, 26.53),\n    (56.74, 26.54),\n    (56.40, 26.56),",
+        "detail": "src.services.demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "_OMAN_COAST_MIN_LAT",
+        "kind": 5,
+        "importPath": "src.services.demo_seeder",
+        "description": "src.services.demo_seeder",
+        "peekOfCode": "_OMAN_COAST_MIN_LAT = 25.50\n_MUSANDAM_ROUNDING_MAX_LAT = 26.22\n_NORTHBOUND_EASTERN_MAX_LAT = 26.58\n_AIRCRAFT_MIN_ALTITUDE_M = 4500.0\n_NORTHBOUND_TEMPLATE: list[tuple[float, float]] = [\n    (57.30, 26.52),\n    (57.02, 26.53),\n    (56.74, 26.54),\n    (56.40, 26.56),\n    (56.00, 26.56),",
+        "detail": "src.services.demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "_MUSANDAM_ROUNDING_MAX_LAT",
+        "kind": 5,
+        "importPath": "src.services.demo_seeder",
+        "description": "src.services.demo_seeder",
+        "peekOfCode": "_MUSANDAM_ROUNDING_MAX_LAT = 26.22\n_NORTHBOUND_EASTERN_MAX_LAT = 26.58\n_AIRCRAFT_MIN_ALTITUDE_M = 4500.0\n_NORTHBOUND_TEMPLATE: list[tuple[float, float]] = [\n    (57.30, 26.52),\n    (57.02, 26.53),\n    (56.74, 26.54),\n    (56.40, 26.56),\n    (56.00, 26.56),\n    (55.58, 26.52),",
+        "detail": "src.services.demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "_NORTHBOUND_EASTERN_MAX_LAT",
+        "kind": 5,
+        "importPath": "src.services.demo_seeder",
+        "description": "src.services.demo_seeder",
+        "peekOfCode": "_NORTHBOUND_EASTERN_MAX_LAT = 26.58\n_AIRCRAFT_MIN_ALTITUDE_M = 4500.0\n_NORTHBOUND_TEMPLATE: list[tuple[float, float]] = [\n    (57.30, 26.52),\n    (57.02, 26.53),\n    (56.74, 26.54),\n    (56.40, 26.56),\n    (56.00, 26.56),\n    (55.58, 26.52),\n]",
+        "detail": "src.services.demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "_AIRCRAFT_MIN_ALTITUDE_M",
+        "kind": 5,
+        "importPath": "src.services.demo_seeder",
+        "description": "src.services.demo_seeder",
+        "peekOfCode": "_AIRCRAFT_MIN_ALTITUDE_M = 4500.0\n_NORTHBOUND_TEMPLATE: list[tuple[float, float]] = [\n    (57.30, 26.52),\n    (57.02, 26.53),\n    (56.74, 26.54),\n    (56.40, 26.56),\n    (56.00, 26.56),\n    (55.58, 26.52),\n]\n_SOUTHBOUND_TEMPLATE: list[tuple[float, float]] = [",
         "detail": "src.services.demo_seeder",
         "documentation": {}
     },
@@ -23402,16 +23652,34 @@
         "kind": 5,
         "importPath": "src.services.demo_seeder",
         "description": "src.services.demo_seeder",
-        "peekOfCode": "_SHIP_ROUTES = [\n    # ── Inbound routes (Gulf of Oman → Persian Gulf, north channel) ──────────\n    # All inbound routes must be at lat > 26.5 when lon is in [56.1, 56.7] to\n    # clear the Musandam Peninsula.  The \"corner\" waypoint at ~(56.75, 26.45)\n    # positions the vessel north of the peninsula BEFORE the interpolation\n    # enters the critical longitude band.\n    {\n        \"mmsi\": \"211330000\", \"name\": \"EVER GRACE\", \"ship_type\": 70,\n        \"dest\": \"Bandar Abbas\", \"speed_kn\": 13.5,\n        \"route\": [",
+        "peekOfCode": "_SHIP_ROUTES = [\n    {\n        \"mmsi\": \"211330000\",\n        \"name\": \"EVER GRACE\",\n        \"ship_type\": 70,\n        \"dest\": \"Bandar Abbas\",\n        \"lane\": \"north_inbound\",\n        \"speed_kn\": 13.5,\n        \"route\": [\n            (57.18, 25.70),",
         "detail": "src.services.demo_seeder",
         "documentation": {}
     },
     {
-        "label": "_AIRCRAFT",
+        "label": "_ACTIVE_WAR_SCENARIO_SHIPS",
         "kind": 5,
         "importPath": "src.services.demo_seeder",
         "description": "src.services.demo_seeder",
-        "peekOfCode": "_AIRCRAFT = [\n    {\"icao24\": \"710112\", \"callsign\": \"QTR802\", \"country\": \"Qatar\"},\n    {\"icao24\": \"896340\", \"callsign\": \"UAE567\", \"country\": \"United Arab Emirates\"},\n    {\"icao24\": \"730003\", \"callsign\": \"IRA412\", \"country\": \"Iran\"},\n    {\"icao24\": \"7107a2\", \"callsign\": \"GFA215\", \"country\": \"Bahrain\"},\n    {\"icao24\": \"71be12\", \"callsign\": \"OMA643\", \"country\": \"Oman\"},\n    {\"icao24\": \"710501\", \"callsign\": \"QTR916\", \"country\": \"Qatar\"},\n]\ndef _aircraft_events() -> list[CanonicalEvent]:\n    events: list[CanonicalEvent] = []",
+        "peekOfCode": "_ACTIVE_WAR_SCENARIO_SHIPS = {\n    \"211330000\",  # EVER GRACE\n    \"477123400\",  # PACIFIC VOYAGER\n    \"538006712\",  # ORIENT PEARL\n    \"215631000\",  # GULF BREEZE\n    \"422002000\",  # JAHAN HEROES\n    \"403110120\",  # SAFAT HORIZON\n    \"422119900\",  # PERSIAN VECTOR\n    \"636021800\",  # MUSANDAM LINK\n}",
+        "detail": "src.services.demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "_AIRCRAFT_ROUTES",
+        "kind": 5,
+        "importPath": "src.services.demo_seeder",
+        "description": "src.services.demo_seeder",
+        "peekOfCode": "_AIRCRAFT_ROUTES = [\n    {\n        \"icao24\": \"710112\",\n        \"callsign\": \"QTR802\",\n        \"country\": \"Qatar\",\n        \"origin\": \"Doha\",\n        \"destination\": \"Muscat\",\n        \"speed_ms\": 244.0,\n        \"route\": [\n            (55.02, 25.46),",
+        "detail": "src.services.demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "_ACTIVE_WAR_SCENARIO_AIRCRAFT",
+        "kind": 5,
+        "importPath": "src.services.demo_seeder",
+        "description": "src.services.demo_seeder",
+        "peekOfCode": "_ACTIVE_WAR_SCENARIO_AIRCRAFT = {\n    \"710112\",  # QTR802\n    \"896340\",  # UAE567\n    \"730003\",  # IRA412\n    \"71be12\",  # OMA643\n    \"8965ff\",  # ETD441\n    \"7060b1\",  # KNE204\n}\ndef _interp_route_with_altitude(\n    waypoints: list[tuple[float, float]],",
         "detail": "src.services.demo_seeder",
         "documentation": {}
     },
@@ -23420,7 +23688,16 @@
         "kind": 5,
         "importPath": "src.services.demo_seeder",
         "description": "src.services.demo_seeder",
-        "peekOfCode": "_GDELT_HEADLINES = [\n    (\"Major port expansion announced in Fujairah\", \"ECON_TRADE;CONSTRUCTION\"),\n    (\"UAE approves new industrial zone near Jebel Ali\", \"ECON_DEVELOPMENT;CONSTRUCTION\"),\n    (\"Iran-Oman submarine cable project begins\", \"INFRA_UNDERWATER;CONSTRUCTION\"),\n    (\"Shipping traffic surge through Strait of Hormuz\", \"ECON_TRADE;SHIPPING\"),\n    (\"New desalination plant breaks ground near Bandar Abbas\", \"INFRA_WATER;CONSTRUCTION\"),\n    (\"Oman Coast Guard increases maritime patrols\", \"SECURITY_MARITIME;DEFENSE\"),\n    (\"GCC ministers discuss cross-border rail link\", \"INFRA_TRANSPORT;DIPLOMACY\"),\n    (\"Dubai Port World reports record container throughput\", \"ECON_TRADE;LOGISTICS\"),\n    (\"Environmental survey of Qeshm Island mangroves completed\", \"ENV_CONSERVATION;SCIENCE\"),",
+        "peekOfCode": "_GDELT_HEADLINES = [\n    (\"UAE reopens airspace after missile and drone threat over Dubai\", \"SECURITY_AIRSPACE;MISSILE_ACTIVITY\", 55.12, 25.19, \"AP\", \"Dubai Airspace\"),\n    (\"Commercial shipping through Hormuz falls to a trickle after vessel strikes\", \"SHIPPING;SECURITY_MARITIME;ENERGY\", 56.34, 26.18, \"AP\", \"Strait of Hormuz\"),\n    (\"War-risk insurers sharply raise premiums for Hormuz transits\", \"FINANCE_RISK;SHIPPING;ENERGY\", 56.46, 26.56, \"Reuters\", \"Inbound TSS\"),\n    (\"Fujairah tank farm hit again as east-coast energy sites face drone attacks\", \"ENERGY;SECURITY_MILITARY;DRONE_ACTIVITY\", 56.34, 25.13, \"AP\", \"Fujairah Port\"),\n    (\"Bandar Abbas approaches congest with vessels awaiting escorted windows\", \"LOGISTICS;SHIPPING;SECURITY_MARITIME\", 56.18, 26.86, \"Reuters\", \"Bandar Abbas Approaches\"),\n    (\"Coalition debates defensive naval mission to reopen Hormuz traffic\", \"DEFENSE;DIPLOMACY;SHIPPING\", 56.18, 26.02, \"AP\", \"Outbound TSS\"),\n    (\"Sanctioned and shadow-linked tankers dominate remaining Gulf movements\", \"SANCTIONS;SHIPPING;ENERGY\", 55.92, 26.14, \"Reuters\", \"Central Gulf Lanes\"),\n    (\"Emergency convoy planning shifts cargo staging toward Khor Fakkan\", \"LOGISTICS;SECURITY_MARITIME;TRANSPORT\", 56.37, 25.34, \"Gulf News\", \"Khor Fakkan\"),\n    (\"Abu Musa garrison activity increases as regional war widens\", \"SECURITY_MILITARY;CONFLICT\", 55.03, 25.88, \"AP\", \"Abu Musa\"),",
+        "detail": "src.services.demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "_IMAGERY_SCENES",
+        "kind": 5,
+        "importPath": "src.services.demo_seeder",
+        "description": "src.services.demo_seeder",
+        "peekOfCode": "_IMAGERY_SCENES = [\n    (\"Sentinel-2A\", \"copernicus-cdse\", \"sentinel-2-l2a\", 56.34, 26.56, 0.34, 0.22, \"Inbound TSS\"),\n    (\"Sentinel-2B\", \"copernicus-cdse\", \"sentinel-2-l2a\", 56.16, 25.98, 0.34, 0.22, \"Outbound TSS\"),\n    (\"Landsat-9\", \"usgs-landsat\", \"landsat-c2-l2\", 56.34, 25.14, 0.36, 0.24, \"Fujairah Port\"),\n    (\"Sentinel-2A\", \"earth-search\", \"sentinel-2-l2a\", 56.28, 27.06, 0.32, 0.22, \"Bandar Abbas\"),\n    (\"Sentinel-2B\", \"copernicus-cdse\", \"sentinel-2-l2a\", 56.74, 26.58, 0.34, 0.20, \"Qeshm South\"),\n    (\"Landsat-9\", \"usgs-landsat\", \"landsat-c2-l2\", 55.06, 25.08, 0.34, 0.24, \"Jebel Ali\"),\n    (\"Sentinel-2A\", \"earth-search\", \"sentinel-2-l2a\", 56.62, 25.96, 0.28, 0.18, \"Musandam Approaches\"),\n    (\"Sentinel-2B\", \"copernicus-cdse\", \"sentinel-2-l2a\", 56.46, 25.18, 0.28, 0.18, \"Fujairah Anchorage\"),\n    (\"Landsat-9\", \"usgs-landsat\", \"landsat-c2-l2\", 55.03, 25.88, 0.26, 0.18, \"Abu Musa\"),",
         "detail": "src.services.demo_seeder",
         "documentation": {}
     },
@@ -27166,6 +27443,69 @@
         "description": "tests.unit.test_demo_provider",
         "peekOfCode": "RING = [[30.0, 50.0], [30.1, 50.0], [30.1, 50.1], [30.0, 50.1], [30.0, 50.0]]\ndef test_polygon_area_reasonable():\n    area = _polygon_area_km2(RING)\n    assert 1.0 < area < 200.0\ndef test_polygon_area_min_coords_raises():\n    with pytest.raises(ValueError):\n        _polygon_area_km2([[0, 0], [1, 0], [0, 0]])\ndef test_demo_credentials_always_valid():\n    ok, _ = DemoProvider().validate_credentials()\n    assert ok is True",
         "detail": "tests.unit.test_demo_provider",
+        "documentation": {}
+    },
+    {
+        "label": "test_ship_events_stay_at_surface_level",
+        "kind": 2,
+        "importPath": "tests.unit.test_demo_seeder",
+        "description": "tests.unit.test_demo_seeder",
+        "peekOfCode": "def test_ship_events_stay_at_surface_level() -> None:\n    events = demo_seeder._ship_events()\n    assert events\n    for event in events:\n        assert event.entity_type.value == \"vessel\"\n        assert event.event_type.value == \"ship_position\"\n        assert event.altitude_m == 0\n        assert event.attributes[\"route_lane\"] in {\n            \"north_inbound\",\n            \"south_outbound\",",
+        "detail": "tests.unit.test_demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "test_ship_routes_remain_in_plausible_hormuz_lanes",
+        "kind": 2,
+        "importPath": "tests.unit.test_demo_seeder",
+        "description": "tests.unit.test_demo_seeder",
+        "peekOfCode": "def test_ship_routes_remain_in_plausible_hormuz_lanes() -> None:\n    for ship in demo_seeder._SHIP_ROUTES:\n        route = demo_seeder._deterministic_lane_route(ship[\"mmsi\"], ship[\"lane\"])\n        samples = demo_seeder._interp_route(route, 120, random.Random(0), jitter_lon=0.0, jitter_lat=0.0)\n        for lon, lat in samples:\n            assert demo_seeder._LON_MIN <= lon <= demo_seeder._LON_MAX\n            assert demo_seeder._LAT_MIN <= lat <= demo_seeder._LAT_MAX\n            _assert_lane_bounds(lon, lat, ship[\"lane\"])\n            if ship[\"lane\"] == \"north_inbound\":\n                assert not _MUSANDAM_LANDMASS.contains(Point(lon, lat)), (",
+        "detail": "tests.unit.test_demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "test_problematic_demo_mmsis_stay_offshore_across_full_timeline",
+        "kind": 2,
+        "importPath": "tests.unit.test_demo_seeder",
+        "description": "tests.unit.test_demo_seeder",
+        "peekOfCode": "def test_problematic_demo_mmsis_stay_offshore_across_full_timeline() -> None:\n    events = demo_seeder._ship_events()\n    assert events\n    by_mmsi: dict[str, list[tuple[float, float]]] = {\n        \"215631000\": [],\n        \"538006712\": [],\n        \"636021800\": [],\n    }\n    for event in events:\n        mmsi = str(event.attributes.get(\"mmsi\", \"\"))",
+        "detail": "tests.unit.test_demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "test_aircraft_events_have_positive_altitude_from_source_data",
+        "kind": 2,
+        "importPath": "tests.unit.test_demo_seeder",
+        "description": "tests.unit.test_demo_seeder",
+        "peekOfCode": "def test_aircraft_events_have_positive_altitude_from_source_data() -> None:\n    events = demo_seeder._aircraft_events()\n    assert events\n    altitudes = defaultdict(list)\n    for event in events:\n        assert event.entity_type.value == \"aircraft\"\n        assert event.event_type.value == \"aircraft_position\"\n        assert event.altitude_m is not None\n        assert event.altitude_m >= 4500\n        assert event.attributes[\"on_ground\"] is False",
+        "detail": "tests.unit.test_demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "test_contextual_events_are_anchored_to_curated_locations",
+        "kind": 2,
+        "importPath": "tests.unit.test_demo_seeder",
+        "description": "tests.unit.test_demo_seeder",
+        "peekOfCode": "def test_contextual_events_are_anchored_to_curated_locations() -> None:\n    gdelt = demo_seeder._gdelt_events()\n    assert len(gdelt) == len(demo_seeder._GDELT_HEADLINES)\n    expected = {\n        headline: (lon, lat, publication, location_name)\n        for headline, _themes, lon, lat, publication, location_name in demo_seeder._GDELT_HEADLINES\n    }\n    for event in gdelt:\n        headline = event.attributes[\"headline\"]\n        lon, lat = _coords(event)",
+        "detail": "tests.unit.test_demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "test_imagery_events_use_curated_anchor_centroids",
+        "kind": 2,
+        "importPath": "tests.unit.test_demo_seeder",
+        "description": "tests.unit.test_demo_seeder",
+        "peekOfCode": "def test_imagery_events_use_curated_anchor_centroids() -> None:\n    events = demo_seeder._imagery_events()\n    centroids = {_coords(event) for event in events}\n    expected = {\n        (cx, cy)\n        for _platform, _source, _collection, cx, cy, _hw, _hh, _label in demo_seeder._IMAGERY_SCENES\n    }\n    assert centroids == expected",
+        "detail": "tests.unit.test_demo_seeder",
+        "documentation": {}
+    },
+    {
+        "label": "_MUSANDAM_LANDMASS",
+        "kind": 5,
+        "importPath": "tests.unit.test_demo_seeder",
+        "description": "tests.unit.test_demo_seeder",
+        "peekOfCode": "_MUSANDAM_LANDMASS = Polygon([\n    (56.18, 25.70),\n    (56.28, 25.88),\n    (56.38, 26.06),\n    (56.50, 26.20),\n    (56.66, 26.26),\n    (56.74, 26.18),\n    (56.72, 25.96),\n    (56.60, 25.76),\n    (56.42, 25.64),",
+        "detail": "tests.unit.test_demo_seeder",
         "documentation": {}
     },
     {

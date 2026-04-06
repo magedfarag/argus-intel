@@ -41,9 +41,16 @@ const SIGNAL_EVENT_TYPES: import("./api/types").EventType[] = [
   "conflict_event", "maritime_warning", "military_site_observation",
   "thermal_anomaly_event", "space_weather_event", "air_quality_observation",
 ];
+const CORE_EVENT_TYPES: import("./api/types").EventType[] = [
+  "permit_event", "inspection_event", "project_event", "complaint_event",
+];
 
-/** Minimum ms between React state updates during track animation (~30 fps). */
-const ANIM_FRAME_MS = 33;
+/**
+ * Minimum ms between React state updates during track animation.
+ * ~20 fps is intentionally used to keep replay smooth under headless recording
+ * and heavy map rendering loads (prevents narration/video desync).
+ */
+const ANIM_FRAME_MS = 50;
 
 // ── Event detail helpers ─────────────────────────────────────────────────────
 function formatEventType(et: string): string {
@@ -228,6 +235,7 @@ function AppShell() {
   const [cameraFocusPoint, setCameraFocusPoint] = useState<{ lon: number; lat: number } | null>(null);
   // Phase 4 Track C — shared entity selection
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
+  const [isGlobeBriefingExpanded, setIsGlobeBriefingExpanded] = useState(false);
 
   // Track animation: null = live end-of-range, number = Unix seconds sim time
   const [playbackTime, setPlaybackTime] = useState<number | null>(null);
@@ -245,8 +253,8 @@ function AppShell() {
       if (animRafRef.current !== null) { cancelAnimationFrame(animRafRef.current); animRafRef.current = null; }
       return;
     }
-    const simEnd   = Date.parse(endTime) / 1000;
-    const simStart = playbackTime ?? (Date.parse(startTime) / 1000);
+    const simEnd = Date.parse(endTime) / 1000;
+    const simStart = playbackTime ?? trackAnimationStartTime;
     const realStart = performance.now();
     function tick(now: number) {
       const elapsed = (now - realStart) / 1000;
@@ -283,12 +291,16 @@ function AppShell() {
   // useMemo avoids a new [] reference on every render when data is undefined.
   const aois = useMemo(() => aoiQuery.data ?? [], [aoiQuery.data]);
 
-  // Auto-select first AOI when available and nothing is selected
+  // Auto-select first AOI when available and nothing is selected.
+  // Also recover from stale persisted AOI ids after backend/demo restarts,
+  // where the in-memory AOI UUID can change.
   // Use aoiQuery.data as the dep so the stable query-result reference is tracked,
   // not the inline `?? []` fallback which creates a new array every render.
   useEffect(() => {
     const list = aoiQuery.data;
-    if (!selectedAoiId && list && list.length > 0) {
+    const hasSelection = !!selectedAoiId;
+    const selectionExists = hasSelection && !!list?.some(a => a.id === selectedAoiId);
+    if (list && list.length > 0 && (!hasSelection || !selectionExists)) {
       setSelectedAoiId(list[0].id);
     }
   }, [aoiQuery.data, selectedAoiId, setSelectedAoiId]);
@@ -305,6 +317,11 @@ function AppShell() {
   const gdeltSearch = useEventSearch(
     layers.showGdelt && selectedAoiId
       ? { aoi_id: selectedAoiId, start_time: startTime, end_time: endTime, source_types: ["context_feed"], limit: 300 }
+      : null
+  );
+  const coreEventSearch = useEventSearch(
+    layers.showEvents && selectedAoiId
+      ? { aoi_id: selectedAoiId, start_time: startTime, end_time: endTime, event_types: CORE_EVENT_TYPES, limit: 250 }
       : null
   );
 
@@ -358,23 +375,32 @@ function AppShell() {
     const step = Math.round(1 / layers.trackDensity);
     return all.filter((_, i) => i % step === 0);
   }, [tracksQuery.data, layers.trackDensity]);
+  const trackAnimationStartTime = useMemo(() => {
+    const fallback = Date.parse(startTime) / 1000;
+    let earliestTrackPoint = Number.POSITIVE_INFINITY;
+    for (const trip of visibleTracks) {
+      const firstPoint = trip.waypoints[0]?.[2];
+      if (firstPoint != null) earliestTrackPoint = Math.min(earliestTrackPoint, firstPoint);
+    }
+    if (!Number.isFinite(earliestTrackPoint)) return fallback;
+    return Math.max(fallback, earliestTrackPoint - 900);
+  }, [startTime, visibleTracks]);
 
   // currentTime for TripsLayer — driven by animation or playback, fallback to end of window
   const tracksCurrentTime = playbackTime ?? (Date.parse(endTime) / 1000);
-  // trailLength covers the entire selected time range so all tracks are visible
-  const tracksTrailLength = useMemo(
-    () => Math.max(300, (Date.parse(endTime) - Date.parse(startTime)) / 1000),
-    [startTime, endTime],
-  );
+  // Keep only very recent tails visible to prevent map-spanning artifacts
+  // during high-speed replay.
+  const tracksTrailLength = 5 * 60;
 
   // ── Memoize all layer data arrays ─────────────────────────────────────────
   // Each `?? []` fallback would create a new array reference on every render,
   // causing MapView/GlobeView effects (setData, setProps) to run unnecessarily.
-  const gdeltData       = useMemo(() => gdeltSearch.data    ?? [], [gdeltSearch.data]);
-  const imageryData     = useMemo(() => imagerySearch.data  ?? [], [imagerySearch.data]);
-  const orbitPassData   = useMemo(() => passesQuery.passes  ?? [], [passesQuery.passes]);
+  const coreEventData   = useMemo(() => coreEventSearch.data ?? [], [coreEventSearch.data]);
+  const gdeltData       = useMemo(() => gdeltSearch.data ?? [], [gdeltSearch.data]);
+  const imageryData     = useMemo(() => imagerySearch.data ?? [], [imagerySearch.data]);
+  const orbitPassData   = useMemo(() => passesQuery.passes ?? [], [passesQuery.passes]);
   const detectionsData  = useMemo(() => detectionsQuery.detections ?? [], [detectionsQuery.detections]);
-  const signalData      = useMemo(() => signalsSearch.data  ?? [], [signalsSearch.data]);
+  const signalData      = useMemo(() => signalsSearch.data ?? [], [signalsSearch.data]);
   const jammingRaw      = useMemo(() => jammingQuery.events ?? [], [jammingQuery.events]);
   const strikesRaw      = useMemo(() => strikesQuery.strikes ?? [], [strikesQuery.strikes]);
   const airspaceRaw     = useMemo(() => airspaceQuery.restrictions ?? [], [airspaceQuery.restrictions]);
@@ -608,7 +634,7 @@ function AppShell() {
             <MapView
               aois={aois}
               imageryItems={imageryData}
-              events={gdeltData}
+              events={coreEventData}
               drawMode={drawMode}
               selectedAoiId={selectedAoiId}
               onAoiClick={setSelectedAoiId}
@@ -646,7 +672,7 @@ function AppShell() {
             <>
               <GlobeView
                 aois={aois}
-                events={gdeltData}
+                events={coreEventData}
                 gdeltEvents={gdeltData}
                 trips={visibleTracks}
                 showEventLayer={layers.showEvents}
@@ -674,8 +700,20 @@ function AppShell() {
                 centerPoint={cameraFocusPoint ?? undefined}
               />
               {/* P6: Intel briefing overlay (top-right of globe) */}
-              <div className="globe-intel-overlay">
-                <IntelBriefingPanel compact={true} />
+              <div className={`globe-intel-overlay${isGlobeBriefingExpanded ? " globe-intel-overlay--expanded" : " globe-intel-overlay--collapsed"}`}>
+                <button
+                  type="button"
+                  className="globe-intel-toggle"
+                  onClick={() => setIsGlobeBriefingExpanded(v => !v)}
+                  aria-expanded={isGlobeBriefingExpanded}
+                  title={isGlobeBriefingExpanded ? "Collapse globe briefing" : "Expand globe briefing"}
+                >
+                  <span className="globe-intel-toggle-label">INTEL BRIEFING</span>
+                  <span className="globe-intel-toggle-icon">{isGlobeBriefingExpanded ? "−" : "+"}</span>
+                </button>
+                {isGlobeBriefingExpanded && (
+                  <IntelBriefingPanel compact={true} />
+                )}
               </div>
               {/* P6-8: Chokepoint metrics bar at bottom of globe */}
               <ChokeMetricsBar />

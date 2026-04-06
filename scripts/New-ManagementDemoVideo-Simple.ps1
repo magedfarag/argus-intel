@@ -394,16 +394,22 @@ if ($ffmpegPath -and $mp3Count -gt 0 -and (Test-Path $rawVideoPath)) {
     if ($LASTEXITCODE -eq 0 -and (Test-Path $fullNarrationWav)) {
         Write-Host '  ✓ Narration track mixed' -ForegroundColor Green
 
-        # Calculate content trim point: last NARRATE timestamp + last scene duration + 1 s margin.
-        # Playwright's context.close() appends 2-3 min of blank encoder-finalization frames to
-        # the webm; trimming removes them without re-encoding the video stream.
+        # Calculate content trim point: last NARRATE timestamp + last scene narration +
+        # the configured 2 s silence tail. Keep millisecond precision so the final
+        # cut does not introduce an extra whole-second silent pad after the narration.
+        # Playwright's context.close() appends 2-3 min of blank encoder-finalization
+        # frames to the webm; trimming removes them without re-encoding the video stream.
         $lastJsKey      = ($sceneKeyMap.Values | Select-Object -Last 1)   # e.g. "closing"
         $lastNarKey     = ($sceneKeyMap.Keys   | Select-Object -Last 1)   # e.g. "14-closing"
         $lastNarrateMs  = if ($narrateTs.Contains($lastJsKey)) { [int]$narrateTs[$lastJsKey] } else { 0 }
         $lastDurMs      = if ($sceneDurations.Contains($lastNarKey)) { [int]$sceneDurations[$lastNarKey] } else { 6000 }
-        # trim = content end (last NARRATE + duration + 2 s tail) + 1 s safety margin
-        $trimSecs       = [Math]::Ceiling(($lastNarrateMs + $lastDurMs + $silenceTrailMs + 1000) / 1000)
-        Write-Host "  ✓ Trim point: ${trimSecs}s (last NARRATE ${lastNarrateMs}ms + ${lastDurMs}ms narration)" -ForegroundColor Gray
+        $trimMs         = $lastNarrateMs + $lastDurMs + $silenceTrailMs
+        $trimSecs       = [string]::Format(
+            [System.Globalization.CultureInfo]::InvariantCulture,
+            '{0:0.000}',
+            ($trimMs / 1000.0)
+        )
+        Write-Host "  ✓ Trim point: ${trimSecs}s (last NARRATE ${lastNarrateMs}ms + ${lastDurMs}ms narration + ${silenceTrailMs}ms tail)" -ForegroundColor Gray
 
         # Merge video + narration into final MP4; -t trims encoder-padding blank at end
         $stamp          = Get-Date -Format 'yyyyMMdd-HHmm'

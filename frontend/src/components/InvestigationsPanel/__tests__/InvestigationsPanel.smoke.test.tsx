@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import type { UseInvestigationsResult } from '../../../hooks/useInvestigations';
 
 // Mock the hook before importing the component
-const mockUseInvestigations = vi.fn<[], UseInvestigationsResult>();
+const mockUseInvestigations = vi.fn<() => UseInvestigationsResult>();
 vi.mock('../../../hooks/useInvestigations', () => ({
   useInvestigations: () => mockUseInvestigations(),
 }));

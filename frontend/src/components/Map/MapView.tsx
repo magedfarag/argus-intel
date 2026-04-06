@@ -8,7 +8,7 @@ import { PathLayer, ScatterplotLayer } from "@deck.gl/layers";
 import { HeatmapLayer } from "@deck.gl/aggregation-layers";
 import type { Aoi, ImageryItem, CanonicalEvent } from "../../api/types";
 import type { Map as MaplibreMap } from "maplibre-gl";
-import type { Trip } from "../../hooks/useTracks";
+import type { Trip, TrackWaypoint } from "../../hooks/useTracks";
 import type { SatellitePass, AirspaceRestriction, GpsJammingEvent, StrikeEvent } from "../../types/operationalLayers";
 import type { DetectionOverlay } from "../../types/sensorFusion";
 import { MapLegend } from "./MapLegend";
@@ -43,7 +43,14 @@ function computeEntityPositions(trips: Trip[], t: number): GeoJSON.FeatureCollec
     features.push({
       type: "Feature",
       geometry: { type: "Point", coordinates: [last[0], last[1]] },
-      properties: { id: trip.id, entityType: trip.entityType, heading: Math.round(heading), speedKts, lastSeenUnix: last[2] },
+      properties: {
+        id: trip.id,
+        entityType: trip.entityType,
+        heading: Math.round(heading),
+        speedKts,
+        lastSeenUnix: last[2],
+        altitudeM: last[3] ?? 0,
+      },
     });
   }
   return { type: "FeatureCollection", features };
@@ -73,7 +80,7 @@ function makeArrowImageData(r: number, g: number, b: number): ImageData {
 // -- Helper: build HTML string for entity popup
 function buildEntityPopupHtml(
   id: string, entityType: string, heading: number,
-  speedKts: number, lastSeenUnix: number, lng: number, lat: number,
+  speedKts: number, lastSeenUnix: number, lng: number, lat: number, altitudeM = 0,
 ): string {
   const icon = entityType === "ship" ? "\u{1F6A2}" : "\u2708\uFE0F";
   const typeClass = entityType === "ship" ? "entity-popup-ship" : "entity-popup-aircraft";
@@ -89,6 +96,7 @@ function buildEntityPopupHtml(
     <div class="entity-popup-grid">
       <span class="ep-label">Heading</span><span class="ep-val">${heading}\u00B0</span>
       <span class="ep-label">Speed</span><span class="ep-val">${speedLabel}</span>
+      ${entityType === "aircraft" ? `<span class="ep-label">Altitude</span><span class="ep-val">${Math.round(altitudeM)} m</span>` : ""}
       <span class="ep-label">Position</span><span class="ep-val">${latStr} ${lngStr}</span>
       <span class="ep-label">Last seen</span><span class="ep-val">${lastSeen}</span>
     </div>
@@ -375,11 +383,44 @@ export function MapView({
     if (src) { src.setData(fc); } else {
       map.addSource("events", { type: "geojson", data: fc, cluster: true, clusterMaxZoom: 12 });
       map.addLayer({
+        id: "events-clusters",
+        type: "circle",
+        source: "events",
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-radius": ["step", ["get", "point_count"], 15, 10, 21, 50, 26],
+          "circle-color": ["step", ["get", "point_count"], "#f59e0b", 10, "#d97706", 50, "#b45309"],
+          "circle-stroke-color": "#fff",
+          "circle-stroke-width": 1,
+        },
+      });
+      map.addLayer({
+        id: "events-cluster-count",
+        type: "symbol",
+        source: "events",
+        filter: ["has", "point_count"],
+        layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 11 },
+        paint: { "text-color": "#fff" },
+      });
+      map.addLayer({
         id: "events-circle",
         type: "circle",
         source: "events",
         filter: ["!", ["has", "point_count"]],
         paint: { "circle-radius": 6, "circle-color": "#f59e0b", "circle-stroke-color": "#fff", "circle-stroke-width": 1 },
+      });
+      map.on("click", "events-clusters", (e) => {
+        const p = e.features?.[0]?.properties;
+        if (!p) return;
+        new maplibregl.Popup({ closeButton: true, maxWidth: "220px" })
+          .setLngLat(e.lngLat)
+          .setHTML(`<div class="entity-popup">
+            <div class="entity-popup-header">\u26A0\uFE0F EVENT CLUSTER</div>
+            <div class="entity-popup-grid">
+              <span class="ep-label">Items</span><span class="ep-val">${String(p.point_count ?? 0)}</span>
+            </div>
+          </div>`)
+          .addTo(map);
       });
       map.on("click", "events-circle", (e) => {
         const id = e.features?.[0]?.properties?.id;
@@ -594,23 +635,12 @@ export function MapView({
       const shipTrips = trips.filter(tr => tr.entityType === "ship");
       const aircraftTrips = trips.filter(tr => tr.entityType === "aircraft");
       if (showShipsLayer && shipTrips.length > 0) {
-        // Outer glow halo — subtle depth effect around core trail
-        layers.push(new TripsLayer({
-          id: "ships-glow",
-          data: shipTrips,
-          getPath: (d: Trip) => d.waypoints.map(w => [w[0], w[1]]) as [number, number][],
-          getTimestamps: (d: Trip) => d.waypoints.map(w => w[2]),
-          getColor: [20, 186, 140] as [number, number, number],
-          opacity: 0.12,
-          widthMinPixels: 6, capRounded: true, jointRounded: true,
-          trailLength: tl, currentTime: t,
-        }));
         // Bright core trail
         layers.push(new TripsLayer({
           id: "ships-trips",
           data: shipTrips,
-          getPath: (d: Trip) => d.waypoints.map(w => [w[0], w[1]]) as [number, number][],
-          getTimestamps: (d: Trip) => d.waypoints.map(w => w[2]),
+          getPath: (d: Trip) => d.waypoints.map((w: TrackWaypoint) => [w[0], w[1]]) as [number, number][],
+          getTimestamps: (d: Trip) => d.waypoints.map((w: TrackWaypoint) => w[2]),
           getColor: [20, 186, 140] as [number, number, number],
           opacity: 0.85,
           widthMinPixels: 2, capRounded: true, jointRounded: true,
@@ -618,23 +648,12 @@ export function MapView({
         }));
       }
       if (showAircraftLayer && aircraftTrips.length > 0) {
-        // Outer glow halo
-        layers.push(new TripsLayer({
-          id: "aircraft-glow",
-          data: aircraftTrips,
-          getPath: (d: Trip) => d.waypoints.map(w => [w[0], w[1]]) as [number, number][],
-          getTimestamps: (d: Trip) => d.waypoints.map(w => w[2]),
-          getColor: [255, 100, 50] as [number, number, number],
-          opacity: 0.12,
-          widthMinPixels: 6, capRounded: true, jointRounded: true,
-          trailLength: tl, currentTime: t,
-        }));
         // Bright core trail
         layers.push(new TripsLayer({
           id: "aircraft-trips",
           data: aircraftTrips,
-          getPath: (d: Trip) => d.waypoints.map(w => [w[0], w[1]]) as [number, number][],
-          getTimestamps: (d: Trip) => d.waypoints.map(w => w[2]),
+          getPath: (d: Trip) => d.waypoints.map((w: TrackWaypoint) => [w[0], w[1]]) as [number, number][],
+          getTimestamps: (d: Trip) => d.waypoints.map((w: TrackWaypoint) => w[2]),
           getColor: [255, 100, 50] as [number, number, number],
           opacity: 0.85,
           widthMinPixels: 2, capRounded: true, jointRounded: true,
@@ -977,7 +996,7 @@ export function MapView({
         .setHTML(buildEntityPopupHtml(
           String(p.id ?? ""), String(p.entityType ?? ""),
           Number(p.heading ?? 0), Number(p.speedKts ?? 0),
-          Number(p.lastSeenUnix ?? 0), lng, lat,
+          Number(p.lastSeenUnix ?? 0), lng, lat, Number(p.altitudeM ?? 0),
         ))
         .addTo(map);
     };

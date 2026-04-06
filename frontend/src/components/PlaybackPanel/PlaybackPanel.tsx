@@ -10,11 +10,13 @@ interface Props {
   onFrameChange?: (frame: PlaybackFrame | null) => void;
 }
 
+const PLAYBACK_SPEED_OPTIONS = [5, 10, 15, 20, 30];
+
 export function PlaybackPanel({ aoiId, startTime, endTime, onFrameChange }: Props) {
   const [playback, setPlayback] = useState<PlaybackQueryResponse | null>(null);
   const [frameIdx, setFrameIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [speed, setSpeed] = useState(1);
+  const [speed, setSpeed] = useState(10);
   const [loading, setLoading] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -80,8 +82,9 @@ export function PlaybackPanel({ aoiId, startTime, endTime, onFrameChange }: Prop
               className="input-sm"
               value={speed}
               onChange={e => setSpeed(Number(e.target.value))}
+              title="Playback speed"
             >
-              {[0.5, 1, 2, 4].map(s => <option key={s} value={s}>{s}×</option>)}
+              {PLAYBACK_SPEED_OPTIONS.map(s => <option key={s} value={s}>{s}×</option>)}
             </select>
           </div>
           <input
