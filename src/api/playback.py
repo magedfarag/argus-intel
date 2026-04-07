@@ -28,6 +28,7 @@ import logging
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import Response
 
 from app.cache.query_cache import get_query_cache, ttl_for_window
 from app.rate_limiter import heavy_endpoint_rate_limit
@@ -120,7 +121,7 @@ def set_telemetry_store(store: TelemetryStore) -> None:
 def query_playback(
     req: PlaybackQueryRequest,
     _rl: None = Depends(heavy_endpoint_rate_limit),
-) -> PlaybackQueryResponse:
+) -> Response:
     if req.end_time <= req.start_time:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
@@ -145,17 +146,22 @@ def query_playback(
     ).hexdigest()
 
     cache = get_query_cache()
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return cached
+    cached_json: str | None = cache.get(cache_key)
+    if cached_json is not None:
+        return Response(content=cached_json, media_type="application/json")
 
     window_days = (req.end_time - req.start_time).total_seconds() / 86_400
     ttl = ttl_for_window(window_days)
 
     svc = get_playback_service()
     result = svc.query(req)
-    cache.set(cache_key, result, ttl=ttl)
-    return result
+    # Use Pydantic v2's Rust-backed serialiser (model_dump_json) instead of
+    # FastAPI's jsonable_encoder + json.dumps so that the cache always stores
+    # a compact, pre-serialised string.  Subsequent cache hits skip all
+    # Python-level pydantic traversal entirely.
+    json_str = result.model_dump_json()
+    cache.set(cache_key, json_str, ttl=ttl)
+    return Response(content=json_str, media_type="application/json")
 
 
 @router.post(

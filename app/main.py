@@ -301,26 +301,34 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
             "noaa-swpc": "public_record",
             "openaq": "public_record",
         }
+        async def _probe_one(client: httpx.AsyncClient, cid: str, url: str) -> None:
+            stype = _source_types.get(cid, "unknown")
+            try:
+                resp = await client.get(url)
+                # Any HTTP response (even 4xx/5xx) means the service is
+                # reachable.  Only count connection/timeout failures as
+                # errors — e.g. GDELT returns 429 when rate-limited but
+                # the service is alive.
+                if resp.status_code < 500:
+                    _health_svc.record_success(cid, source_type=stype)
+                    _probe_log.debug("probe %s: ok (%d)", cid, resp.status_code)
+                else:
+                    _health_svc.record_error(cid, f"HTTP {resp.status_code}", source_type=stype)
+                    _probe_log.warning("probe %s: HTTP %d", cid, resp.status_code)
+            except Exception as exc:  # noqa: BLE001
+                _health_svc.record_error(cid, str(exc), source_type=stype)
+                _probe_log.warning("probe %s: %s", cid, exc)
+
         while True:
             _probe_log.info("Running health probes for %d connectors", len(targets))
+            # Fire all connector probes concurrently so a single slow/unreachable
+            # endpoint cannot stall the remaining 14.  Worst-case probe round
+            # time drops from N×timeout to 1×timeout (15 s).
             async with httpx.AsyncClient(timeout=15.0) as client:
-                for cid, url in targets.items():
-                    stype = _source_types.get(cid, "unknown")
-                    try:
-                        resp = await client.get(url)
-                        # Any HTTP response (even 4xx/5xx) means the service is
-                        # reachable.  Only count connection/timeout failures as
-                        # errors — e.g. GDELT returns 429 when rate-limited but
-                        # the service is alive.
-                        if resp.status_code < 500:
-                            _health_svc.record_success(cid, source_type=stype)
-                            _probe_log.debug("probe %s: ok (%d)", cid, resp.status_code)
-                        else:
-                            _health_svc.record_error(cid, f"HTTP {resp.status_code}", source_type=stype)
-                            _probe_log.warning("probe %s: HTTP %d", cid, resp.status_code)
-                    except Exception as exc:  # noqa: BLE001
-                        _health_svc.record_error(cid, str(exc), source_type=stype)
-                        _probe_log.warning("probe %s: %s", cid, exc)
+                await asyncio.gather(
+                    *[_probe_one(client, cid, url) for cid, url in targets.items()],
+                    return_exceptions=True,
+                )
             await asyncio.sleep(300)  # 5 minutes
 
     _probe_task = asyncio.create_task(_periodic_health_probe())

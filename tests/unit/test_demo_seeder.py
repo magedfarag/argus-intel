@@ -39,9 +39,8 @@ def _assert_lane_bounds(lon: float, lat: float, lane: str) -> None:
             assert lat >= demo_seeder._NORTHBOUND_MIN_LAT
     elif lane == "south_outbound":
         if demo_seeder._CRITICAL_STRAIT_LON_MIN <= lon <= demo_seeder._CRITICAL_STRAIT_LON_MAX:
-            assert lat <= demo_seeder._SOUTHBOUND_MAX_LAT
-        if 56.18 <= lon <= 56.45:
-            assert lat <= demo_seeder._SOUTHBOUND_MUSANDAM_MAX_LAT
+            assert lat <= demo_seeder._SOUTHBOUND_MAX_LAT  # below northbound lane
+            assert lat >= demo_seeder._SOUTHBOUND_MUSANDAM_MAX_LAT  # north of Musandam zone
     elif lane == "oman_coastal":
         if lon >= 56.20:
             assert lat <= demo_seeder._OMAN_COAST_MAX_LAT
@@ -106,10 +105,10 @@ def test_problematic_demo_mmsis_stay_offshore_across_full_timeline() -> None:
     assert min(lat for _, lat in gulf_breeze) >= 25.50
     assert max(lat for _, lat in gulf_breeze) <= 25.62
 
-    # ORIENT PEARL (southbound lane): should not climb into the northbound corridor.
+    # ORIENT PEARL (southbound lane): runs through strait ~26.40°N, exits Gulf of Oman ~25.52°N.
     orient_pearl = by_mmsi["538006712"]
-    assert min(lat for _, lat in orient_pearl) >= 25.50
-    assert max(lat for _, lat in orient_pearl) <= 25.62
+    assert min(lat for _, lat in orient_pearl) >= 25.40
+    assert max(lat for _, lat in orient_pearl) <= 26.44
 
     # MUSANDAM LINK (rounding lane): must round the cape without crossing inland.
     musandam_link = by_mmsi["636021800"]

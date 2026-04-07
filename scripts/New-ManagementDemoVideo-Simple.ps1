@@ -219,27 +219,42 @@ if (-not $SkipVoice) {
         Write-Host "  ✓ $key  $($sceneDurations[$key])ms" -ForegroundColor Green
     }
 } else {
-    # -SkipVoice: read real durations from existing MP3 files via ffprobe.
-    # Falls back to 6 s only when an MP3 is genuinely absent.
+    # -SkipVoice: read real durations from existing MP3 files.
+    # Priority:
+    #   1. ffprobe (if available alongside ffmpeg — not bundled with ffmpeg-static)
+    #   2. MP3 file-size estimate: same formula used by tts-generate.js
+    #      (96 kbps CBR → 12 000 bytes/s)
+    #   3. Hard fallback: 6 s
     Write-Host '  (SkipVoice — reading durations from existing MP3s)' -ForegroundColor Gray
     foreach ($key in $narrationScript.Keys) {
         $mp3Path = Join-Path $audioDir "$key.mp3"
-        if ($ffmpegPath -and (Test-Path $mp3Path)) {
-            $ffprobePath = Join-Path (Split-Path $ffmpegPath) 'ffprobe.exe'
-            if (Test-Path $ffprobePath) {
-                $raw = & $ffprobePath -v quiet -show_entries format=duration `
-                           -of default=noprint_wrappers=1:nokey=1 $mp3Path 2>&1
-                $secs = [double]0
-                if ([double]::TryParse($raw, [ref]$secs) -and $secs -gt 0) {
-                    $sceneDurations[$key] = [int]($secs * 1000)
-                    Write-Host "  ✓ $key  $($sceneDurations[$key])ms (ffprobe)" -ForegroundColor Green
-                    continue
+        if (Test-Path $mp3Path) {
+            # Attempt 1: ffprobe
+            if ($ffmpegPath) {
+                $ffprobePath = Join-Path (Split-Path $ffmpegPath) 'ffprobe.exe'
+                if (Test-Path $ffprobePath) {
+                    $raw = & $ffprobePath -v quiet -show_entries format=duration `
+                               -of default=noprint_wrappers=1:nokey=1 $mp3Path 2>&1
+                    $secs = [double]0
+                    if ([double]::TryParse($raw, [ref]$secs) -and $secs -gt 0) {
+                        $sceneDurations[$key] = [int]($secs * 1000)
+                        Write-Host "  ✓ $key  $($sceneDurations[$key])ms (ffprobe)" -ForegroundColor Green
+                        continue
+                    }
                 }
+            }
+            # Attempt 2: file-size estimate (96 kbps CBR — matches tts-generate.js)
+            $bytes = (Get-Item $mp3Path).Length
+            $durMs = [int](($bytes / 12000) * 1000)
+            if ($durMs -gt 500) {
+                $sceneDurations[$key] = $durMs
+                Write-Host "  ✓ $key  ${durMs}ms (MP3 size estimate)" -ForegroundColor Green
+                continue
             }
         }
         # Fallback
         $sceneDurations[$key] = 6000
-        Write-Warning "$key MP3 not found or ffprobe failed — using 6 s default"
+        Write-Warning "$key MP3 not found — using 6 s default"
     }
 }
 
@@ -325,6 +340,22 @@ if (-not $SkipCapture) {
     # Persist NARRATE timestamps so the merge phase can run independently
     # (supports re-run with -SkipCapture after a successful recording).
     $syncCachePath = Join-Path $demoRoot 'audio-sync.json'
+
+    # If the Playwright script renamed the file for us, it emits [VIDEO_PATH:...]
+    # so we can verify the destination. If the rename didn't happen (old template),
+    # fall back: find the newest webm in $demoRoot and rename it.
+    $videoReported = ($outputLines | Where-Object { $_ -match '\[VIDEO_PATH:' } | Select-Object -Last 1) -replace '.*\[VIDEO_PATH:(.+)\].*', '$1'
+    if (-not $videoReported -or -not (Test-Path $videoReported)) {
+        $latestWebm = Get-ChildItem $demoRoot -Filter '*.webm' |
+            Where-Object { $_.Name -ne 'recording.webm' } |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        if ($latestWebm) {
+            $dest = Join-Path $demoRoot 'recording.webm'
+            Move-Item $latestWebm.FullName $dest -Force
+            Write-Host "  ✓ Video renamed: $($latestWebm.Name) → recording.webm" -ForegroundColor Gray
+        }
+    }
+
     $narrateTsRaw = [ordered]@{}
     foreach ($line in $outputLines) {
         if ($line -match '\[NARRATE:(\w+):(\d+)\]') {

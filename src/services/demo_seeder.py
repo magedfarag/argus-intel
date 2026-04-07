@@ -68,9 +68,9 @@ def _validate_point_in_aoi(label: str, lon: float, lat: float) -> None:
 _CRITICAL_STRAIT_LON_MIN = 56.05
 _CRITICAL_STRAIT_LON_MAX = 56.78
 _NORTHBOUND_MIN_LAT = 26.44
-_SOUTHBOUND_MAX_LAT = 26.10
-_SOUTHBOUND_MUSANDAM_MAX_LAT = 25.62
-_SOUTHBOUND_MIN_LAT = 25.50
+_SOUTHBOUND_MAX_LAT = 26.44          # upper bound — stays below northbound lane
+_SOUTHBOUND_MUSANDAM_MAX_LAT = 26.28  # lower bound in crit. strait — must be north of Musandam
+_SOUTHBOUND_MIN_LAT = 25.40          # Gulf-of-Oman exit floor
 _OMAN_COAST_MAX_LAT = 25.62
 _OMAN_COAST_MIN_LAT = 25.50
 _MUSANDAM_ROUNDING_MAX_LAT = 26.22
@@ -78,7 +78,7 @@ _NORTHBOUND_EASTERN_MAX_LAT = 26.58
 _AIRCRAFT_MIN_ALTITUDE_M = 4500.0
 
 _NORTHBOUND_TEMPLATE: list[tuple[float, float]] = [
-    (57.30, 26.52),
+    (56.95, 26.52),  # moved west of Iranian coast (land east of ~57.08°E at this latitude)
     (57.02, 26.53),
     (56.74, 26.54),
     (56.40, 26.56),
@@ -87,20 +87,24 @@ _NORTHBOUND_TEMPLATE: list[tuple[float, float]] = [
 ]
 
 _SOUTHBOUND_TEMPLATE: list[tuple[float, float]] = [
-    (55.12, 25.56),
-    (55.46, 25.57),
-    (55.86, 25.58),
-    (56.26, 25.56),
-    (56.66, 25.54),
-    (57.16, 25.52),
+    # Southbound lane runs through the strait at ~26.40°N (south of northbound ~26.52°N),
+    # then descends SE into the Gulf of Oman east of the UAE/Hajar mountain coast barrier
+    # (land 55.6–56.2°E, 25.1–25.7°N). Old route (lat 25.52–25.58°N) clipped that barrier.
+    (55.12, 26.40),  # Persian Gulf start — south lane
+    (55.46, 26.41),
+    (55.86, 26.40),
+    (56.26, 26.40),  # Through strait channel, north of Musandam
+    (56.68, 26.36),  # Approaching end of critical strait
+    (56.80, 26.33),  # Past narrows — still clear of Musandam
+    (57.00, 25.96),  # Descending into Gulf of Oman, east of UAE mountain coast
+    (57.16, 25.52),  # Gulf of Oman — clear of UAE/Oman coast barrier (land ends ~56.40°E)
 ]
 
 _OMAN_COASTAL_TEMPLATE: list[tuple[float, float]] = [
     (57.24, 25.58),
     (56.98, 25.59),
-    (56.72, 25.60),
-    (56.46, 25.60),
-    (56.22, 25.60),
+    (56.72, 25.59),
+    (56.48, 25.57),  # removed old (56.46, 25.60)→(56.22, 25.60) chain; land from ~56.20°E at these lats
 ]
 
 
@@ -116,8 +120,8 @@ def _deterministic_lane_route(mmsi: str, lane: str) -> list[tuple[float, float]]
         max_lat = _NORTHBOUND_EASTERN_MAX_LAT
     elif lane == "south_outbound":
         template = _SOUTHBOUND_TEMPLATE
-        min_lat = _SOUTHBOUND_MIN_LAT
-        max_lat = _SOUTHBOUND_MUSANDAM_MAX_LAT
+        min_lat = _SOUTHBOUND_MIN_LAT      # 25.40 — Gulf-of-Oman exit floor
+        max_lat = _SOUTHBOUND_MAX_LAT      # 26.44 — stays below northbound lane
     elif lane in {"oman_coastal", "musandam_rounding"}:
         template = _OMAN_COASTAL_TEMPLATE
         min_lat = _OMAN_COAST_MIN_LAT
@@ -459,36 +463,39 @@ def _validate_ship_positions(ship_name: str, lane: str, positions: list[tuple[fl
         return
 
     if lane == "south_outbound":
-        offenders = [
+        # Southbound lane passes through the strait at ~26.40°N, then descends SE into
+        # the Gulf of Oman east of the UAE Hajar mountain coast barrier.
+        northbound_overlap = [
             (lon, lat)
             for lon, lat in positions
             if _CRITICAL_STRAIT_LON_MIN <= lon <= _CRITICAL_STRAIT_LON_MAX and lat > _SOUTHBOUND_MAX_LAT
         ]
-        shoreline_offenders = [
+        musandam_intrusion = [
             (lon, lat)
             for lon, lat in positions
-            if 56.08 <= lon <= 56.55 and lat > _SOUTHBOUND_MUSANDAM_MAX_LAT
+            if _CRITICAL_STRAIT_LON_MIN <= lon <= _CRITICAL_STRAIT_LON_MAX and lat < _SOUTHBOUND_MUSANDAM_MAX_LAT
         ]
         low_lat_offenders = [
             (lon, lat)
             for lon, lat in positions
             if lat < _SOUTHBOUND_MIN_LAT
         ]
-        if offenders:
-            raise ValueError(f"{ship_name} crossed north of the southbound TSS lane: {offenders[:3]!r}")
-        if shoreline_offenders:
+        if northbound_overlap:
+            raise ValueError(f"{ship_name} crossed north of the southbound TSS lane: {northbound_overlap[:3]!r}")
+        if musandam_intrusion:
             raise ValueError(
-                f"{ship_name} hugged the Musandam shoreline too closely: {shoreline_offenders[:3]!r}"
+                f"{ship_name} descended into the Musandam hazard zone in the critical strait: "
+                f"{musandam_intrusion[:3]!r}"
             )
         if low_lat_offenders:
-            raise ValueError(f"{ship_name} dipped too close to UAE shoreline: {low_lat_offenders[:3]!r}")
+            raise ValueError(f"{ship_name} exited below the Gulf of Oman floor: {low_lat_offenders[:3]!r}")
         return
 
     if lane == "oman_coastal":
         offenders = [
             (lon, lat)
             for lon, lat in positions
-            if lon >= 56.20 and lat > _OMAN_COAST_MAX_LAT
+            if lon >= 56.44 and lat > _OMAN_COAST_MAX_LAT
         ]
         low_lat_offenders = [
             (lon, lat)
