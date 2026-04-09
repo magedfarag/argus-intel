@@ -46,5 +46,3 @@ This documentation tree was consolidated on 2026-04-09 against the current codeb
 | Area | Purpose |
 |---|---|
 | [delivery/README.md](delivery/README.md) | Handover and validation artifact index |
-| [roadmaps/README.md](roadmaps/README.md) | Architecture plans, transformation plans, and roadmap packs |
-| [archive/README.md](archive/README.md) | Preserved legacy notes and tactical one-off documentation |

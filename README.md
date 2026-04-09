@@ -104,7 +104,6 @@ argus-intel/
 ├── docs/                        # All project documentation
 │   ├── getting-started/         # Setup and onboarding guides
 │   ├── delivery/                # Delivery and release documentation
-│   ├── roadmaps/                # Feature roadmaps and planning
 │   └── ...
 ├── tools/                       # Operational scripts and utilities
 │   ├── run_api.ps1              # Start FastAPI backend
@@ -177,6 +176,5 @@ Start with [docs/README.md](docs/README.md). The key current docs are:
 - [docs/reference/environment.md](docs/reference/environment.md)
 - [docs/testing/strategy.md](docs/testing/strategy.md)
 
-Delivery reports, handover material, and historical validation snapshots live under [docs/delivery](docs/delivery/README.md). Longer-range plans and transformation papers live under [docs/roadmaps](docs/roadmaps/README.md).
-
+Delivery reports, handover material, and validation snapshots live under [docs/delivery](docs/delivery/README.md).
 
