@@ -17,6 +17,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+from src.api.aois import get_aoi_store
 from src.models.canonical_event import CanonicalEvent
 from src.models.event_search import (
     EventSearchRequest,
@@ -45,6 +46,17 @@ def get_event_store() -> EventStore:
 
 
 EventStoreDep = Annotated[EventStore, Depends(get_event_store)]
+
+
+def _resolve_aoi_geometry(aoi_id: str | None) -> dict | None:
+    """Resolve an AOI id to its geometry so searches can use spatial filtering."""
+    if not aoi_id:
+        return None
+    aoi = get_aoi_store().get(aoi_id)
+    if not aoi:
+        return None
+    geometry = aoi.geometry
+    return geometry.model_dump() if hasattr(geometry, "model_dump") else geometry
 
 
 def _apply_density_reduction(response: EventSearchResponse) -> EventSearchResponse:
@@ -83,6 +95,10 @@ def search_events(req: EventSearchRequest, store: EventStoreDep) -> EventSearchR
     """
     if req.end_time <= req.start_time:
         raise HTTPException(status_code=422, detail="end_time must be after start_time")
+    if req.geometry is None and req.aoi_id:
+        resolved_geometry = _resolve_aoi_geometry(req.aoi_id)
+        if resolved_geometry is not None:
+            req = req.model_copy(update={"geometry": resolved_geometry})
     result = store.search(req)
     return _apply_density_reduction(result)
 
@@ -111,7 +127,13 @@ def get_timeline(
 ) -> TimelineResponse:
     if end_time <= start_time:
         raise HTTPException(status_code=422, detail="end_time must be after start_time")
-    return store.timeline(start_time, end_time, aoi_id=aoi_id, bucket_minutes=bucket_minutes)
+    return store.timeline(
+        start_time,
+        end_time,
+        aoi_id=aoi_id,
+        geometry=_resolve_aoi_geometry(aoi_id),
+        bucket_minutes=bucket_minutes,
+    )
 
 
 @router.get(

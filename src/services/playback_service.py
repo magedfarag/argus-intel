@@ -24,7 +24,7 @@ from src.models.playback import (
     PlaybackQueryResponse,
     WindowFrame,
 )
-from src.services.event_store import EventStore
+from src.services.event_store import EventStore, _coerce_geometry, _event_intersects_geometry
 
 
 def _centroid_in_bbox(
@@ -168,7 +168,10 @@ class PlaybackService:
 
         results = [e for e in candidates if req.start_time <= e.event_time <= req.end_time]
 
-        if req.aoi_id:
+        geometry_filter = _coerce_geometry(req.geometry)
+        if geometry_filter is not None:
+            results = [e for e in results if _event_intersects_geometry(e, geometry_filter)]
+        elif req.aoi_id:
             results = [e for e in results if req.aoi_id in e.correlation_keys.aoi_ids]
 
         if req.event_types:

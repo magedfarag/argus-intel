@@ -32,6 +32,7 @@ from fastapi.responses import Response
 
 from app.cache.query_cache import get_query_cache, ttl_for_window
 from app.rate_limiter import heavy_endpoint_rate_limit
+from src.api.aois import get_aoi_store
 from src.models.playback import (
     EntityTrackPoint,
     EntityTrackResponse,
@@ -105,6 +106,17 @@ def set_telemetry_store(store: TelemetryStore) -> None:
     _ts_mod._default_store = store
 
 
+def _resolve_aoi_geometry(aoi_id: str | None) -> dict | None:
+    """Resolve AOI ids to geometry for playback filtering and cache consistency."""
+    if not aoi_id:
+        return None
+    aoi = get_aoi_store().get(aoi_id)
+    if not aoi:
+        return None
+    geometry = aoi.geometry
+    return geometry.model_dump() if hasattr(geometry, "model_dump") else geometry
+
+
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 
@@ -122,6 +134,10 @@ def query_playback(
     req: PlaybackQueryRequest,
     _rl: None = Depends(heavy_endpoint_rate_limit),
 ) -> Response:
+    if req.geometry is None and req.aoi_id:
+        resolved_geometry = _resolve_aoi_geometry(req.aoi_id)
+        if resolved_geometry is not None:
+            req = req.model_copy(update={"geometry": resolved_geometry})
     if req.end_time <= req.start_time:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
@@ -135,6 +151,7 @@ def query_playback(
         "s": start_m.isoformat(),
         "e": end_m.isoformat(),
         "aoi": req.aoi_id,
+        "geom": req.geometry,
         "et": sorted(et.value for et in (req.event_types or [])),
         "st": sorted(st.value for st in (req.source_types or [])),
         "src": sorted(req.sources or []),
@@ -178,6 +195,10 @@ def materialize_playback(
     req: MaterializeRequest,
     _rl: None = Depends(heavy_endpoint_rate_limit),
 ) -> MaterializeJobResponse:
+    if req.geometry is None and req.aoi_id:
+        resolved_geometry = _resolve_aoi_geometry(req.aoi_id)
+        if resolved_geometry is not None:
+            req = req.model_copy(update={"geometry": resolved_geometry})
     if req.end_time <= req.start_time:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,

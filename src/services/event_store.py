@@ -8,6 +8,10 @@ from __future__ import annotations
 
 import threading
 from datetime import datetime, timedelta
+from typing import Any
+
+from shapely.geometry import shape
+from shapely.geometry.base import BaseGeometry
 
 from src.models.canonical_event import CanonicalEvent
 from src.models.event_search import (
@@ -17,6 +21,30 @@ from src.models.event_search import (
     TimelineBucket,
     TimelineResponse,
 )
+
+
+def _coerce_geometry(geometry: dict[str, Any] | None) -> BaseGeometry | None:
+    """Best-effort conversion from GeoJSON geometry dict to a Shapely shape."""
+    if not geometry:
+        return None
+    try:
+        return shape(geometry)
+    except Exception:
+        return None
+
+
+def _event_intersects_geometry(
+    event: CanonicalEvent,
+    geometry_filter: BaseGeometry,
+) -> bool:
+    """Return True when an event geometry or centroid intersects the AOI geometry."""
+    event_geometry = _coerce_geometry(event.geometry) or _coerce_geometry(event.centroid)
+    if event_geometry is None:
+        return False
+    try:
+        return event_geometry.intersects(geometry_filter)
+    except Exception:
+        return False
 
 
 class EventStore:
@@ -60,8 +88,12 @@ class EventStore:
             if req.start_time <= e.event_time <= req.end_time
         ]
 
-        # AOI correlation filter
-        if req.aoi_id:
+        # Geometry filter takes precedence over correlation-based AOI ids so
+        # freshly drawn AOIs can immediately surface intersecting events.
+        geometry_filter = _coerce_geometry(req.geometry)
+        if geometry_filter is not None:
+            results = [e for e in results if _event_intersects_geometry(e, geometry_filter)]
+        elif req.aoi_id:
             results = [e for e in results if req.aoi_id in e.correlation_keys.aoi_ids]
 
         # Event-type filter
@@ -105,16 +137,22 @@ class EventStore:
         start_time: datetime,
         end_time: datetime,
         aoi_id: str | None = None,
+        geometry: dict[str, Any] | None = None,
         bucket_minutes: int = 60,
     ) -> TimelineResponse:
         """Aggregate event counts into uniform time buckets."""
         with self._lock:
             candidates = list(self._events.values())
 
+        geometry_filter = _coerce_geometry(geometry)
         window = [
             e for e in candidates
             if start_time <= e.event_time <= end_time
-            and (aoi_id is None or aoi_id in e.correlation_keys.aoi_ids)
+            and (
+                _event_intersects_geometry(e, geometry_filter)
+                if geometry_filter is not None
+                else (aoi_id is None or aoi_id in e.correlation_keys.aoi_ids)
+            )
         ]
 
         buckets: list[TimelineBucket] = []

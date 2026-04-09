@@ -46,6 +46,29 @@ test.describe("Responsive — narrow viewport", () => {
     const layerPanel = page.locator('[data-testid="layer-panel"]');
     await expect(layerPanel).toBeVisible();
   });
+
+  test("map shell shrinks with the viewport without horizontal overflow", async ({ page }) => {
+    const base = new BasePage(page);
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await base.goto();
+
+    const mapSurface = base.mapContainer.or(base.globeContainer).first();
+    const wideBox = await mapSurface.boundingBox();
+
+    await page.setViewportSize({ width: 800, height: 600 });
+    await page.waitForTimeout(300);
+
+    const narrowBox = await mapSurface.boundingBox();
+    const hasHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth + 1,
+    );
+
+    expect(wideBox?.width ?? 0).toBeGreaterThan(0);
+    expect(narrowBox?.width ?? 0).toBeGreaterThan(0);
+    expect(narrowBox?.width ?? 0).toBeLessThan(wideBox?.width ?? Number.POSITIVE_INFINITY);
+    expect(hasHorizontalOverflow).toBeFalsy();
+  });
 });
 
 test.describe("Responsive — large viewport", () => {

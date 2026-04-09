@@ -70,16 +70,26 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   height: 100vh;
+  min-height: 100dvh;
   overflow: hidden;
 }
 
-.app-layout { display: flex; flex-direction: column; height: 100vh; }
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100vh;
+  height: 100dvh;
+}
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
 .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: 0 16px;
   height: 48px;
   background: linear-gradient(90deg, #0b1828 0%, #122035 50%, #0b1828 100%);
@@ -87,6 +97,7 @@ body {
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
+  min-width: 0;
 }
 /* Animated scan line on header bottom */
 .app-header::after {
@@ -122,7 +133,7 @@ body {
   box-shadow: 0 0 8px 2px rgba(0,229,255,0.6);
 }
 
-.app-title { display: flex; align-items: center; }
+.app-title { display: flex; align-items: center; min-width: 0; }
 .app-title h1 {
   font-size: 18px;
   font-weight: 800;
@@ -159,15 +170,15 @@ body {
   letter-spacing: 0.05em;
 }
 
-.api-key-input { width: 180px; }
-.header-controls { display: flex; align-items: center; gap: 8px; }
+.api-key-input { width: min(180px, 32vw); }
+.header-controls { display: flex; align-items: center; gap: 8px; min-width: 0; flex-shrink: 0; }
 
 /* ── Body ────────────────────────────────────────────────────────────────── */
-.app-body { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+.app-body { display: flex; flex: 1; overflow: hidden; min-height: 0; min-width: 0; }
 
 /* ── Sidebar nav ─────────────────────────────────────────────────────────── */
 .sidebar {
-  width: var(--sidebar-width);
+  width: clamp(72px, 10vw, var(--sidebar-width));
   background: var(--bg-secondary);
   border-right: 1px solid var(--border);
   display: flex;
@@ -214,17 +225,18 @@ body {
 
 /* ── Side panel ──────────────────────────────────────────────────────────── */
 .side-panel {
-  width: var(--panel-width);
+  width: clamp(220px, 28vw, var(--panel-width));
   background: var(--bg-panel);
   border-right: 1px solid var(--border);
   overflow-y: auto;
   flex-shrink: 0;
   min-height: 0;
+  min-width: 0;
   animation: slide-in 0.22s ease-out;
 }
 
 /* ── Map area ────────────────────────────────────────────────────────────── */
-.map-area { flex: 1; position: relative; min-height: 0; overflow: hidden; }
+.map-area { flex: 1; position: relative; min-height: 0; min-width: 0; overflow: hidden; }
 .map-area--health { display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
 
 /* ── Timeline bar ────────────────────────────────────────────────────────── */
@@ -234,6 +246,7 @@ body {
   flex-shrink: 0;
   position: relative;
   pointer-events: auto;
+  min-width: 0;
 }
 .timeline-panel--collapsed { height: 44px; overflow: hidden; }
 
@@ -1076,3 +1089,71 @@ body {
 
 /* Misc */
 .cam-select-hint { font-size: 0.8rem; padding: 12px 0; }
+
+@media (max-width: 960px) {
+  .header-center {
+    position: static;
+    transform: none;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .api-key-input {
+    width: min(150px, 26vw);
+  }
+
+  .side-panel {
+    width: clamp(200px, 34vw, 260px);
+  }
+}
+
+@media (max-width: 720px) {
+  .app-header {
+    height: auto;
+    min-height: 48px;
+    flex-wrap: wrap;
+    padding: 8px 10px;
+  }
+
+  .app-title {
+    flex: 1 1 auto;
+  }
+
+  .header-center {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin: 0;
+  }
+
+  .header-controls {
+    margin-left: auto;
+  }
+
+  .sidebar {
+    width: 68px;
+  }
+
+  .sidebar-label {
+    font-size: 9px;
+  }
+
+  .side-panel {
+    width: min(220px, 44vw);
+  }
+
+  .map-draw-tools,
+  .imagery-opacity-ctrl,
+  .basemap-picker {
+    max-width: calc(100% - 16px);
+    flex-wrap: wrap;
+  }
+
+  .draw-hint {
+    white-space: normal;
+  }
+
+  .map-legend {
+    max-width: min(160px, calc(100% - 20px));
+  }
+}

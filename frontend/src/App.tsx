@@ -310,7 +310,10 @@ function AppShell() {
     const hasSelection = !!selectedAoiId;
     const selectionExists = hasSelection && !!list?.some(a => a.id === selectedAoiId);
     if (list && list.length > 0 && (!hasSelection || !selectionExists)) {
-      setSelectedAoiId(list[0].id);
+      const preferredDemoAoi = IS_DEMO_MODE
+        ? list.find(a => a.name === "Strait of Hormuz")
+        : undefined;
+      setSelectedAoiId((preferredDemoAoi ?? list[0]).id);
     }
   }, [aoiQuery.data, selectedAoiId, setSelectedAoiId]);
 

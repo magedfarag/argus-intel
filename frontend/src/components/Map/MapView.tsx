@@ -197,6 +197,7 @@ export function MapView({
   // Track when the MapLibre style finishes loading so data-dependent effects
   // can safely add sources/layers without bailing out on isStyleLoaded().
   const [styleLoaded, setStyleLoaded] = useState(false);
+  const [styleRevision, setStyleRevision] = useState(0);
   const initialBaseStyleRef = useRef(baseStyle);
   const isMountedRef = useRef(false);
   const [coordDisplay, setCoordDisplay] = useState("");
@@ -243,6 +244,7 @@ export function MapView({
     // Signal that all base layers are ready, so data-dependent effects can add sources
     map.on("load", () => {
       setStyleLoaded(true);
+      setStyleRevision((revision) => revision + 1);
       // Expose map instance for Playwright demo recording (dev / demo mode only)
       (window as Window & { __argusMap?: MaplibreMap }).__argusMap = map;
       // Ensure map is properly sized after load
@@ -346,7 +348,7 @@ export function MapView({
           .addTo(map);
       });
     }
-  }, [aois, selectedAoiId, onAoiClick, styleLoaded]);
+  }, [aois, selectedAoiId, onAoiClick, styleLoaded, styleRevision]);
 
   // Update imagery footprints layer (P1-3.9, P2-3.3 opacity)
   useEffect(() => {
@@ -417,7 +419,7 @@ export function MapView({
           .addTo(map);
       });
     }
-  }, [imageryItems, showImageryLayer, imageryOpacity, styleLoaded]);
+  }, [imageryItems, showImageryLayer, imageryOpacity, styleLoaded, styleRevision]);
 
   // Update event markers layer (P1-4.6)
   useEffect(() => {
@@ -484,7 +486,7 @@ export function MapView({
         }
       });
     }
-  }, [events, showEventLayer, onEventClick, styleLoaded]);
+  }, [events, showEventLayer, onEventClick, styleLoaded, styleRevision]);
 
   // P2-1.5: GDELT contextual event cluster layer (purple theme)
   useEffect(() => {
@@ -587,7 +589,7 @@ export function MapView({
           .addTo(map);
       });
     }
-  }, [gdeltEvents, showGdeltLayer, styleLoaded]);
+  }, [gdeltEvents, showGdeltLayer, styleLoaded, styleRevision]);
 
   // Intel signals layer — seismic, hazard, weather, conflict, maritime warning, military, thermal, space weather, AQ
   useEffect(() => {
@@ -715,7 +717,7 @@ export function MapView({
           .addTo(map);
       });
     }
-  }, [signalEvents, showSignalsLayer, onEventClick, styleLoaded]);
+  }, [signalEvents, showSignalsLayer, onEventClick, styleLoaded, styleRevision]);
 
   // P3-3.2/3.3 + Phase 2: all deck.gl layers (trips, orbits, jamming)
   useEffect(() => {
@@ -843,7 +845,7 @@ export function MapView({
     deckLayersRef.current = layers;
     overlay.setProps({ layers });
   }, [trips, currentTime, trailLength, showShipsLayer, showAircraftLayer,
-      showOrbitsLayer, orbitPasses, showJammingLayer, jammingEvents, styleLoaded]);
+      showOrbitsLayer, orbitPasses, showJammingLayer, jammingEvents, styleLoaded, styleRevision]);
 
   // Phase 2: Airspace restrictions — fill + dashed line
   useEffect(() => {
@@ -905,7 +907,7 @@ export function MapView({
           .addTo(map);
       });
     }
-  }, [showAirspaceLayer, airspaceRestrictions, styleLoaded]);
+  }, [showAirspaceLayer, airspaceRestrictions, styleLoaded, styleRevision]);
 
   // Phase 2: Strike events — circle markers by type
   useEffect(() => {
@@ -969,7 +971,7 @@ export function MapView({
         onStrikeClickRef.current?.(p.strike_id as string);
       });
     }
-  }, [showStrikesLayer, strikeEvents, styleLoaded]);
+  }, [showStrikesLayer, strikeEvents, styleLoaded, styleRevision]);
 
   // Phase 4 Track C — fly to camera focus point
   useEffect(() => {
@@ -1045,7 +1047,7 @@ export function MapView({
           .addTo(map);
       });
     }
-  }, [showDetectionsLayer, detections, styleLoaded]);
+  }, [showDetectionsLayer, detections, styleLoaded, styleRevision]);
 
   // Entity position arrows — directional icon for each entity's current head position
   useEffect(() => {
@@ -1156,7 +1158,7 @@ export function MapView({
         },
       });
     }
-  }, [trips, currentTime, showShipsLayer, showAircraftLayer, styleLoaded]);
+  }, [trips, currentTime, showShipsLayer, showAircraftLayer, styleLoaded, styleRevision]);
 
   // Entity interactions — click popup + hover cursors (re-attaches on style reload)
   useEffect(() => {
@@ -1231,7 +1233,7 @@ export function MapView({
       map.off("mouseleave", "detections-circle", cursorOff);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [styleLoaded]);
+  }, [styleLoaded, styleRevision]);
 
   // Change basemap style when baseStyle prop changes (skip initial mount)
   useEffect(() => {
@@ -1239,9 +1241,12 @@ export function MapView({
     const map = mapRef.current;
     if (!map) return;
     setStyleLoaded(false);
+    map.once("style.load", () => {
+      setStyleLoaded(true);
+      setStyleRevision((revision) => revision + 1);
+    });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     map.setStyle(resolveMapStyle(baseStyle) as any);
-    map.once("style.load", () => setStyleLoaded(true));
   }, [baseStyle]);
   // ── Draw interaction handler with live preview ───────────────────────────
   const [drawCoords, setDrawCoords] = useState<[number, number][]>([]);
@@ -1305,7 +1310,7 @@ export function MapView({
       return;
     }
     updateDrawPreview(map, drawCoords, mouseCoordRef.current, drawMode);
-  }, [drawCoords, drawMode, styleLoaded]);
+  }, [drawCoords, drawMode, styleLoaded, styleRevision]);
 
   useEffect(() => {
     const map = mapRef.current;
