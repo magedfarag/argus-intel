@@ -72,7 +72,7 @@ class TestSentinel2LiveSTAC:
         assert scene.cloud_cover >= 0 and scene.cloud_cover <= 100
         assert scene.resolution_m == 10
         assert scene.acquired_at is not None
-        assert scene.image_url is not None and len(scene.image_url) > 0
+        assert isinstance(scene.assets, dict) and len(scene.assets) > 0
 
     def test_sentinel2_scene_search_over_ocean_empty(self, sentinel2_live_provider):
         """Test scene search returns empty when over open ocean (expected behavior)."""

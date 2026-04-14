@@ -165,8 +165,8 @@ class NasaFirmsConnector(BaseConnector):
     # ── BaseConnector interface ───────────────────────────────────────────────
 
     def connect(self) -> None:
-        """Health-check: probe FIRMS with a tiny null-island bbox."""
-        url = self._area_url(0.0, 0.0, 0.001, 0.001)
+        """Health-check: probe FIRMS with a 1°×1° null-island bbox (FIRMS requires non-trivial area)."""
+        url = self._area_url(0.0, 0.0, 1.0, 1.0)
         try:
             resp = httpx.get(url, timeout=20.0)
             resp.raise_for_status()

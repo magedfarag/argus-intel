@@ -252,6 +252,9 @@ docker compose logs -f api | grep -i "<connector-id>"
 | OpenSky | 10 min (unauthenticated: 1 req / 10 min) |
 | AISStream | 30 s (WebSocket; reconnect immediately on drop) |
 | Sentinel-2 / Landsat STAC | 2 min |
+| CelesTrak GP (`celestrak-gp-live`) | 60 min (TLE epoch updates are infrequent; do not hammer the public endpoint) |
+| FAA NOTAM (`faa-notam-live`) | 5 min |
+| ACLED Strike (`acled-strike-live`) | 15 min |
 
 ---
 
@@ -448,3 +451,60 @@ See also §3 (Rollback Procedure) for the Docker image rollback steps.
    ```
 6. Validate with the post-deployment checklist (§4).
 7. Re-import critical investigations from the exported JSON files if needed.
+
+---
+
+## 8. Operational Layer Connectors (Wave 1)
+
+The following connectors were added in Wave 1 of the Free/Open-Source API
+implementation plan.  Each is managed by its corresponding `*LayerService`
+singleton and reports health to `GET /api/v1/health/connectors`.
+
+### 8.1 CelesTrak GP Live (`celestrak-gp-live`)
+
+| Item | Detail |
+|---|---|
+| File | `src/connectors/celestrak_connector.py` |
+| Config key | `CELESTRAK_FETCH_TIMEOUT_SEC` (default: `30`) |
+| Registration | None — open data; <https://celestrak.org/> |
+| Fallback | `OrbitLayerService` falls back to seeded TLE stub if live fetch fails |
+| Degrades when | CelesTrak GP endpoint is unreachable or returns HTTP 5xx |
+
+**Ops notes:**  CelesTrak is a shared-resource public endpoint.  Do not poll
+more than once per hour.  A 5-minute orbital propagation tolerance means stale
+TLEs do not cause immediate position errors.
+
+### 8.2 FAA NOTAM Live (`faa-notam-live`)
+
+| Item | Detail |
+|---|---|
+| File | `src/connectors/faa_notam_connector.py` |
+| Config key | `FAA_NOTAM_CLIENT_ID` (required; empty → connector disabled) |
+| Registration | Free key at <https://api.faa.gov/> |
+| Fallback | `AirspaceLayerService` falls back to demo stub when key is absent |
+| Degrades when | FAA API is unreachable, returns 4xx/5xx, or client_id has expired |
+
+**Ops notes:**  ICAO location list defaults to KDCA/KJFK/KLAX/KORD/KATL.
+Override via `src/connectors/faa_notam_connector.py` `_DEFAULT_ICAO_LOCATIONS`
+or pass `icao_locations` at connector construction time.
+
+### 8.3 ACLED Strike Layer (`acled-strike-live`)
+
+| Item | Detail |
+|---|---|
+| File | `src/connectors/acled_strike_connector.py` |
+| Config keys | `ACLED_EMAIL`, `ACLED_PASSWORD` |
+| Registration | Free via myACLED: <https://acleddata.com/user/register> |
+| Fallback | `StrikeLayerService` falls back to stub when credentials are absent |
+| Degrades when | ACLED OAuth2 token URL unreachable, credentials invalid, or rate-limited |
+
+**Ops notes:**  ACLED is **non-commercial** and **AI/ML-use-restricted** without
+a written agreement.  Re-verify the OAuth2 token URL before production
+deployment (`ACLED_TOKEN_URL` in `.env.example`).
+
+### 8.4 GNSS Jamming (demo-only, permanent)
+
+The jamming lane is **permanently demo-only** (JAM-01 / JAM-03 decision in the
+implementation plan).  No live GNSS jamming source has been approved.  All
+jamming responses carry `is_demo_data: true`.  Do not use jamming data as a
+source of truth for real jamming activity.

@@ -47,8 +47,9 @@ def upgrade() -> None:
             nullable=False,
             comment="PostGIS geometry SRID=4326 stored as WKB/GeoJSON via GeoAlchemy2",
         ),
-        sa.Column("tags", JSONB, nullable=False, server_default="'[]'"),
-        sa.Column("metadata", JSONB, nullable=False, server_default="'{}'"),
+        sa.Column("tags", JSONB, nullable=False, server_default=sa.text("'[]'")),
+        sa.Column("metadata", JSONB, nullable=False, server_default=sa.text("'{}'")),
+
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("NOW()")),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("NOW()")),
         sa.Column("deleted", sa.Boolean, nullable=False, server_default="false"),
@@ -72,14 +73,15 @@ def upgrade() -> None:
         sa.Column("geometry", sa.Text, nullable=True),
         sa.Column("centroid", sa.Text, nullable=True),
         sa.Column("altitude_m", sa.Float, nullable=True),
-        sa.Column("attributes", JSONB, nullable=False, server_default="'{}'"),
+        sa.Column("attributes", JSONB, nullable=False, server_default=sa.text("'{}'")),
         sa.Column("normalization", JSONB, nullable=True),
         sa.Column("provenance", JSONB, nullable=True),
         sa.Column("license", JSONB, nullable=True),
         sa.Column("correlation_keys", JSONB, nullable=True),
         sa.Column("confidence", sa.Float, nullable=True),
-        sa.Column("quality_flags", JSONB, nullable=False, server_default="'[]'"),
-        sa.Column("tags", JSONB, nullable=False, server_default="'[]'"),
+        sa.Column("quality_flags", JSONB, nullable=False, server_default=sa.text("'[]'")),
+        sa.Column("tags", JSONB, nullable=False, server_default=sa.text("'[]'")),
+
         sa.Column("ingested_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("NOW()")),
         sa.Column("primary_aoi_id", sa.String(36), sa.ForeignKey("aois.id", ondelete="SET NULL"), nullable=True),
     )
@@ -127,10 +129,11 @@ def upgrade() -> None:
         sa.Column("distance_km", sa.Float, nullable=True),
         sa.Column("avg_speed_kn", sa.Float, nullable=True),
         sa.Column("track_geom", sa.Text, nullable=True),
-        sa.Column("attributes", JSONB, nullable=False, server_default="'{}'"),
+        sa.Column("attributes", JSONB, nullable=False, server_default=sa.text("'{}'")),
         sa.Column("ingested_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("NOW()")),
     )
-    op.create_index("ix_track_entity_start", "track_segments", ["entity_id", "segment_start"])
+    op.create_index("ix_track_entity_start"
+, "track_segments", ["entity_id", "segment_start"])
     op.create_index("ix_track_entity_type", "track_segments", ["entity_type"])
     op.execute("""
         ALTER TABLE track_segments
@@ -153,7 +156,8 @@ def upgrade() -> None:
         sa.Column("consecutive_errors", sa.Integer, nullable=False, server_default="0"),
         sa.Column("total_events_ingested", sa.BigInteger, nullable=False, server_default="0"),
         sa.Column("is_enabled", sa.Boolean, nullable=False, server_default="true"),
-        sa.Column("circuit_state", sa.String(16), nullable=False, server_default="'closed'"),
+        sa.Column("circuit_state", sa.String(16), nullable=False, server_default=sa.text("'closed'")),
+
         sa.Column("config_snapshot", JSONB, nullable=True),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("NOW()")),
     )
@@ -166,10 +170,12 @@ def upgrade() -> None:
         sa.Column("event_id", sa.String(128), nullable=False),
         sa.Column("aoi_id", sa.String(36), sa.ForeignKey("aois.id", ondelete="SET NULL"), nullable=True),
         sa.Column("analyst_id", sa.String(128), nullable=True),
-        sa.Column("review_status", sa.String(32), nullable=False, server_default="'pending'"),
+        sa.Column("review_status", sa.String(32), nullable=False, server_default=sa.text("'pending'")),
+
         sa.Column("confidence_override", sa.Float, nullable=True),
         sa.Column("notes", sa.Text, nullable=True),
-        sa.Column("evidence", JSONB, nullable=False, server_default="'{}'"),
+        sa.Column("evidence", JSONB, nullable=False, server_default=sa.text("'{}'")),
+
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("NOW()")),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("NOW()")),
     )

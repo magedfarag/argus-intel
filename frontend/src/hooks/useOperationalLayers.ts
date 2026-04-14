@@ -29,10 +29,12 @@ export function useOrbits(): {
   orbits: SatelliteOrbit[];
   loading: boolean;
   error: string | null;
+  isDemo: boolean;
 } {
   const [orbits, setOrbits] = useState<SatelliteOrbit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDemo, setIsDemo] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -40,7 +42,10 @@ export function useOrbits(): {
     setError(null);
 
     fetchOrbits(controller.signal)
-      .then(setOrbits)
+      .then(r => {
+        setOrbits(r.orbits);
+        setIsDemo(r.is_demo_data ?? false);
+      })
       .catch((err: unknown) => {
         if ((err as { name?: string }).name !== 'AbortError') {
           setError(err instanceof Error ? err.message : String(err));
@@ -51,7 +56,7 @@ export function useOrbits(): {
     return () => controller.abort();
   }, []);
 
-  return { orbits, loading, error };
+  return { orbits, loading, error, isDemo };
 }
 
 // ── Airspace layer ────────────────────────────────────────────────────────────
@@ -60,10 +65,12 @@ export function useAirspaceRestrictions(activeOnly?: boolean): {
   restrictions: AirspaceRestriction[];
   notams: NotamEvent[];
   loading: boolean;
+  isDemo: boolean;
 } {
   const [restrictions, setRestrictions] = useState<AirspaceRestriction[]>([]);
   const [notams, setNotams] = useState<NotamEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isDemo, setIsDemo] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -74,8 +81,9 @@ export function useAirspaceRestrictions(activeOnly?: boolean): {
       fetchNotams(undefined, controller.signal),
     ])
       .then(([r, n]) => {
-        setRestrictions(r);
-        setNotams(n);
+        setRestrictions(r.restrictions);
+        setNotams(n.notams);
+        setIsDemo((r.is_demo_data ?? false) || (n.is_demo_data ?? false));
       })
       .catch((err: unknown) => {
         if ((err as { name?: string }).name !== 'AbortError') {
@@ -88,7 +96,7 @@ export function useAirspaceRestrictions(activeOnly?: boolean): {
     return () => controller.abort();
   }, [activeOnly]);
 
-  return { restrictions, notams, loading };
+  return { restrictions, notams, loading, isDemo };
 }
 
 // ── GPS Jamming layer ─────────────────────────────────────────────────────────
@@ -97,10 +105,12 @@ export function useJammingLayer(confidenceMin?: number): {
   events: GpsJammingEvent[];
   heatmapPoints: HeatmapPoint[];
   loading: boolean;
+  isDemo: boolean;
 } {
   const [events, setEvents] = useState<GpsJammingEvent[]>([]);
   const [heatmapPoints, setHeatmapPoints] = useState<HeatmapPoint[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isDemo, setIsDemo] = useState(true); // jamming is permanently demo-only
 
   useEffect(() => {
     const controller = new AbortController();
@@ -110,9 +120,10 @@ export function useJammingLayer(confidenceMin?: number): {
       fetchJammingEvents(confidenceMin, controller.signal),
       fetchJammingHeatmap(controller.signal),
     ])
-      .then(([evts, pts]) => {
-        setEvents(evts);
+      .then(([evtsResp, pts]) => {
+        setEvents(evtsResp.events);
         setHeatmapPoints(pts);
+        setIsDemo(evtsResp.is_demo_data ?? true);
       })
       .catch((err: unknown) => {
         if ((err as { name?: string }).name !== 'AbortError') {
@@ -124,7 +135,7 @@ export function useJammingLayer(confidenceMin?: number): {
     return () => controller.abort();
   }, [confidenceMin]);
 
-  return { events, heatmapPoints, loading };
+  return { events, heatmapPoints, loading, isDemo };
 }
 
 // ── Strike layer ──────────────────────────────────────────────────────────────
@@ -133,10 +144,12 @@ export function useStrikeLayer(strikeType?: string): {
   strikes: StrikeEvent[];
   summary: Record<string, number>;
   loading: boolean;
+  isDemo: boolean;
 } {
   const [strikes, setStrikes] = useState<StrikeEvent[]>([]);
   const [summary, setSummary] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [isDemo, setIsDemo] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -146,9 +159,10 @@ export function useStrikeLayer(strikeType?: string): {
       fetchStrikeEvents(strikeType, undefined, controller.signal),
       fetchStrikeSummary(controller.signal),
     ])
-      .then(([evts, sum]) => {
-        setStrikes(evts);
+      .then(([evtsResp, sum]) => {
+        setStrikes(evtsResp.events);
         setSummary(sum);
+        setIsDemo(evtsResp.is_demo_data ?? false);
       })
       .catch((err: unknown) => {
         if ((err as { name?: string }).name !== 'AbortError') {
@@ -160,7 +174,7 @@ export function useStrikeLayer(strikeType?: string): {
     return () => controller.abort();
   }, [strikeType]);
 
-  return { strikes, summary, loading };
+  return { strikes, summary, loading, isDemo };
 }
 
 // ── Satellite passes ──────────────────────────────────────────────────────────

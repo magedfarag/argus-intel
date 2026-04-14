@@ -99,6 +99,13 @@ class AppSettings(BaseSettings):
         default="https://api.maxar.com/discovery/v1"
     )
 
+    # ── FAA NOTAM (airspace restrictions) ──────────────────────────────────────
+    # Register for a free API key at https://api.faa.gov/.
+    faa_notam_client_id: str | None = Field(
+        default=None,
+        description="FAA NOTAM API client_id (free) from https://api.faa.gov/. Required for live airspace data.",
+    )
+
     # ── Planet (PlanetScope / SkySat) ────────────────────────────────────────
     # Commercial daily revisit (3-5 m PlanetScope, 0.5 m SkySat).
     planet_api_key: str = Field(default="")
@@ -260,19 +267,29 @@ class AppSettings(BaseSettings):
         description="Number of hours over which to average forecast values per query",
     )
 
-    # ACLED Armed Conflict Location & Event Data (free with registration)
-    # Register at: https://acleddata.com (OAuth2 authentication)
+    # ACLED Armed Conflict Location & Event Data
+    # Register via myACLED at: https://acleddata.com/user/register
+    # IMPORTANT: Current onboarding is through myACLED; access levels, usage limits,
+    # and competitive/AI-use restrictions are enforced there. Commercial, competitive,
+    # and AI/ML use cases require explicit agreement with ACLED before production use.
+    # Re-verify onboarding flow at https://acleddata.com/myacled-faqs before deployment.
     acled_email: str = Field(
         default="",
-        description="Registered email for ACLED account",
+        description=(
+            "Registered email for ACLED myACLED account. "
+            "Commercial, competitive, and AI/ML use requires explicit ACLED agreement."
+        ),
     )
     acled_password: str = Field(
         default="",
-        description="Password for ACLED account",
+        description="Password for ACLED myACLED account",
     )
     acled_token_url: str = Field(
         default="https://acleddata.com/oauth/token",
-        description="ACLED OAuth2 token endpoint",
+        description=(
+            "ACLED OAuth2 token endpoint. Verify this is still the correct endpoint "
+            "at https://acleddata.com/api-documentation/getting-started before deployment."
+        ),
     )
     acled_api_url: str = Field(
         default="https://acleddata.com/api/acled/read",
@@ -341,7 +358,12 @@ class AppSettings(BaseSettings):
     )
     openaq_api_key: str = Field(
         default="",
-        description="Optional OpenAQ API key for increased rate limits",
+        description=(
+            "OpenAQ API key — required for the hosted OpenAQ v3 API (https://api.openaq.org). "
+            "Register and obtain a key at https://explore.openaq.org/register. "
+            "Without a key, requests to the hosted API will be rejected (401). "
+            "Self-hosted OpenAQ instances may not require a key."
+        ),
     )
 
     # Earth Search (Element 84) — free STAC, no auth
@@ -456,6 +478,12 @@ class AppSettings(BaseSettings):
 
     def vessel_data_is_configured(self) -> bool:
         return bool(self.vessel_data_api_key)
+
+    # ── CelesTrak orbit connector ─────────────────────────────────────────────
+    celestrak_fetch_timeout_sec: int = Field(
+        default=30,
+        description="HTTP request timeout in seconds for CelesTrak GP TLE fetch (ORB-01)",
+    )
 
     # ── Phase 6 Auth / RBAC ───────────────────────────────────────────────────
     jwt_secret: str = Field(

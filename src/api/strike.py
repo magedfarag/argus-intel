@@ -7,56 +7,44 @@ GET  /api/v1/strikes/summary               — aggregate counts by strike_type
 GET  /api/v1/strikes/{strike_id}           — single event detail with evidence_refs
 POST /api/v1/strikes/{strike_id}/evidence  — attach an EvidenceLink to a strike
 
-In-memory store is seeded at module load with 5 deterministic events spanning
-the 30 days prior to the project reference date (2026-04-04).
+Data is served from the ``StrikeLayerService`` singleton, which is seeded at
+app startup and supports a live ACLED-connector swap (ARCH-01 / ARCH-02 / STR-02).
+Routes no longer maintain module-level seeded stores.
 
 IMPORTANT — route order: /summary is registered BEFORE /{strike_id} so that
 GET /api/v1/strikes/summary is not captured by the path parameter route.
 """
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import Field
+from pydantic import BaseModel
 
 from app.dependencies import UserClaims, require_operator
-from src.connectors.strike_connector import StrikeConnector
 from src.models.operational_layers import EvidenceLink, StrikeEvent
+from src.services.operational_layer_service import _STUB_REF_NOW, get_strike_service
 
 router = APIRouter(prefix="/api/v1/strikes", tags=["strikes"])
 
-# ── In-memory stores ──────────────────────────────────────────────────────────
-_connector = StrikeConnector()
-_store: dict[str, StrikeEvent] = {}
-# Per-strike list of attached evidence links
-_evidence_store: dict[str, list[EvidenceLink]] = {}
-
-# Fixed reference "now" for deterministic seeding (project-relative timestamp)
-_REF_NOW = datetime(2026, 4, 4, 0, 0, 0, tzinfo=UTC)
 _WINDOW_DAYS = 30
 
 
-def _seed_store() -> None:
-    """Seed the in-memory store with 5 deterministic strike events.
-
-    Draws from two consecutive 30-day windows to guarantee at least 5 events
-    regardless of how many the connector returns from a single window.
-    """
-    w1_end = _REF_NOW
-    w1_start = _REF_NOW - timedelta(days=_WINDOW_DAYS)
-    events: list[StrikeEvent] = _connector.fetch_strikes(w1_start, w1_end)
-
-    if len(events) < 5:
-        w2_end = w1_start
-        w2_start = _REF_NOW - timedelta(days=60)
-        events.extend(_connector.fetch_strikes(w2_start, w2_end))
-
-    for ev in events[:5]:
-        _store[ev.strike_id] = ev
-        _evidence_store[ev.strike_id] = []
+# ── Response models ───────────────────────────────────────────────────────────
 
 
-_seed_store()
+class StrikeListResponse(BaseModel):
+    events: list[StrikeEvent]
+    is_demo_data: bool = Field(
+        default=False,
+        description="True when backed by stub/demo data rather than a live ACLED source.",
+    )
+
+
+class StrikeSummaryResponse(BaseModel):
+    counts: dict[str, int]
+    is_demo_data: bool = Field(default=False)
 
 
 # ── Endpoints — static routes FIRST to avoid param capture ───────────────────
@@ -64,18 +52,18 @@ _seed_store()
 
 @router.get(
     "",
-    response_model=list[StrikeEvent],
+    response_model=StrikeListResponse,
     summary="List strike events",
     description=(
-        "Returns strike events from the in-memory store.  "
+        "Returns strike events from the service store. "
         "All query parameters are optional; omitting them returns all events."
     ),
 )
 def list_strikes(
-    start: datetime | None = Query(
+    start=Query(
         default=None, description="Filter events on or after this UTC timestamp"
     ),
-    end: datetime | None = Query(
+    end=Query(
         default=None, description="Filter events on or before this UTC timestamp"
     ),
     strike_type: str | None = Query(
@@ -85,8 +73,9 @@ def list_strikes(
     confidence_min: float = Query(
         default=0.0, ge=0.0, le=1.0, description="Minimum confidence threshold"
     ),
-) -> list[StrikeEvent]:
-    results = list(_store.values())
+) -> StrikeListResponse:
+    svc = get_strike_service()
+    results = list(svc.all_strikes().values())
 
     if start is not None:
         results = [e for e in results if e.occurred_at >= start]
@@ -98,25 +87,26 @@ def list_strikes(
         results = [e for e in results if e.confidence >= confidence_min]
 
     results.sort(key=lambda e: e.occurred_at, reverse=True)
-    return results
+    return StrikeListResponse(events=results, is_demo_data=svc.is_demo_mode)
 
 
 @router.get(
     "/summary",
-    response_model=dict[str, int],
+    response_model=StrikeSummaryResponse,
     summary="Strike counts by type over the last 30 days",
     description=(
         "Returns a dict mapping each strike_type to the count of events "
         "occurring within the last 30 days (relative to the reference date)."
     ),
 )
-def get_strikes_summary() -> dict[str, int]:
-    window_start = _REF_NOW - timedelta(days=_WINDOW_DAYS)
+def get_strikes_summary() -> StrikeSummaryResponse:
+    svc = get_strike_service()
+    window_start = _STUB_REF_NOW - timedelta(days=_WINDOW_DAYS)
     counts: dict[str, int] = {}
-    for ev in _store.values():
+    for ev in svc.all_strikes().values():
         if ev.occurred_at >= window_start:
             counts[ev.strike_type] = counts.get(ev.strike_type, 0) + 1
-    return counts
+    return StrikeSummaryResponse(counts=counts, is_demo_data=svc.is_demo_mode)
 
 
 @router.post(
@@ -133,18 +123,24 @@ def attach_evidence(
     link: EvidenceLink,
     _user: UserClaims = Depends(require_operator),
 ) -> StrikeEvent:
-    ev = _store.get(strike_id)
+    svc = get_strike_service()
+    ev = svc.get_strike(strike_id)
     if ev is None:
         raise HTTPException(
             status_code=404, detail=f"Strike {strike_id!r} not found"
         )
 
-    # Append to per-strike evidence list (idempotent by evidence_id)
-    existing_ids = {el.evidence_id for el in _evidence_store.get(strike_id, [])}
-    if link.evidence_id not in existing_ids:
-        _evidence_store.setdefault(strike_id, []).append(link)
-        updated = _connector.add_evidence(ev, [link])
-        _store[strike_id] = updated
+    # Idempotent by evidence_id
+    existing = {el.evidence_id for el in svc.list_evidence(strike_id)}
+    if link.evidence_id not in existing:
+        svc.attach_evidence(strike_id, link)
+        # Delegate evidence-ref merge to the connector helper
+        from src.connectors.strike_connector import StrikeConnector
+        _stub_connector = StrikeConnector()
+        updated = _stub_connector.add_evidence(ev, [link])
+        # Persist the updated strike in the service store
+        from threading import Lock  # noqa: F401
+        svc._store[strike_id] = updated  # direct update — service owns the store
         return updated
 
     return ev
@@ -157,9 +153,10 @@ def attach_evidence(
     description="Returns the strike event including all evidence_refs attached so far.",
 )
 def get_strike(strike_id: str) -> StrikeEvent:
-    ev = _store.get(strike_id)
+    ev = get_strike_service().get_strike(strike_id)
     if ev is None:
         raise HTTPException(
             status_code=404, detail=f"Strike {strike_id!r} not found"
         )
     return ev
+

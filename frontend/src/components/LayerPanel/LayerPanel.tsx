@@ -1,3 +1,5 @@
+import { DemoBadge } from '../DemoBadge';
+
 interface LayerState {
   showAois: boolean;
   showImagery: boolean;
@@ -22,31 +24,38 @@ interface LayerState {
 interface Props {
   layers: LayerState;
   onChange: (layers: LayerState) => void;
+  /** Optional demo-data flags for operational layers — drives DemoBadge rendering. */
+  demoFlags?: {
+    orbits?: boolean;
+    airspace?: boolean;
+    jamming?: boolean;
+    strikes?: boolean;
+  };
 }
 
-const LAYERS: { key: keyof LayerState; label: string; color: string }[] = [
+const LAYERS: { key: keyof LayerState; label: string; color: string; demoFlagKey?: keyof NonNullable<Props['demoFlags']> }[] = [
   { key: "showAois",    label: "AOI Boundaries",    color: "#2196f3" },
   { key: "showImagery", label: "Imagery Footprints", color: "#4caf50" },
   { key: "showEvents",  label: "Events",             color: "#f59e0b" },
   { key: "showGdelt",   label: "GDELT Context",      color: "#9c27b0" },
   { key: "showShips",   label: "Maritime (AIS)",     color: "#14ba8c" },
   { key: "showAircraft",label: "Aviation (ADS-B)",   color: "#ff5722" },
-  { key: "showOrbits",        label: "Satellite Orbits",   color: "#00ff88" },
-  { key: "showAirspace",      label: "Airspace NFZ/TFR",   color: "#ff4444" },
-  { key: "showJamming",       label: "GPS Jamming",        color: "#ff3232" },
-  { key: "showStrikes",       label: "Strike Events",      color: "#ff2200" },
+  { key: "showOrbits",        label: "Satellite Orbits",   color: "#00ff88", demoFlagKey: "orbits"   },
+  { key: "showAirspace",      label: "Airspace NFZ/TFR",   color: "#ff4444", demoFlagKey: "airspace" },
+  { key: "showJamming",       label: "GPS Jamming",        color: "#ff3232", demoFlagKey: "jamming"  },
+  { key: "showStrikes",       label: "Strike Events",      color: "#ff2200", demoFlagKey: "strikes"  },
   { key: "showTerrain",       label: "Terrain (DEM)",      color: "#8b7355" },
   { key: "show3dBuildings",   label: "3D Buildings",       color: "#b0c4de" },
   { key: "showDetections",    label: "Detections (AI)",    color: "#ffdd00" },
   { key: "showSignals",       label: "Intel Signals",       color: "#22d3ee" },
 ];
 
-export function LayerPanel({ layers, onChange }: Props) {
+export function LayerPanel({ layers, onChange, demoFlags }: Props) {
   const showTrackControls = layers.showShips || layers.showAircraft;
   return (
     <div className="panel" data-testid="layer-panel">
       <h3 className="panel-title">Layers</h3>
-      {LAYERS.map(({ key, label, color }) => (
+      {LAYERS.map(({ key, label, color, demoFlagKey }) => (
         <label key={key} className="layer-toggle">
           <input
             type="checkbox"
@@ -55,6 +64,7 @@ export function LayerPanel({ layers, onChange }: Props) {
           />
           <span className="layer-dot" style={{ background: color }} />
           {label}
+          {demoFlagKey && <DemoBadge isDemo={demoFlags?.[demoFlagKey] ?? false} />}
         </label>
       ))}
       {/* P3-3.6: Track density control — shown when ships or aircraft layer is on */}

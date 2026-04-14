@@ -69,6 +69,16 @@ These do not register in `app/main.py`, but they are present in `app/workers/tas
 | RapidAPI AIS (generic bbox endpoint) | Worker-only, used by `poll_rapidapi_ais` when `RAPID_API_KEY` is set | `rapidapi-ais` in `src/connectors/rapidapi_ais.py` | AIS vessel positions from a third-party RapidAPI marketplace endpoint | RapidAPI Hub: <https://rapidapi.com/hub> | Pricing is marketplace-provider-defined, not fixed by our repo. RapidAPI supports monthly subscription, pay-per-use, and tiered plans depending on the listing. | RapidAPI key plus host header | This is a marketplace wrapper, not a first-party data owner integration. Use only if AISStream is unavailable or a commercial RapidAPI source is explicitly preferred. |
 | Vessel Data (RapidAPI) | Worker-only, used by `poll_vessel_data` when `VESSEL_DATA_API_KEY` is set | `vessel-data` in `src/connectors/vessel_data.py` | Vessel positions and related vessel data via `vessel-data.p.rapidapi.com` | Listing: <https://rapidapi.com/ai-box-ai-box-default/api/vessel-data> | Pricing varies by listing plan on RapidAPI; no stable public flat fee could be extracted from the static listing view during verification | RapidAPI key | Similar caution as generic RapidAPI AIS: this is marketplace-dependent and operational terms can change outside our control. |
 
+## Operational Layer Live Connectors (Wave 1)
+
+These connectors were added in Wave 1 of the Free/Open-Source API implementation plan. They replace the previously stub-only paths for orbit, airspace, and strike data.
+
+| Source | Connector ID | Repo code | Config keys | Registration | Fallback if unconfigured |
+|---|---|---|---|---|---|
+| CelesTrak GP (active satellites) | `celestrak-gp-live` | `src/connectors/celestrak_connector.py` | `CELESTRAK_FETCH_TIMEOUT_SEC` (default 30) | Open data, no registration required: <https://celestrak.org/> | Falls back to seeded TLE stub in `OrbitLayerService` |
+| FAA NOTAM Search API | `faa-notam-live` | `src/connectors/faa_notam_connector.py` | `FAA_NOTAM_CLIENT_ID` (required) | Free key at <https://api.faa.gov/> | `ConnectorError` raised at startup if `FAA_NOTAM_CLIENT_ID` is absent; `AirspaceLayerService` falls back to stub |
+| ACLED Strike Layer | `acled-strike-live` | `src/connectors/acled_strike_connector.py` | `ACLED_EMAIL`, `ACLED_PASSWORD` | Free via myACLED: <https://acleddata.com/user/register> — non-commercial only; AI/ML use requires written agreement | `StrikeLayerService` falls back to stub when credentials are absent |
+
 ## Local Stubs And Non-External Sources
 
 These appear in code, but they are not current live external data sources:
@@ -76,10 +86,10 @@ These appear in code, but they are not current live external data sources:
 | Source | Repo IDs / code | Why excluded from external inventory |
 |---|---|---|
 | Demo imagery provider | `app/providers/demo.py` | Synthetic deterministic construction scenarios only |
-| FAA NOTAM / airspace stub | `src/connectors/airspace_connector.py` (`faa-notam-stub`) | Local seeded in-memory data; no live FAA fetch |
-| CelesTrak TLE stub | `src/connectors/orbit_connector.py` (`celestrak-tle-stub`) | Uses representative seeded TLE text; no live CelesTrak pull |
-| GNSS jamming monitor stub | `src/connectors/jamming_connector.py` | Derived/stub output, not a real external source |
-| Strike reconstruction stub | `src/connectors/strike_connector.py` | Derived/stub output, not a real external source |
+| FAA NOTAM / airspace stub | `src/connectors/airspace_connector.py` (`faa-notam-stub`) | Fallback/demo path; superseded by `faa-notam-live` connector when `FAA_NOTAM_CLIENT_ID` is set |
+| CelesTrak TLE stub | `src/connectors/orbit_connector.py` (`celestrak-tle-stub`) | Fallback/demo path; superseded by `celestrak-gp-live` connector |
+| GNSS jamming monitor stub | `src/connectors/jamming_connector.py` | Permanently demo-only (JAM-01 decision — no approved live GNSS jamming source) |
+| Strike reconstruction stub | `src/connectors/strike_connector.py` | Fallback/demo path; superseded by `acled-strike-live` connector when ACLED credentials are set |
 
 ## Most Important Mismatches To Fix
 

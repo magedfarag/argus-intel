@@ -18,6 +18,7 @@ This documentation tree was consolidated on 2026-04-09 against the current codeb
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Current system architecture, mode behavior, runtime composition |
 | [API.md](API.md) | Current API surface, auth model, and route-group inventory |
 | [PROVIDERS.md](PROVIDERS.md) | Provider and connector matrix, credentials, and registration rules |
+| [FREE_OPEN_SOURCE_API_IMPLEMENTATION_PLAN.md](FREE_OPEN_SOURCE_API_IMPLEMENTATION_PLAN.md) | In-repo execution board for the remaining free/open-source API work, including task status, agent ownership, and parallel lanes |
 | [CHANGE_DETECTION.md](CHANGE_DETECTION.md) | V1 raster-based imagery change-detection pipeline |
 | [CONTRACTS.md](CONTRACTS.md) | Current contract boundaries and source-of-truth notes |
 | [domain/README.md](domain/README.md) | Domain-specific notes and preserved specialist references |

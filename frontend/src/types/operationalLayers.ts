@@ -88,3 +88,35 @@ export interface HeatmapPoint {
   lat: number;
   weight: number;
 }
+
+// ── List response envelopes (mirrors backend Pydantic list response models) ──
+
+export interface OrbitListResponse {
+  total: number;
+  orbits: SatelliteOrbit[];
+  is_demo_data?: boolean;
+}
+
+export interface RestrictionListResponse {
+  total: number;
+  active_only: boolean;
+  restrictions: AirspaceRestriction[];
+  is_demo_data?: boolean;
+}
+
+export interface NotamListResponse {
+  total: number;
+  icao_filter?: string | null;
+  notams: NotamEvent[];
+  is_demo_data?: boolean;
+}
+
+export interface JammingListResponse {
+  events: GpsJammingEvent[];
+  is_demo_data?: boolean;
+}
+
+export interface StrikeListResponse {
+  events: StrikeEvent[];
+  is_demo_data?: boolean;
+}

@@ -3,13 +3,13 @@
 
 import { getApiKey } from './client';
 import type {
-  SatelliteOrbit,
   SatellitePass,
-  AirspaceRestriction,
-  NotamEvent,
-  GpsJammingEvent,
   HeatmapPoint,
-  StrikeEvent,
+  OrbitListResponse,
+  RestrictionListResponse,
+  NotamListResponse,
+  JammingListResponse,
+  StrikeListResponse,
 } from '../types/operationalLayers';
 
 const BASE = '';
@@ -35,8 +35,8 @@ async function opRequest<T>(
 
 // ── Orbits ───────────────────────────────────────────────────────────────────
 
-export function fetchOrbits(signal?: AbortSignal): Promise<SatelliteOrbit[]> {
-  return opRequest<{ orbits: SatelliteOrbit[] }>('/api/v1/orbits', signal).then(r => r.orbits);
+export function fetchOrbits(signal?: AbortSignal): Promise<OrbitListResponse> {
+  return opRequest<OrbitListResponse>('/api/v1/orbits', signal);
 }
 
 export function fetchSatellitePasses(
@@ -62,18 +62,18 @@ export function fetchSatellitePasses(
 export function fetchAirspaceRestrictions(
   activeOnly?: boolean,
   signal?: AbortSignal,
-): Promise<AirspaceRestriction[]> {
+): Promise<RestrictionListResponse> {
   const params = new URLSearchParams();
   if (activeOnly !== undefined) params.set('active_only', String(activeOnly));
   const qs = params.toString() ? `?${params}` : '';
-  return opRequest<{ restrictions: AirspaceRestriction[] }>(`/api/v1/airspace/restrictions${qs}`, signal).then(r => r.restrictions);
+  return opRequest<RestrictionListResponse>(`/api/v1/airspace/restrictions${qs}`, signal);
 }
 
-export function fetchNotams(icao?: string, signal?: AbortSignal): Promise<NotamEvent[]> {
+export function fetchNotams(icao?: string, signal?: AbortSignal): Promise<NotamListResponse> {
   const params = new URLSearchParams();
   if (icao) params.set('icao', icao);
   const qs = params.toString() ? `?${params}` : '';
-  return opRequest<{ notams: NotamEvent[] }>(`/api/v1/airspace/notams${qs}`, signal).then(r => r.notams);
+  return opRequest<NotamListResponse>(`/api/v1/airspace/notams${qs}`, signal);
 }
 
 // ── GPS Jamming ────────────────────────────────────────────────────────────────
@@ -81,11 +81,11 @@ export function fetchNotams(icao?: string, signal?: AbortSignal): Promise<NotamE
 export function fetchJammingEvents(
   confidenceMin?: number,
   signal?: AbortSignal,
-): Promise<GpsJammingEvent[]> {
+): Promise<JammingListResponse> {
   const params = new URLSearchParams();
   if (confidenceMin !== undefined) params.set('confidence_min', String(confidenceMin));
   const qs = params.toString() ? `?${params}` : '';
-  return opRequest<GpsJammingEvent[]>(`/api/v1/jamming/events${qs}`, signal);
+  return opRequest<JammingListResponse>(`/api/v1/jamming/events${qs}`, signal);
 }
 
 export function fetchJammingHeatmap(signal?: AbortSignal): Promise<HeatmapPoint[]> {
@@ -98,12 +98,12 @@ export function fetchStrikeEvents(
   strikeType?: string,
   confidenceMin?: number,
   signal?: AbortSignal,
-): Promise<StrikeEvent[]> {
+): Promise<StrikeListResponse> {
   const params = new URLSearchParams();
   if (strikeType) params.set('strike_type', strikeType);
   if (confidenceMin !== undefined) params.set('confidence_min', String(confidenceMin));
   const qs = params.toString() ? `?${params}` : '';
-  return opRequest<StrikeEvent[]>(`/api/v1/strikes${qs}`, signal);
+  return opRequest<StrikeListResponse>(`/api/v1/strikes${qs}`, signal);
 }
 
 export function fetchStrikeSummary(signal?: AbortSignal): Promise<Record<string, number>> {

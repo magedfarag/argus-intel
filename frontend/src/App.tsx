@@ -527,7 +527,18 @@ function AppShell() {
               onClearPendingGeometry={() => setPendingGeometry(null)}
             />
           )}
-          {activePanel === "layers" && <LayerPanel layers={layers} onChange={setLayers} />}
+          {activePanel === "layers" && (
+            <LayerPanel
+              layers={layers}
+              onChange={setLayers}
+              demoFlags={{
+                orbits:   orbitsQuery.isDemo,
+                airspace: airspaceQuery.isDemo,
+                jamming:  jammingQuery.isDemo,
+                strikes:  strikesQuery.isDemo,
+              }}
+            />
+          )}
           {activePanel === "search" && (
             <SearchPanel
               aoiId={selectedAoiId}

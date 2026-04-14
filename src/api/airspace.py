@@ -7,52 +7,24 @@ GET  /api/v1/airspace/restrictions/{restriction_id}    — single restriction
 GET  /api/v1/airspace/notams                           — list NOTAMs
 GET  /api/v1/airspace/notams/{notam_id}                — single NOTAM
 
-In-memory stores (module-level dicts) are seeded at import time from the
-``AirspaceConnector`` stub data.  The ``active_only`` query parameter on the
-list endpoints filters by real-time UTC comparison.
+Data is served from the ``AirspaceLayerService`` singleton, which is seeded
+at app startup and supports a live-connector swap (ARCH-01 / ARCH-02 pattern).
+Routes no longer maintain module-level seeded stores.
 """
 from __future__ import annotations
 
 import logging
 
 from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-from src.connectors.airspace_connector import (
-    AirspaceConnector,
-    notam_to_canonical_event,
-    restriction_to_canonical_event,
-)
+from src.connectors.airspace_connector import AirspaceConnector
 from src.models.operational_layers import AirspaceRestriction, NotamEvent
-from src.services.event_store import get_default_event_store
+from src.services.operational_layer_service import get_airspace_service
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/airspace", tags=["airspace"])
-
-# ────────────────────────────────────────────────────────────────────────────
-# Module-level stores seeded from connector stub
-# ────────────────────────────────────────────────────────────────────────────
-
-_connector = AirspaceConnector()
-_connector.connect()
-
-# Restriction store: restriction_id → AirspaceRestriction
-_restriction_store: dict[str, AirspaceRestriction] = {
-    r.restriction_id: r for r in _connector.fetch_restrictions()
-}
-
-# NOTAM store: notam_id → NotamEvent
-_notam_store: dict[str, NotamEvent] = {
-    n.notam_id: n for n in _connector.fetch_notams()
-}
-
-# Push seed data into the canonical EventStore so events appear in searches.
-_event_store = get_default_event_store()
-_event_store.ingest_batch(
-    [restriction_to_canonical_event(r) for r in _restriction_store.values()]
-    + [notam_to_canonical_event(n) for n in _notam_store.values()]
-)
 
 # ────────────────────────────────────────────────────────────────────────────
 # Response models
@@ -62,12 +34,14 @@ class RestrictionListResponse(BaseModel):
     total: int
     active_only: bool
     restrictions: list[AirspaceRestriction]
+    is_demo_data: bool = Field(default=False, description="True when backed by stub/demo data")
 
 
 class NotamListResponse(BaseModel):
     total: int
     icao_filter: str | None
     notams: list[NotamEvent]
+    is_demo_data: bool = Field(default=False, description="True when backed by stub/demo data")
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -108,7 +82,7 @@ def list_restrictions(
         description="Bounding box filter: lon1,lat1,lon2,lat2 (WGS-84 decimal degrees)",
     ),
 ) -> RestrictionListResponse:
-    """Return airspace restrictions from the in-memory store.
+    """Return airspace restrictions from the service store.
 
     - ``active_only=true`` (default): compares UTC now against ``valid_from`` /
       ``valid_to``; restrictions outside the active window are excluded.
@@ -121,7 +95,8 @@ def list_restrictions(
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
-    candidates = list(_restriction_store.values())
+    svc = get_airspace_service()
+    candidates = list(svc.all_restrictions().values())
 
     if active_only:
         candidates = [r for r in candidates if AirspaceConnector.is_active(r)]
@@ -143,6 +118,7 @@ def list_restrictions(
         total=len(candidates),
         active_only=active_only,
         restrictions=candidates,
+        is_demo_data=svc.is_demo_mode,
     )
 
 
@@ -153,7 +129,7 @@ def list_restrictions(
 )
 def get_restriction(restriction_id: str) -> AirspaceRestriction:
     """Return the restriction record for the given ID, or 404 if unknown."""
-    restriction = _restriction_store.get(restriction_id)
+    restriction = get_airspace_service().get_restriction(restriction_id)
     if restriction is None:
         raise HTTPException(status_code=404, detail=f"Restriction not found: {restriction_id!r}")
     return restriction
@@ -176,11 +152,12 @@ def list_notams(
         max_length=4,
     ),
 ) -> NotamListResponse:
-    """Return NOTAMs from the in-memory store.
+    """Return NOTAMs from the service store.
 
     - ``icao``: case-insensitive match against ``NotamEvent.location_icao``.
     """
-    candidates = list(_notam_store.values())
+    svc = get_airspace_service()
+    candidates = list(svc.all_notams().values())
 
     if icao is not None:
         upper = icao.upper()
@@ -190,6 +167,7 @@ def list_notams(
         total=len(candidates),
         icao_filter=icao.upper() if icao else None,
         notams=candidates,
+        is_demo_data=svc.is_demo_mode,
     )
 
 
@@ -200,7 +178,7 @@ def list_notams(
 )
 def get_notam(notam_id: str) -> NotamEvent:
     """Return the NOTAM record for the given ID, or 404 if unknown."""
-    notam = _notam_store.get(notam_id)
+    notam = get_airspace_service().get_notam(notam_id)
     if notam is None:
         raise HTTPException(status_code=404, detail=f"NOTAM not found: {notam_id!r}")
     return notam

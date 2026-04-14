@@ -196,7 +196,7 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         v2_registry.register(NoaaSwpcConnector(api_url=settings.noaa_swpc_api_url))
     except Exception as exc:
         _log.getLogger(__name__).warning("NoaaSwpcConnector: %s", exc)
-    # OpenAQ Air Quality Network (zero auth)
+    # OpenAQ Air Quality Network (API key required for hosted API)
     try:
         from src.connectors.openaq import OpenAqConnector
         v2_registry.register(OpenAqConnector(
@@ -207,6 +207,17 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         _log.getLogger(__name__).warning("OpenAqConnector: %s", exc)
     from src.api.imagery import set_connector_registry, set_imagery_event_store
     set_connector_registry(v2_registry)
+
+    # ── Operational layer services (ARCH-01 / ARCH-02 / ARCH-03) ────────────
+    # Initialises the singleton services for orbit, airspace, jamming, and
+    # strike with the current APP_MODE and any available live connectors.
+    # Note: live connectors for these layers will be wired here once ORB-01,
+    # AIR-01, and STR-01 tasks land.  Until then, stub connectors are used.
+    try:
+        from src.services.operational_layer_service import initialize_operational_layers
+        initialize_operational_layers(settings)
+    except Exception as exc:
+        _log.getLogger(__name__).warning("Operational layer init failed: %s", exc)
 
     # Pre-register all V2 connectors into the health service so the health
     # dashboard shows every connector immediately — not only after first poll.
@@ -293,7 +304,7 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
             "open-meteo": "https://api.open-meteo.com/v1/forecast?latitude=51.5&longitude=0.1&hourly=cloud_cover&forecast_days=1",
             "nga-msi": "https://msi.nga.mil/api/publications/broadcast-warn?output=json&includePublications=true&status=active&navArea=IX",
             "osm-military": "https://overpass-api.de/api/status",
-            "nasa-firms": "https://firms.modaps.eosdis.nasa.gov/api/area/json/DEMO_KEY/VIIRS_SNPP_NRT/0,0,0.001,0.001/1",
+            "nasa-firms": f"https://firms.modaps.eosdis.nasa.gov/api/area/json/{settings.nasa_firms_map_key}/VIIRS_SNPP_NRT/0,0,1,1/1",
             "noaa-swpc": "https://services.swpc.noaa.gov/products/alerts.json",
             "openaq": "https://api.openaq.org/v3/locations?limit=1",
         }
