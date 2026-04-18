@@ -316,9 +316,11 @@ export function GlobeView({
 
     // Restore last globe viewport from localStorage; fall back to global overview default.
     let storedViewport: { lng: number; lat: number; zoom: number; pitch?: number; bearing?: number } | null = null;
+    let hasVisited = false;
     try {
       const raw = localStorage.getItem("geoint:globeViewport");
       if (raw) storedViewport = JSON.parse(raw) as typeof storedViewport;
+      hasVisited = !!localStorage.getItem("geoint:globeVisited");
     } catch { /* ignore corrupt data */ }
 
     const map = new maplibregl.Map({
@@ -455,9 +457,11 @@ export function GlobeView({
       (window as Window & { __argusMap?: maplibregl.Map }).__argusMap = map;
 
       // P6-7: God's Eye entry animation — descend from orbit to Hormuz.
-      // Skipped on subsequent visits when a persisted viewport is available.
-      if (!godsEyeFiredRef.current && !storedViewport) {
+      // Runs exactly once per browser (first visit). Uses a dedicated key so clearing
+      // the viewport does not re-trigger the animation.
+      if (!godsEyeFiredRef.current && !hasVisited) {
         godsEyeFiredRef.current = true;
+        try { localStorage.setItem("geoint:globeVisited", "1"); } catch { /* storage quota */ }
         setTimeout(() => {
           map.flyTo({
             center: [56.52, 26.35],   // Strait of Hormuz centroid
