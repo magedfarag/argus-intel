@@ -2,7 +2,7 @@
 // Replaces globe.gl (static JPEG texture → blurry on zoom) with MapLibre's
 // native globe projection which streams vector tiles at full resolution at
 // every zoom level — identical to the 2D view but rendered as a 3D sphere.
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -17,8 +17,6 @@ import type { DetectionOverlay } from "../../types/sensorFusion";
 import { chokepointsApi } from "../../api/client";
 import { darkShipsApi } from "../../api/client";
 import { MapLegend } from "../Map/MapLegend";
-import { MapPopup } from "../Map/MapPopup";
-import type { MapPopupData } from "../Map/MapPopup";
 import type { RenderMode } from "../../types/renderModes";
 import { RENDER_MODE_CONFIGS } from "../../types/renderModes";
 import { normalizeEntityAltitudeM } from "../../utils/entityAltitude";
@@ -219,6 +217,7 @@ interface Props {
   // Phase 4 Track C — entity selection + camera focus
   selectedEntityId?: string | null;
   centerPoint?: { lon: number; lat: number };
+  // Selected AOI ID for globe context
   selectedAoiId?: string | null;
 }
 
@@ -257,19 +256,7 @@ export function GlobeView({
   signalEvents = [], showSignalsLayer = false,
   selectedEntityId = null,
   centerPoint,
-  selectedAoiId,
 }: Props) {
-  // Draggable popup state
-  const [activePopups, setActivePopups] = useState<MapPopupData[]>([]);
-  const openPopupRef = useRef<(x: number, y: number, html: string) => void>(() => {});
-  openPopupRef.current = (x: number, y: number, html: string) => {
-    const id = `popup-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    setActivePopups(prev => [...prev, { id, x, y, html }]);
-  };
-  const closePopup = useCallback((id: string) => {
-    setActivePopups(prev => prev.filter(p => p.id !== id));
-  }, []);
-
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const deckRef = useRef<MapboxOverlay | null>(null);
@@ -327,22 +314,13 @@ export function GlobeView({
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Restore last globe viewport from localStorage; fall back to global overview default.
-    let storedViewport: { lng: number; lat: number; zoom: number; pitch?: number; bearing?: number } | null = null;
-    let hasVisited = false;
-    try {
-      const raw = localStorage.getItem("geoint:globeViewport");
-      if (raw) storedViewport = JSON.parse(raw) as typeof storedViewport;
-      hasVisited = !!localStorage.getItem("geoint:globeVisited");
-    } catch { /* ignore corrupt data */ }
-
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: GLOBE_STYLE_URL,
-      center: storedViewport ? [storedViewport.lng, storedViewport.lat] : [30, 20],
-      zoom: storedViewport?.zoom ?? 1.5,
-      pitch: storedViewport?.pitch ?? 30,
-      bearing: storedViewport?.bearing ?? 20,
+      center: [30, 20],   // Africa / Middle East centre for good global perspective
+      zoom: 1.5,
+      pitch: 30,          // tilt for 3-D sphere feel
+      bearing: 20,
     });
     mapRef.current = map;
 
@@ -368,17 +346,6 @@ export function GlobeView({
     
     // Backup: Also listen to window resize events
     window.addEventListener('resize', handleResize);
-
-    // Persist viewport on every pan/zoom so it survives page reloads.
-    map.on("moveend", () => {
-      const { lng, lat } = map.getCenter();
-      const zoom = map.getZoom();
-      const pitch = map.getPitch();
-      const bearing = map.getBearing();
-      try {
-        localStorage.setItem("geoint:globeViewport", JSON.stringify({ lng, lat, zoom, pitch, bearing }));
-      } catch { /* storage quota exceeded — ignore */ }
-    });
 
     // Defensive font remapper — patches any loaded style that references fonts not
     // hosted on OpenFreeMap (e.g. old Carto Voyager style migrated its glyphs URL to
@@ -411,11 +378,6 @@ export function GlobeView({
     map.on("load", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (map as any).setProjection({ type: "globe" });
-
-      // Globe projection does not support fog — remove it from the loaded style
-      // to suppress the "calculateFogMatrix is not supported on globe projection" warning.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      try { (map as any).setFog(null); } catch { /* MapLibre version may not support setFog */ }
 
       // Ensure map is properly sized after load
       requestAnimationFrame(() => {
@@ -469,12 +431,9 @@ export function GlobeView({
       // Expose map instance for Playwright demo recording (dev / demo mode only)
       (window as Window & { __argusMap?: maplibregl.Map }).__argusMap = map;
 
-      // P6-7: God's Eye entry animation — descend from orbit to Hormuz.
-      // Runs exactly once per browser (first visit). Uses a dedicated key so clearing
-      // the viewport does not re-trigger the animation.
-      if (!godsEyeFiredRef.current && !hasVisited) {
+      // P6-7: God's Eye entry animation — descend from orbit to Hormuz
+      if (!godsEyeFiredRef.current) {
         godsEyeFiredRef.current = true;
-        try { localStorage.setItem("geoint:globeVisited", "1"); } catch { /* storage quota */ }
         setTimeout(() => {
           map.flyTo({
             center: [56.52, 26.35],   // Strait of Hormuz centroid
@@ -838,11 +797,14 @@ export function GlobeView({
       if (!feat || feat.geometry.type !== "Point") return;
       const [lng, lat] = (feat.geometry as GeoJSON.Point).coordinates;
       const p = feat.properties as Record<string, unknown>;
-      openPopupRef.current(e.point.x, e.point.y, buildEntityPopupHtml(
-        String(p.id ?? ""), String(p.entityType ?? ""),
-        Number(p.heading ?? 0), Number(p.speedKts ?? 0),
-        Number(p.lastSeenUnix ?? 0), lng, lat, Number(p.altitudeM ?? 0),
-      ));
+      new maplibregl.Popup({ closeButton: true, maxWidth: "300px" })
+        .setLngLat([lng, lat])
+        .setHTML(buildEntityPopupHtml(
+          String(p.id ?? ""), String(p.entityType ?? ""),
+          Number(p.heading ?? 0), Number(p.speedKts ?? 0),
+          Number(p.lastSeenUnix ?? 0), lng, lat, Number(p.altitudeM ?? 0),
+        ))
+        .addTo(map);
     };
     const handleEventClick = (e: maplibregl.MapLayerMouseEvent) => {
       const feat = e.features?.[0];
@@ -874,7 +836,10 @@ export function GlobeView({
       }
       content += `</div></div>`;
       
-      openPopupRef.current(e.point.x, e.point.y, content);
+      new maplibregl.Popup({ closeButton: true, maxWidth: "320px" })
+        .setLngLat([lng, lat])
+        .setHTML(content)
+        .addTo(map);
     };
     const handleGdeltClick = (e: maplibregl.MapLayerMouseEvent) => {
       const feat = e.features?.[0];
@@ -904,7 +869,10 @@ export function GlobeView({
       }
       content += `</div></div>`;
       
-      openPopupRef.current(e.point.x, e.point.y, content);
+      new maplibregl.Popup({ closeButton: true, maxWidth: "320px" })
+        .setLngLat([lng, lat])
+        .setHTML(content)
+        .addTo(map);
     };
     const handleSignalClick = (e: maplibregl.MapLayerMouseEvent) => {
       const feat = e.features?.[0];
@@ -913,14 +881,20 @@ export function GlobeView({
       const p = feat.properties as Record<string, unknown>;
       const label = String(p.type ?? "").replace(/_/g, " ").toUpperCase();
       const conf = p.confidence != null ? `${Math.round(Number(p.confidence) * 100)}%` : "\u2014";
-      openPopupRef.current(e.point.x, e.point.y, `<div class="entity-popup"><div class="entity-popup-header">\u26a1 ${label}</div><div class="entity-popup-id">${String(p.id ?? "")}</div><div class="entity-popup-grid"><span class="ep-label">Source</span><span class="ep-val">${String(p.source ?? "\u2014")}</span><span class="ep-label">Confidence</span><span class="ep-val">${conf}</span></div></div>`);
+      new maplibregl.Popup({ closeButton: true, maxWidth: "280px" })
+        .setLngLat([lng, lat])
+        .setHTML(`<div class="entity-popup"><div class="entity-popup-header">\u26a1 ${label}</div><div class="entity-popup-id">${String(p.id ?? "")}</div><div class="entity-popup-grid"><span class="ep-label">Source</span><span class="ep-val">${String(p.source ?? "\u2014")}</span><span class="ep-label">Confidence</span><span class="ep-val">${conf}</span></div></div>`)
+        .addTo(map);
     };
     const handleDarkShipClick = (e: maplibregl.MapLayerMouseEvent) => {
       const feat = e.features?.[0];
       if (!feat || feat.geometry.type !== "Point") return;
       const [lng, lat] = (feat.geometry as GeoJSON.Point).coordinates;
       const p = feat.properties as Record<string, unknown>;
-      openPopupRef.current(e.point.x, e.point.y, `<div class="entity-popup entity-popup-ship"><div class="entity-popup-header">\uD83D\uDD26 DARK SHIP</div><div class="entity-popup-id">${String(p.label ?? "")}</div><div class="entity-popup-grid"><span class="ep-label">Confidence</span><span class="ep-val">${String(p.conf ?? "\u2014")}%</span></div></div>`);
+      new maplibregl.Popup({ closeButton: true, maxWidth: "280px" })
+        .setLngLat([lng, lat])
+        .setHTML(`<div class="entity-popup entity-popup-ship"><div class="entity-popup-header">\uD83D\uDD26 DARK SHIP</div><div class="entity-popup-id">${String(p.label ?? "")}</div><div class="entity-popup-grid"><span class="ep-label">Confidence</span><span class="ep-val">${String(p.conf ?? "\u2014")}%</span></div></div>`)
+        .addTo(map);
     };
     const cursorOn  = () => { map.getCanvas().style.cursor = "pointer"; };
     const cursorOff = () => { map.getCanvas().style.cursor = ""; };
@@ -1181,7 +1155,7 @@ export function GlobeView({
         // ["zoom"] must be the top-level interpolate input — cannot nest inside ["*"].
         "circle-radius": ["interpolate", ["linear"], ["zoom"],
           1, ["case", ["==", ["get", "selected"], 1], 6, 3],
-          6, ["case", ["==", ["get", "selected"], 1], ["*", ["coalesce", ["get", "confidence"], 0.5], 24], ["*", ["coalesce", ["get", "confidence"], 0.5], 12]],
+          6, ["case", ["==", ["get", "selected"], 1], ["*", ["get", "confidence"], 24], ["*", ["get", "confidence"], 12]],
         ] as unknown as number,
         "circle-opacity": 0.85,
         "circle-stroke-color": "#ffffff",
@@ -1226,39 +1200,6 @@ export function GlobeView({
       : [];
     flushOverlay();
   }, [showDetectionsLayer, detections]);
-
-  // Fly to selected AOI bounds when selection changes or when style first loads (3D globe).
-  const prevGlobeAoiIdRef = useRef<string | null | undefined>(undefined);
-  useEffect(() => {
-    const map = mapRef.current;
-    // Wait for style — early return leaves prevRef untouched so zoom fires once style is ready
-    if (!map || !styleLoaded || !selectedAoiId) return;
-    if (prevGlobeAoiIdRef.current === (selectedAoiId ?? null)) return;
-    prevGlobeAoiIdRef.current = selectedAoiId ?? null;
-    const aoi = aois.find(a => a.id === selectedAoiId);
-    if (!aoi?.geometry) return;
-    const geom = aoi.geometry as GeoJSON.Geometry;
-    function collectCoords(g: GeoJSON.Geometry): number[][] {
-      if (g.type === "Point") return [g.coordinates as number[]];
-      if (g.type === "MultiPoint") return g.coordinates as number[][];
-      if (g.type === "LineString") return g.coordinates as number[][];
-      if (g.type === "MultiLineString") return (g.coordinates as number[][][]).flat();
-      if (g.type === "Polygon") return (g.coordinates as number[][][]).flat();
-      if (g.type === "MultiPolygon") return (g.coordinates as number[][][][]).flat(2);
-      return [];
-    }
-    const coords = collectCoords(geom);
-    if (coords.length === 0) return;
-    const lons = coords.map(c => c[0]);
-    const lats = coords.map(c => c[1]);
-    const minLon = Math.min(...lons), maxLon = Math.max(...lons);
-    const minLat = Math.min(...lats), maxLat = Math.max(...lats);
-    if (minLon === maxLon && minLat === maxLat) {
-      map.flyTo({ center: [minLon, minLat], zoom: 10, pitch: 30, duration: 900 });
-    } else {
-      map.fitBounds([[minLon, minLat], [maxLon, maxLat]], { padding: 80, maxZoom: 12, pitch: 30, duration: 900 });
-    }
-  }, [selectedAoiId, aois, styleLoaded]);
 
   // Phase 4 Track C — fly to camera focus point
   useEffect(() => {
@@ -1326,9 +1267,6 @@ export function GlobeView({
           {perfReport.fps} FPS · {perfReport.frameMs}ms{perfReport.isDenseView ? " · DENSE" : ""}
         </div>
       )}
-      {activePopups.map(p => (
-        <MapPopup key={p.id} {...p} onClose={closePopup} />
-      ))}
     </div>
   );
 }

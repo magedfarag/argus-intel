@@ -1,7 +1,7 @@
-# Architecture — ARGUS Multi-Domain Surveillance Intelligence v6.0
+# Architecture — ARGUS Multi-Domain Surveillance Intelligence v6.1
 
-**Date**: 2026-04-04  
-**Version**: 6.0.0  
+**Date**: 2026-04-19  
+**Version**: 2.0.0  
 **Mode**: FastAPI + React + Redis + Celery + rasterio + PostgreSQL  
 **Status**: Production Release Candidate — all 6 transformation phases complete
 
@@ -58,6 +58,7 @@ Tokens are issued by `create_access_token(user_id, role)` and verified by `get_c
 - `API_KEY` not set (dev mode) — all requests treated as `admin`.
 - Raw `API_KEY` match maps to `analyst` role.
 - `ADMIN_API_KEY` / `OPERATOR_API_KEY` / `ANALYST_API_KEY` env vars enable direct tiered key issuance.
+- `JWT_SECRET` is used as the HMAC signing key; falls back to `API_KEY`.
 
 ### Audit logging
 
@@ -83,7 +84,29 @@ Exposed at `/api/v1/health/connectors` (per-connector health) and `/api/v1/healt
 
 Prometheus scrape endpoint at `/metrics` (requires `prometheus-fastapi-instrumentator`).
 
-Background health prober runs every 5 minutes and probes all registered STAC catalogs + GDELT + OpenSky.
+Background health prober runs every 5 minutes and probes all registered STAC catalogs, GDELT, OpenSky, AISStream, USGS Earthquake, NASA EONET, Open-Meteo, NGA MSI, OSM Overpass, NASA FIRMS, NOAA SWPC, and OpenAQ (15 targets total).
+
+### Performance Budget Middleware (Phase 6 Track B)
+
+`PerformanceBudgetMiddleware` (registered on `app` in `main.py`) enforces per-endpoint latency and payload budgets:
+
+- Budget violations are logged as `WARNING` and increment `performance_budget_violations_total`.
+- Zero blocking I/O; uses `Content-Length` header for payload size checks — body is never buffered.
+- Budgets defined in `app/performance_budgets.py` (e.g., replay query ≤ 3 s, evidence pack export ≤ 10 s).
+
+### Cost Guardrails (Phase 6 Track B)
+
+`app/cost_guardrails.py` enforces per-user per-hour operation caps:
+
+- `max_briefings_per_hour_per_user` (default 10)
+- `max_evidence_packs_per_hour_per_user` (default 20)
+- `max_export_size_mb` (default 50 MB)
+- Admin users bypass all guardrails.
+- In-process counters; replace with Redis INCR/EXPIRE for multi-worker deployments.
+
+### Cache Statistics (Phase 6 Track B)
+
+`GET /api/v1/cache/stats` — returns hit/miss rates, eviction count, and live entry count for the in-process query cache (`app/cache/query_cache.py`).
 
 See `docs/ALERTING_RULES.md` for the 8 Prometheus alerting rules and `docs/RUNBOOK.md` for incident response procedures.
 
@@ -115,6 +138,7 @@ See `docs/ALERTING_RULES.md` for the 8 Prometheus alerting rules and `docs/RUNBO
 │ V1 Routers (app/routers/):                          │
 │   ├─ health.py:          GET /api/health            │
 │   ├─ health_connectors:  GET /api/v1/health/connectors, /metrics│
+│   ├─ cache_stats.py:     GET /api/v1/cache/stats    │
 │   ├─ config_router.py:   GET /api/config            │
 │   ├─ providers_router.py: GET /api/providers        │
 │   ├─ analyze.py:         POST /api/analyze          │
@@ -265,7 +289,7 @@ See `docs/ALERTING_RULES.md` for the 8 Prometheus alerting rules and `docs/RUNBO
   - Respects CircuitBreaker state per provider
   - Maintains request counts for credits endpoint
 
-### **Services** (`backend/app/services/`)
+### **Services** (`app/services/`)
 
 - **analysis.py**: `AnalysisService`
   - Orchestrates: cache → search → select → detect → format
@@ -275,10 +299,11 @@ See `docs/ALERTING_RULES.md` for the 8 Prometheus alerting rules and `docs/RUNBO
   - Ranks by: cloud%, recency, scene quality
   - Returns before/after pair for change detection
 
-- **change_detection.py**: `ChangeDetectionService`
+- **change_detection.py**: `run_change_detection()`
   - Streams COG via HTTPS
   - Computes NDVI via rasterio
   - Detects clusters via scikit-image + morphology
+  - Public entrypoint is the module-level `run_change_detection` function (no class wrapper)
 
 - **job_manager.py**: `JobManager`
   - Write-through persistence: Redis → PostgreSQL → Memory
@@ -297,7 +322,7 @@ See `docs/ALERTING_RULES.md` for the 8 Prometheus alerting rules and `docs/RUNBO
   - LRU cache (max 128 entries)
   - Graceful degradation: returns None if rasterio unavailable
 
-### **Cache** (`backend/app/cache/`)
+### **Cache** (`app/cache/`)
 
 - **client.py**: `CacheClient`
   - Primary: Redis (pipelined, atomic key expiry)
@@ -305,7 +330,7 @@ See `docs/ALERTING_RULES.md` for the 8 Prometheus alerting rules and `docs/RUNBO
   - Methods: `get()`, `set()`, `delete()`, `stats()`, `is_healthy()`
   - TTL configurable via `CACHE_TTL_SECONDS` env
 
-### **Resilience** (`backend/app/resilience/`)
+### **Resilience** (`app/resilience/`)
 
 - **circuit_breaker.py**: Per-provider state machine
   - States: CLOSED (normal) → OPEN (failed) → HALF_OPEN (probe)
@@ -321,7 +346,7 @@ See `docs/ALERTING_RULES.md` for the 8 Prometheus alerting rules and `docs/RUNBO
   - Limits: 5/min analyze, 10/min search, 20/min jobs
   - Returns HTTP 429 with structured JSON error
 
-### **Models** (`backend/app/models/`)
+### **Models** (`app/models/`)
 
 - **requests.py**: Pydantic v2 request validation
   - `AnalyzeRequest`, `SearchRequest`
@@ -337,9 +362,11 @@ See `docs/ALERTING_RULES.md` for the 8 Prometheus alerting rules and `docs/RUNBO
 - **scene.py**: Scene metadata
   - `SceneMetadata`: id, provider, satellite, dates, cloud%, bbox, resolution
 
-### **Routers** (`backend/app/routers/`)
+### **Routers** (`app/routers/`)
 
 - **health.py**: GET /api/health (no auth)
+- **health_connectors.py**: GET /api/v1/health/connectors, GET /api/v1/health/metrics (no auth)
+- **cache_stats.py**: GET /api/v1/cache/stats (no auth)
 - **config_router.py**: GET /api/config (no auth)
 - **providers_router.py**: GET /api/providers (no auth)
 - **analyze.py**: POST /api/analyze (auth + rate-limited)
@@ -428,38 +455,76 @@ Output: Change Records
 All via environment variables (`.env` file). See `.env.example` for full reference.
 
 ```
-# App mode: demo | staging | production
-APP_MODE=staging
+# ── App mode ───────────────────────────────────────────────────────────────
+APP_MODE=staging                        # demo | staging | production
 
-# Providers
+# ── Imagery providers ──────────────────────────────────────────────────────
 SENTINEL2_CLIENT_ID=...                 # Leave empty to skip Sentinel-2
 SENTINEL2_CLIENT_SECRET=...
 # Landsat: no auth needed for STAC search
 MAXAR_API_KEY=...                       # Leave empty to skip Maxar
 PLANET_API_KEY=...                      # Leave empty to skip Planet
 
-# Cache
+# ── STAC catalogs ──────────────────────────────────────────────────────────
+EARTH_SEARCH_STAC_URL=https://earth-search.aws.element84.com/v1
+PLANETARY_COMPUTER_STAC_URL=https://planetarycomputer.microsoft.com/api/stac/v1
+PLANETARY_COMPUTER_TOKEN=               # Optional subscription key
+
+# ── Maritime connectors ────────────────────────────────────────────────────
+AISSTREAM_API_KEY=                      # AISStream WebSocket (https://aisstream.io)
+RAPID_API_KEY=                          # RapidAPI subscription key
+RAPID_API_HOST=                         # RapidAPI maritime host
+VESSEL_DATA_API_KEY=                    # VesselData REST API key
+
+# ── Context / event connectors ─────────────────────────────────────────────
+OPENSKY_USERNAME=                       # Optional; improves OpenSky rate limits
+OPENSKY_PASSWORD=
+ACLED_EMAIL=                            # myACLED account (commercial use requires ACLED agreement)
+ACLED_PASSWORD=
+
+# ── Environmental / signals connectors ───────────────────────────────────
+NASA_FIRMS_MAP_KEY=DEMO_KEY             # Free key from https://firms.modaps.eosdis.nasa.gov/
+OPENAQ_API_KEY=                         # Required for hosted OpenAQ v3 API
+
+# ── Airspace ───────────────────────────────────────────────────────────────
+FAA_NOTAM_CLIENT_ID=                    # Free from https://api.faa.gov/
+
+# ── Cache ──────────────────────────────────────────────────────────────────
 REDIS_URL=redis://localhost:6379        # Leave empty to use TTLCache only
 CACHE_TTL_SECONDS=3600
+CACHE_TTL_TIMELINE_SECONDS=300          # Hot timeline window TTL
+CACHE_TTL_STAC_SECONDS=900             # STAC search result TTL
+CACHE_TTL_PLAYBACK_SECONDS=120         # Playback query result TTL
+CACHE_TTL_SOURCE_HEALTH_SECONDS=60     # Source health snapshot TTL
 
-# Database (optional — for persistent job history)
-DATABASE_URL=postgresql+psycopg2://user:pass@localhost:5432/construction_monitor
+# ── Database (optional — for persistent job history + PostGIS) ─────────────
+DATABASE_URL=postgresql+psycopg2://user:pass@localhost:5432/argus
 
-# Celery / Async
+# ── Object storage (MinIO local / S3-compatible production) ───────────────
+OBJECT_STORAGE_ENDPOINT=               # e.g. http://localhost:9000
+OBJECT_STORAGE_BUCKET=geoint-raw
+OBJECT_STORAGE_ACCESS_KEY=
+OBJECT_STORAGE_SECRET_KEY=
+
+# ── Celery / Async ─────────────────────────────────────────────────────────
 CELERY_BROKER_URL=${REDIS_URL}          # Same as REDIS_URL
 ASYNC_AREA_THRESHOLD_KM2=25.0          # Trigger async for AOI > 25 km²
 
-# Resilience
-CIRCUIT_BREAKER_FAILURE_THRESHOLD=5     # Open after 5 failures
-CIRCUIT_BREAKER_RECOVERY_TIMEOUT=60     # Try recovery after 60s
+# ── Resilience ─────────────────────────────────────────────────────────────
+CIRCUIT_BREAKER_FAILURE_THRESHOLD=5    # Open after 5 failures
+CIRCUIT_BREAKER_RECOVERY_TIMEOUT=60   # Try recovery after 60s
 
-# Security
-ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000,http://127.0.0.1:8000
-API_KEY=                                # Set to a strong value for production
+# ── Security ───────────────────────────────────────────────────────────────
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173,http://localhost:8000,http://127.0.0.1:8000
+API_KEY=                               # Set to a strong value for production
+JWT_SECRET=                            # HMAC signing key; falls back to API_KEY
+ADMIN_API_KEY=                         # Direct admin-tier key issuance
+OPERATOR_API_KEY=                      # Direct operator-tier key issuance
+ANALYST_API_KEY=                       # Direct analyst-tier key issuance
 
-# Logging
-LOG_LEVEL=INFO                          # DEBUG | INFO | WARNING | ERROR
-LOG_FORMAT=json                         # or text
+# ── Logging ────────────────────────────────────────────────────────────────
+LOG_LEVEL=INFO                         # DEBUG | INFO | WARNING | ERROR
+LOG_FORMAT=json                        # or text
 ```
 
 ---
@@ -480,16 +545,57 @@ LOG_FORMAT=json                         # or text
 ## **V2 Operational and Intelligence Layers (src/)**
 
 All V2 services share an in-memory `EventStore` seeded at startup by `src/services/demo_seeder.py`.
+In non-demo modes the AOI store is seeded with the Strait of Hormuz geometry; no synthetic events are injected.
 
 ### **Unified Data Plane** (`src/`)
 
 | Module | Purpose |
 |---|---|
-| `src/connectors/` | STAC (Earth Search, Planetary Computer, CDSE Sentinel-2, USGS Landsat), GDELT, AIS, OpenSky |
+| `src/connectors/` | STAC catalogs, GDELT, AIS, OpenSky, ACLED, USGS Earthquake, NASA EONET, NASA FIRMS, NOAA SWPC, NGA MSI, OSM Military, Open-Meteo, OpenAQ, RapidAPI AIS, VesselData, Celestrak (orbits), FAA NOTAM, ACLED Strike |
 | `src/services/event_store.py` | Canonical in-memory event store shared by all V2 routers |
-| `src/services/playback.py` | Time-window slice queries; 24h / 7d / 30d replay windows |
+| `src/services/playback_service.py` | Time-window slice queries; 24h / 7d / 30d replay windows |
 | `src/services/change_analytics.py` | Cross-event trend analysis |
+| `src/services/telemetry_store.py` | Ship/aircraft position persistence with configurable retention and downsampling (PostGIS-swap-ready) |
+| `src/services/v2_cache.py` | Typed Redis/TTLCache helpers for V2 services (timeline, STAC, playback, health TTLs) |
+| `src/services/entity_classification.py` | Entity classification and threat scoring |
+| `src/services/operational_layer_service.py` | Singleton initialisation for orbit, airspace, jamming, and strike services |
+| `src/services/parquet_export.py` | Parquet file generation for bulk event export |
+| `src/services/vessel_registry.py` | Vessel metadata lookup by MMSI / IMO |
 | `src/normalization/pipeline.py` | Deduplication + ingestion pipeline |
+| `src/normalization/deduplication.py` | Event deduplication by hash fingerprint |
+| `src/storage/database.py` | SQLAlchemy engine bootstrap and `create_all_tables()` helper |
+| `src/storage/models.py` | SQLAlchemy ORM models for PostGIS-backed persistence |
+
+### **Connector Registry** (`src/connectors/`)
+
+| Connector | Auth | Data Type |
+|---|---|---|
+| `earth_search.py` | None (public) | Imagery catalog (STAC) |
+| `planetary_computer.py` | Optional subscription key | Imagery catalog (STAC) |
+| `sentinel2.py` | OAuth2 (CDSE) | Imagery catalog (STAC) |
+| `landsat.py` | None (USGS public) | Imagery catalog (STAC) |
+| `gdelt.py` | None (public) | Context events |
+| `ais_stream.py` | `AISSTREAM_API_KEY` | Maritime telemetry (WebSocket) |
+| `opensky.py` | Optional username/password | Aviation telemetry |
+| `rapidapi_ais.py` | `RAPID_API_KEY` | Maritime telemetry (REST bbox poll) |
+| `vessel_data.py` | `VESSEL_DATA_API_KEY` | Maritime telemetry (center+radius poll) |
+| `usgs_earthquake.py` | None (public) | Seismic events |
+| `nasa_eonet.py` | None (public) | Natural events |
+| `open_meteo.py` | None (CC BY 4.0) | Weather forecast |
+| `acled.py` | OAuth2 (myACLED) | Armed conflict events |
+| `acled_strike_connector.py` | OAuth2 (myACLED) | Strike / kinetic events |
+| `nga_msi.py` | None (US Gov public domain) | Maritime safety broadcast warnings |
+| `osm_military.py` | None (ODbL) | Military feature geometries |
+| `nasa_firms.py` | Free MAP_KEY (DEMO_KEY default) | Active fire / thermal anomaly |
+| `noaa_swpc.py` | None (public) | Space weather alerts |
+| `openaq.py` | Optional API key | Air quality |
+| `orbit_connector.py` | None (Celestrak) | Satellite TLE / pass predictions |
+| `celestrak_connector.py` | None (Celestrak) | Celestial track data |
+| `airspace_connector.py` | Optional FAA NOTAM client ID | No-fly zones / NOTAM |
+| `faa_notam_connector.py` | `FAA_NOTAM_CLIENT_ID` (free) | FAA NOTAM airspace restrictions |
+| `jamming_connector.py` | None | GPS/GNSS jamming events |
+| `strike_connector.py` | None | Strike reconstruction events |
+| `stac_normalizer.py` | — | Shared STAC response normalizer |
 
 ### **Operational Layers (Phase 2)**
 
@@ -516,7 +622,7 @@ All V2 services share an in-memory `EventStore` seeded at startup by `src/servic
 | `src/api/cameras.py` | `/api/v1/cameras` | Camera feed inventory; nearest observation by time |
 | `src/api/detections.py` | `/api/v1/detections` | Detection overlays (confidence radius, click popups) |
 
-**Camera observation model**: `CameraObservation` records bearing, elevation, and confidence for each camera-entity pair.  Nearest observations to `currentTime` drive the frontend highlight pass.
+**Camera observation model**: `CameraObservation` records bearing, elevation, and confidence for each camera-entity pair. Nearest observations to `currentTime` drive the frontend highlight pass.
 
 ### **Investigation Workflows (Phase 5)**
 
@@ -541,6 +647,6 @@ All V2 services share an in-memory `EventStore` seeded at startup by `src/servic
 1. **Postgres persistence**: Replace in-memory AOI, event, investigation stores with PostGIS
 2. **Redis caching**: Replace per-worker in-process rate limiter with shared Redis state
 3. **External identity provider**: Replace HMAC-self-signed tokens with OAuth2 / OIDC
-4. **Live connector activation**: Activate AIS, OpenSky, GDELT connectors with real credentials
-5. **3D terrain streaming**: Replace flat-earth orbit approximations with WGS-84 ellipsoid model
-6. **Streaming tiles**: Sliding-window analysis instead of before/after scene pair
+4. **3D terrain streaming**: Replace flat-earth orbit approximations with WGS-84 ellipsoid model
+5. **Streaming tiles**: Sliding-window analysis instead of before/after scene pair
+6. **Multi-worker cost guardrails**: Replace in-process per-user counters with Redis INCR/EXPIRE for accurate cross-worker enforcement

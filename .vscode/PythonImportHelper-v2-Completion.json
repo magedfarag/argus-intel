@@ -1812,6 +1812,62 @@
         "documentation": {}
     },
     {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
         "label": "op",
         "importPath": "alembic",
         "description": "alembic",
@@ -2249,6 +2305,14 @@
     },
     {
         "label": "Annotated",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
         "importPath": "typing",
         "description": "typing",
         "isExtraImport": true,
@@ -5315,6 +5379,70 @@
     },
     {
         "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "UTC",
         "importPath": "datetime",
         "description": "datetime",
         "isExtraImport": true,
@@ -11805,6 +11933,38 @@
         "documentation": {}
     },
     {
+        "label": "ThreadPoolExecutor",
+        "importPath": "concurrent.futures",
+        "description": "concurrent.futures",
+        "isExtraImport": true,
+        "detail": "concurrent.futures",
+        "documentation": {}
+    },
+    {
+        "label": "TimeoutError",
+        "importPath": "concurrent.futures",
+        "description": "concurrent.futures",
+        "isExtraImport": true,
+        "detail": "concurrent.futures",
+        "documentation": {}
+    },
+    {
+        "label": "ThreadPoolExecutor",
+        "importPath": "concurrent.futures",
+        "description": "concurrent.futures",
+        "isExtraImport": true,
+        "detail": "concurrent.futures",
+        "documentation": {}
+    },
+    {
+        "label": "TimeoutError",
+        "importPath": "concurrent.futures",
+        "description": "concurrent.futures",
+        "isExtraImport": true,
+        "detail": "concurrent.futures",
+        "documentation": {}
+    },
+    {
         "label": "CanonicalEvent",
         "importPath": "src.models.canonical_event",
         "description": "src.models.canonical_event",
@@ -11822,6 +11982,14 @@
     },
     {
         "label": "CanonicalEvent",
+        "importPath": "src.models.canonical_event",
+        "description": "src.models.canonical_event",
+        "isExtraImport": true,
+        "detail": "src.models.canonical_event",
+        "documentation": {}
+    },
+    {
+        "label": "EventType",
         "importPath": "src.models.canonical_event",
         "description": "src.models.canonical_event",
         "isExtraImport": true,
@@ -15478,6 +15646,22 @@
         "documentation": {}
     },
     {
+        "label": "poll_live_connectors",
+        "importPath": "src.api.events",
+        "description": "src.api.events",
+        "isExtraImport": true,
+        "detail": "src.api.events",
+        "documentation": {}
+    },
+    {
+        "label": "poll_live_connectors",
+        "importPath": "src.api.events",
+        "description": "src.api.events",
+        "isExtraImport": true,
+        "detail": "src.api.events",
+        "documentation": {}
+    },
+    {
         "label": "router",
         "importPath": "src.api.events",
         "description": "src.api.events",
@@ -18154,6 +18338,14 @@
         "documentation": {}
     },
     {
+        "label": "_parse_ais_timestamp",
+        "importPath": "src.connectors.ais_stream",
+        "description": "src.connectors.ais_stream",
+        "isExtraImport": true,
+        "detail": "src.connectors.ais_stream",
+        "documentation": {}
+    },
+    {
         "label": "PILOT_AOIS",
         "importPath": "src.models.pilot_aois",
         "description": "src.models.pilot_aois",
@@ -18806,12 +18998,48 @@
         "documentation": {}
     },
     {
+        "label": "json,",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json.",
+        "description": "json.",
+        "detail": "json.",
+        "documentation": {}
+    },
+    {
+        "label": "websockets",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "websockets",
+        "description": "websockets",
+        "detail": "websockets",
+        "documentation": {}
+    },
+    {
         "label": "requests,",
         "kind": 6,
         "isExtraImport": true,
         "importPath": "requests.",
         "description": "requests.",
         "detail": "requests.",
+        "documentation": {}
+    },
+    {
+        "label": "urllib.error",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "urllib.error",
+        "description": "urllib.error",
+        "detail": "urllib.error",
+        "documentation": {}
+    },
+    {
+        "label": "urllib.request",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "urllib.request",
+        "description": "urllib.request",
+        "detail": "urllib.request",
         "documentation": {}
     },
     {
@@ -20457,7 +20685,7 @@
         "kind": 5,
         "importPath": "app.main",
         "description": "app.main",
-        "peekOfCode": "app = FastAPI(\n    title=\"ARGUS — Multi-Domain Surveillance Intelligence\",\n    version=\"2.0.0\",\n    description=\"Multi-domain surveillance: ships, aircraft, satellites, events, and signals intelligence.\",\n    lifespan=lifespan,\n)\n_STATIC_ROOT = Path(__file__).resolve().parent / \"static\"\n_STATIC_ROOT.mkdir(parents=True, exist_ok=True)\n(_STATIC_ROOT / \"assets\").mkdir(parents=True, exist_ok=True)\n(_STATIC_ROOT / \"demo\" / \"clips\").mkdir(parents=True, exist_ok=True)",
+        "peekOfCode": "app = FastAPI(\n    title=\"ARGUS — Multi-Domain Surveillance Intelligence\",\n    version=\"2.0.0\",\n    description=\"Multi-domain surveillance: ships, aircraft, satellites, events, and signals intelligence.\",\n    lifespan=lifespan,\n    # Disable automatic trailing-slash redirects (307) — they cause\n    # strict-origin-when-cross-origin browser errors when a Vite dev proxy\n    # passes the redirect to the browser with the backend host in the\n    # Location header. All API routes are defined without trailing slashes.\n    redirect_slashes=False,",
         "detail": "app.main",
         "documentation": {}
     },
@@ -21294,7 +21522,16 @@
         "kind": 2,
         "importPath": "src.api.dark_ships",
         "description": "src.api.dark_ships",
-        "peekOfCode": "def set_event_store(store: Any) -> None:\n    \"\"\"Inject the shared EventStore. Called from app lifespan.\"\"\"\n    global _event_store\n    _event_store = store\nclass DetectRequest(BaseModel):\n    events: list[CanonicalEvent]\ndef list_demo_candidates() -> DarkShipDetectionResponse:\n    \"\"\"Return a fixed set of curated demo dark-ship candidates for testing / demo mode.\n    These are drawn from known sanctioned/shadow-fleet vessels in the vessel registry\n    and are NOT served by the live ``list_candidates()`` endpoint (which queries the",
+        "peekOfCode": "def set_event_store(store: Any) -> None:\n    \"\"\"Inject the shared EventStore. Called from app lifespan.\"\"\"\n    global _event_store\n    _event_store = store\ndef set_connector_registry(registry: Any) -> None:\n    \"\"\"Inject the shared V2 ConnectorRegistry. Called from app lifespan.\"\"\"\n    global _connector_registry\n    _connector_registry = registry\n# Default AoI for best-effort AIS live poll: Strait of Hormuz + surrounding waters.\n# Used only when the EventStore has no ship_position events and no spatial context",
+        "detail": "src.api.dark_ships",
+        "documentation": {}
+    },
+    {
+        "label": "set_connector_registry",
+        "kind": 2,
+        "importPath": "src.api.dark_ships",
+        "description": "src.api.dark_ships",
+        "peekOfCode": "def set_connector_registry(registry: Any) -> None:\n    \"\"\"Inject the shared V2 ConnectorRegistry. Called from app lifespan.\"\"\"\n    global _connector_registry\n    _connector_registry = registry\n# Default AoI for best-effort AIS live poll: Strait of Hormuz + surrounding waters.\n# Used only when the EventStore has no ship_position events and no spatial context\n# is available from the incoming request.\n_HORMUZ_BBOX_GEOM: dict = {\n    \"type\": \"Polygon\",\n    \"coordinates\": [[",
         "detail": "src.api.dark_ships",
         "documentation": {}
     },
@@ -21330,7 +21567,7 @@
         "kind": 5,
         "importPath": "src.api.dark_ships",
         "description": "src.api.dark_ships",
-        "peekOfCode": "log = logging.getLogger(__name__)\nrouter = APIRouter(prefix=\"/api/v1/dark-ships\", tags=[\"dark-ships\"])\n# Module-level EventStore reference — injected by app lifespan\n_event_store: Any | None = None\ndef set_event_store(store: Any) -> None:\n    \"\"\"Inject the shared EventStore. Called from app lifespan.\"\"\"\n    global _event_store\n    _event_store = store\nclass DetectRequest(BaseModel):\n    events: list[CanonicalEvent]",
+        "peekOfCode": "log = logging.getLogger(__name__)\nrouter = APIRouter(prefix=\"/api/v1/dark-ships\", tags=[\"dark-ships\"])\n# Module-level EventStore reference — injected by app lifespan\n_event_store: Any | None = None\n# Module-level ConnectorRegistry reference — injected by app lifespan\n_connector_registry: Any | None = None\ndef set_event_store(store: Any) -> None:\n    \"\"\"Inject the shared EventStore. Called from app lifespan.\"\"\"\n    global _event_store\n    _event_store = store",
         "detail": "src.api.dark_ships",
         "documentation": {}
     },
@@ -21339,7 +21576,7 @@
         "kind": 5,
         "importPath": "src.api.dark_ships",
         "description": "src.api.dark_ships",
-        "peekOfCode": "router = APIRouter(prefix=\"/api/v1/dark-ships\", tags=[\"dark-ships\"])\n# Module-level EventStore reference — injected by app lifespan\n_event_store: Any | None = None\ndef set_event_store(store: Any) -> None:\n    \"\"\"Inject the shared EventStore. Called from app lifespan.\"\"\"\n    global _event_store\n    _event_store = store\nclass DetectRequest(BaseModel):\n    events: list[CanonicalEvent]\ndef list_demo_candidates() -> DarkShipDetectionResponse:",
+        "peekOfCode": "router = APIRouter(prefix=\"/api/v1/dark-ships\", tags=[\"dark-ships\"])\n# Module-level EventStore reference — injected by app lifespan\n_event_store: Any | None = None\n# Module-level ConnectorRegistry reference — injected by app lifespan\n_connector_registry: Any | None = None\ndef set_event_store(store: Any) -> None:\n    \"\"\"Inject the shared EventStore. Called from app lifespan.\"\"\"\n    global _event_store\n    _event_store = store\ndef set_connector_registry(registry: Any) -> None:",
         "detail": "src.api.dark_ships",
         "documentation": {}
     },
@@ -21377,6 +21614,24 @@
         "description": "src.api.detections",
         "peekOfCode": "router = APIRouter(prefix=\"/api/v1/detections\", tags=[\"detections\"])\n# Per-detection evidence lists (idempotent by evidence_id)\n_detection_evidence: dict[str, list[EvidenceLink]] = {\n    det_id: [] for det_id in _detection_store\n}\n# ── Endpoints ─────────────────────────────────────────────────────────────────\n@router.get(\n    \"\",\n    response_model=list[DetectionOverlay],\n    summary=\"List detection overlays\",",
         "detail": "src.api.detections",
+        "documentation": {}
+    },
+    {
+        "label": "set_connector_registry",
+        "kind": 2,
+        "importPath": "src.api.events",
+        "description": "src.api.events",
+        "peekOfCode": "def set_connector_registry(registry: Any) -> None:\n    \"\"\"Inject the shared V2 ConnectorRegistry. Called from app lifespan.\"\"\"\n    global _connector_registry\n    _connector_registry = registry\n# Event types that can be fetched live from a connector when the store is empty.\n# Maps EventType value → ordered list of connector_ids to try (all are attempted;\n# REST connectors first for speed, WebSocket last as fallback).\n_LIVE_POLL_MAP: dict[str, list[str]] = {\n    EventType.SHIP_POSITION.value: [\"ais-stream\"],\n    EventType.AIRCRAFT_POSITION.value: [\"opensky\"],",
+        "detail": "src.api.events",
+        "documentation": {}
+    },
+    {
+        "label": "poll_live_connectors",
+        "kind": 2,
+        "importPath": "src.api.events",
+        "description": "src.api.events",
+        "peekOfCode": "def poll_live_connectors(\n    geometry: dict,\n    start_time: datetime,\n    end_time: datetime,\n    store: EventStore,\n    event_types: list | None = None,\n) -> int:\n    \"\"\"Poll live connectors and ingest results into the store.\n    Shared helper used by both /events/search and /playback/query so that\n    any endpoint that reads from the EventStore can prime it on a cache miss.",
+        "detail": "src.api.events",
         "documentation": {}
     },
     {
@@ -21425,11 +21680,20 @@
         "documentation": {}
     },
     {
+        "label": "log",
+        "kind": 5,
+        "importPath": "src.api.events",
+        "description": "src.api.events",
+        "peekOfCode": "log = logging.getLogger(__name__)\nrouter = APIRouter(prefix=\"/api/v1/events\", tags=[\"events\"])\n# ── P5-1.5: Density reduction threshold (can be overridden via AppSettings) ───\n_DENSITY_THRESHOLD: int = 500\n_DENSITY_MAX_RESULTS: int = 200\n# ── Connector registry (injected by app lifespan for best-effort live poll) ───\n_connector_registry: Any | None = None\ndef set_connector_registry(registry: Any) -> None:\n    \"\"\"Inject the shared V2 ConnectorRegistry. Called from app lifespan.\"\"\"\n    global _connector_registry",
+        "detail": "src.api.events",
+        "documentation": {}
+    },
+    {
         "label": "router",
         "kind": 5,
         "importPath": "src.api.events",
         "description": "src.api.events",
-        "peekOfCode": "router = APIRouter(prefix=\"/api/v1/events\", tags=[\"events\"])\n# ── P5-1.5: Density reduction threshold (can be overridden via AppSettings) ───\n_DENSITY_THRESHOLD: int = 500\n_DENSITY_MAX_RESULTS: int = 200\n# ── Dependency ────────────────────────────────────────────────────────────────\n# _store is the process-wide singleton.  Tests that import _store directly may\n# clear _store._events for isolation.  get_event_store() always dereferences\n# the current singleton so pollers, the events router, and the playback router\n# share the same in-memory store.\n_store: EventStore = get_default_event_store()",
+        "peekOfCode": "router = APIRouter(prefix=\"/api/v1/events\", tags=[\"events\"])\n# ── P5-1.5: Density reduction threshold (can be overridden via AppSettings) ───\n_DENSITY_THRESHOLD: int = 500\n_DENSITY_MAX_RESULTS: int = 200\n# ── Connector registry (injected by app lifespan for best-effort live poll) ───\n_connector_registry: Any | None = None\ndef set_connector_registry(registry: Any) -> None:\n    \"\"\"Inject the shared V2 ConnectorRegistry. Called from app lifespan.\"\"\"\n    global _connector_registry\n    _connector_registry = registry",
         "detail": "src.api.events",
         "documentation": {}
     },
@@ -27824,6 +28088,15 @@
         "documentation": {}
     },
     {
+        "label": "TestParseAisTimestamp",
+        "kind": 6,
+        "importPath": "tests.unit.test_ais_connector",
+        "description": "tests.unit.test_ais_connector",
+        "peekOfCode": "class TestParseAisTimestamp:\n    def test_iso_format(self) -> None:\n        result = _parse_ais_timestamp(\"2026-04-01T10:00:00+00:00\")\n        assert result is not None\n        assert result == datetime(2026, 4, 1, 10, 0, 0, tzinfo=timezone.utc)\n    def test_go_style_format_with_nanoseconds(self) -> None:\n        result = _parse_ais_timestamp(\"2026-04-16 19:11:49.371039786 +0000 UTC\")\n        assert result is not None\n        assert result.year == 2026\n        assert result.month == 4",
+        "detail": "tests.unit.test_ais_connector",
+        "documentation": {}
+    },
+    {
         "label": "TestAisNormalize",
         "kind": 6,
         "importPath": "tests.unit.test_ais_connector",
@@ -34205,12 +34478,291 @@
         "documentation": {}
     },
     {
+        "label": "xget",
+        "kind": 2,
+        "importPath": "tools.run_hormuz_test",
+        "description": "tools.run_hormuz_test",
+        "peekOfCode": "def xget(path):\n    try:\n        with urllib.request.urlopen(f\"{BASE}{path}\", timeout=30) as r: return json.load(r), None\n    except urllib.error.HTTPError as e: return None, f\"HTTP {e.code}: {e.read().decode()[:100]}\"\n    except Exception as e: return None, str(e)[:80]\ndef xpost(path, body):\n    d = json.dumps(body).encode()\n    req = urllib.request.Request(f\"{BASE}{path}\", data=d, headers={\"Content-Type\":\"application/json\"}, method=\"POST\")\n    try:\n        with urllib.request.urlopen(req, timeout=45) as r: return json.load(r), None",
+        "detail": "tools.run_hormuz_test",
+        "documentation": {}
+    },
+    {
+        "label": "xpost",
+        "kind": 2,
+        "importPath": "tools.run_hormuz_test",
+        "description": "tools.run_hormuz_test",
+        "peekOfCode": "def xpost(path, body):\n    d = json.dumps(body).encode()\n    req = urllib.request.Request(f\"{BASE}{path}\", data=d, headers={\"Content-Type\":\"application/json\"}, method=\"POST\")\n    try:\n        with urllib.request.urlopen(req, timeout=45) as r: return json.load(r), None\n    except urllib.error.HTTPError as e: return None, f\"HTTP {e.code}: {e.read().decode()[:150]}\"\n    except Exception as e: return None, str(e)[:80]\nrows = []\n# 1 - IMAGERY SEARCH\nr, err = xpost(\"/api/v1/imagery/search\", {\"geometry\":POLY,\"start_time\":T1,\"end_time\":T2,\"max_cloud_cover\":30})",
+        "detail": "tools.run_hormuz_test",
+        "documentation": {}
+    },
+    {
+        "label": "BASE",
+        "kind": 5,
+        "importPath": "tools.run_hormuz_test",
+        "description": "tools.run_hormuz_test",
+        "peekOfCode": "BASE = \"http://localhost:8000\"\nPOLY = {\"type\":\"Polygon\",\"coordinates\":[[[55.0,25.0],[58.0,25.0],[58.0,28.0],[55.0,28.0],[55.0,25.0]]]}\nLON, LAT = 56.5, 26.5\nBBOX = \"55.0,25.0,58.0,28.0\"\nT1, T2 = \"2026-03-15T00:00:00Z\", \"2026-04-15T00:00:00Z\"\n# Live-telemetry tests (#16, #17, #20) use a rolling window that includes NOW\n# so that best-effort live-poll events (ingested with event_time=now) are visible.\n_NOW = datetime.now(timezone.utc)\nT_LIVE1 = (_NOW - timedelta(hours=2)).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\nT_LIVE2 = (_NOW + timedelta(hours=1)).strftime(\"%Y-%m-%dT%H:%M:%SZ\")",
+        "detail": "tools.run_hormuz_test",
+        "documentation": {}
+    },
+    {
+        "label": "POLY",
+        "kind": 5,
+        "importPath": "tools.run_hormuz_test",
+        "description": "tools.run_hormuz_test",
+        "peekOfCode": "POLY = {\"type\":\"Polygon\",\"coordinates\":[[[55.0,25.0],[58.0,25.0],[58.0,28.0],[55.0,28.0],[55.0,25.0]]]}\nLON, LAT = 56.5, 26.5\nBBOX = \"55.0,25.0,58.0,28.0\"\nT1, T2 = \"2026-03-15T00:00:00Z\", \"2026-04-15T00:00:00Z\"\n# Live-telemetry tests (#16, #17, #20) use a rolling window that includes NOW\n# so that best-effort live-poll events (ingested with event_time=now) are visible.\n_NOW = datetime.now(timezone.utc)\nT_LIVE1 = (_NOW - timedelta(hours=2)).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\nT_LIVE2 = (_NOW + timedelta(hours=1)).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\ndef xget(path):",
+        "detail": "tools.run_hormuz_test",
+        "documentation": {}
+    },
+    {
+        "label": "BBOX",
+        "kind": 5,
+        "importPath": "tools.run_hormuz_test",
+        "description": "tools.run_hormuz_test",
+        "peekOfCode": "BBOX = \"55.0,25.0,58.0,28.0\"\nT1, T2 = \"2026-03-15T00:00:00Z\", \"2026-04-15T00:00:00Z\"\n# Live-telemetry tests (#16, #17, #20) use a rolling window that includes NOW\n# so that best-effort live-poll events (ingested with event_time=now) are visible.\n_NOW = datetime.now(timezone.utc)\nT_LIVE1 = (_NOW - timedelta(hours=2)).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\nT_LIVE2 = (_NOW + timedelta(hours=1)).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\ndef xget(path):\n    try:\n        with urllib.request.urlopen(f\"{BASE}{path}\", timeout=30) as r: return json.load(r), None",
+        "detail": "tools.run_hormuz_test",
+        "documentation": {}
+    },
+    {
+        "label": "_NOW",
+        "kind": 5,
+        "importPath": "tools.run_hormuz_test",
+        "description": "tools.run_hormuz_test",
+        "peekOfCode": "_NOW = datetime.now(timezone.utc)\nT_LIVE1 = (_NOW - timedelta(hours=2)).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\nT_LIVE2 = (_NOW + timedelta(hours=1)).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\ndef xget(path):\n    try:\n        with urllib.request.urlopen(f\"{BASE}{path}\", timeout=30) as r: return json.load(r), None\n    except urllib.error.HTTPError as e: return None, f\"HTTP {e.code}: {e.read().decode()[:100]}\"\n    except Exception as e: return None, str(e)[:80]\ndef xpost(path, body):\n    d = json.dumps(body).encode()",
+        "detail": "tools.run_hormuz_test",
+        "documentation": {}
+    },
+    {
+        "label": "T_LIVE1",
+        "kind": 5,
+        "importPath": "tools.run_hormuz_test",
+        "description": "tools.run_hormuz_test",
+        "peekOfCode": "T_LIVE1 = (_NOW - timedelta(hours=2)).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\nT_LIVE2 = (_NOW + timedelta(hours=1)).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\ndef xget(path):\n    try:\n        with urllib.request.urlopen(f\"{BASE}{path}\", timeout=30) as r: return json.load(r), None\n    except urllib.error.HTTPError as e: return None, f\"HTTP {e.code}: {e.read().decode()[:100]}\"\n    except Exception as e: return None, str(e)[:80]\ndef xpost(path, body):\n    d = json.dumps(body).encode()\n    req = urllib.request.Request(f\"{BASE}{path}\", data=d, headers={\"Content-Type\":\"application/json\"}, method=\"POST\")",
+        "detail": "tools.run_hormuz_test",
+        "documentation": {}
+    },
+    {
+        "label": "T_LIVE2",
+        "kind": 5,
+        "importPath": "tools.run_hormuz_test",
+        "description": "tools.run_hormuz_test",
+        "peekOfCode": "T_LIVE2 = (_NOW + timedelta(hours=1)).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\ndef xget(path):\n    try:\n        with urllib.request.urlopen(f\"{BASE}{path}\", timeout=30) as r: return json.load(r), None\n    except urllib.error.HTTPError as e: return None, f\"HTTP {e.code}: {e.read().decode()[:100]}\"\n    except Exception as e: return None, str(e)[:80]\ndef xpost(path, body):\n    d = json.dumps(body).encode()\n    req = urllib.request.Request(f\"{BASE}{path}\", data=d, headers={\"Content-Type\":\"application/json\"}, method=\"POST\")\n    try:",
+        "detail": "tools.run_hormuz_test",
+        "documentation": {}
+    },
+    {
+        "label": "rows",
+        "kind": 5,
+        "importPath": "tools.run_hormuz_test",
+        "description": "tools.run_hormuz_test",
+        "peekOfCode": "rows = []\n# 1 - IMAGERY SEARCH\nr, err = xpost(\"/api/v1/imagery/search\", {\"geometry\":POLY,\"start_time\":T1,\"end_time\":T2,\"max_cloud_cover\":30})\nif err:\n    rows.append((\"FAIL\",\"01\",\"Imagery Search (STAC multi-catalog)\",\"POST /api/v1/imagery/search\",err,[]))\nelse:\n    total = r.get(\"total_items\", r.get(\"total\", 0))\n    items = r.get(\"items\", r.get(\"scenes\", []))\n    by_c = {}\n    for s in items:",
+        "detail": "tools.run_hormuz_test",
+        "documentation": {}
+    },
+    {
+        "label": "hormuz_id",
+        "kind": 5,
+        "importPath": "tools.run_hormuz_test",
+        "description": "tools.run_hormuz_test",
+        "peekOfCode": "hormuz_id = None\nif err:\n    rows.append((\"FAIL\",\"12\",\"Maritime Chokepoints\",\"GET /api/v1/chokepoints\",err,[]))\nelse:\n    items = r.get(\"chokepoints\", r if isinstance(r,list) else [])\n    details = []\n    for cp in (items if isinstance(items,list) else []):\n        nm = cp.get(\"name\",\"?\")\n        if \"hormuz\" in nm.lower(): hormuz_id = cp.get(\"id\", cp.get(\"chokepoint_id\"))\n        star = \"*** \" if \"hormuz\" in nm.lower() else \"    \"",
+        "detail": "tools.run_hormuz_test",
+        "documentation": {}
+    },
+    {
+        "label": "total",
+        "kind": 5,
+        "importPath": "tools.run_hormuz_test",
+        "description": "tools.run_hormuz_test",
+        "peekOfCode": "total = r.get(\"total\",0) if r else 0\nrows.append((\"OK\" if total else \"EMPTY\",\"16\",\"AIS Ship Positions (event store)\",\"POST /api/v1/events/search {event_types=[ship_position]}\",f\"total={total}\",[\"  AIS store empty — needs AISSTREAM_API_KEY + Celery worker running\"] if not total else []))\n# 17 - AIRCRAFT\nr, err = xpost(\"/api/v1/events/search\", {\"geometry\":POLY,\"start_time\":T_LIVE1,\"end_time\":T_LIVE2,\"event_types\":[\"aircraft_position\"]})\ntotal = r.get(\"total\",0) if r else 0\nrows.append((\"OK\" if total else \"EMPTY\",\"17\",\"Aircraft Positions (event store)\",\"POST /api/v1/events/search {event_types=[aircraft_position]}\",f\"total={total}\",[\"  OpenSky connector healthy but event store empty (staging mode, no Celery)\"] if not total else []))\n# 18 - IMAGERY PROVIDERS\nr, err = xget(\"/api/v1/imagery/providers\")\nif err:\n    rows.append((\"FAIL\",\"18\",\"Imagery Providers\",\"GET /api/v1/imagery/providers\",err,[]))",
+        "detail": "tools.run_hormuz_test",
+        "documentation": {}
+    },
+    {
+        "label": "total",
+        "kind": 5,
+        "importPath": "tools.run_hormuz_test",
+        "description": "tools.run_hormuz_test",
+        "peekOfCode": "total = r.get(\"total\",0) if r else 0\nrows.append((\"OK\" if total else \"EMPTY\",\"17\",\"Aircraft Positions (event store)\",\"POST /api/v1/events/search {event_types=[aircraft_position]}\",f\"total={total}\",[\"  OpenSky connector healthy but event store empty (staging mode, no Celery)\"] if not total else []))\n# 18 - IMAGERY PROVIDERS\nr, err = xget(\"/api/v1/imagery/providers\")\nif err:\n    rows.append((\"FAIL\",\"18\",\"Imagery Providers\",\"GET /api/v1/imagery/providers\",err,[]))\nelse:\n    providers = r.get(\"providers\", r if isinstance(r,list) else [])\n    details = []\n    for p in (providers if isinstance(providers,list) else []):",
+        "detail": "tools.run_hormuz_test",
+        "documentation": {}
+    },
+    {
+        "label": "scenes",
+        "kind": 5,
+        "importPath": "tools.run_hormuz_test",
+        "description": "tools.run_hormuz_test",
+        "peekOfCode": "scenes = r_s.get(\"items\",[]) if r_s else []\nif len(scenes) >= 2:\n    r, err = xpost(\"/api/v1/imagery/compare\", {\"before_event_id\": scenes[-1].get(\"event_id\"), \"after_event_id\": scenes[0].get(\"event_id\")})\n    if err:\n        rows.append((\"FAIL\",\"19\",\"Imagery Compare\",\"POST /api/v1/imagery/compare\",err,[]))\n    else:\n        details = [f\"  {k}: {v}\" for k,v in (r.items() if isinstance(r,dict) else []) if not isinstance(v,(dict,list))]\n        rows.append((\"OK\",\"19\",\"Imagery Compare (oldest vs newest scene)\",\"POST /api/v1/imagery/compare\",f\"before={scenes[-1].get('event_time','')[:10]}  after={scenes[0].get('event_time','')[:10]}\",details))\nelse:\n    rows.append((\"EMPTY\",\"19\",\"Imagery Compare\",\"POST /api/v1/imagery/compare\",\"Need >= 2 scenes\",[]))",
+        "detail": "tools.run_hormuz_test",
+        "documentation": {}
+    },
+    {
+        "label": "total",
+        "kind": 5,
+        "importPath": "tools.run_hormuz_test",
+        "description": "tools.run_hormuz_test",
+        "peekOfCode": "total = (r.get(\"total\") or len(r.get(\"events\",[]))) if r else 0\nrows.append((\"OK\" if total else \"EMPTY\",\"20\",\"Playback Query\",\"POST /api/v1/playback/query\",f\"total={total}\",[\"  Event store empty — set APP_MODE=demo or run Celery worker\"] if not total else []))\n# PRINT REPORT\nICONS = {\"OK\":\"OK  \",\"FAIL\":\"FAIL\",\"EMPTY\":\"MPTY\"}\nprint()\nprint(\"=\"*108)\nprint(\"   ARGUS — Strait of Hormuz External Data Source Report\")\nprint(\"   AOI : bbox 55-58 E  25-28 N  |  centre lon=56.5  lat=26.5\")\nprint(f\"   Win : {T1}  ->  {T2}\")\nprint(f\"   Srv : {BASE}\")",
+        "detail": "tools.run_hormuz_test",
+        "documentation": {}
+    },
+    {
+        "label": "ICONS",
+        "kind": 5,
+        "importPath": "tools.run_hormuz_test",
+        "description": "tools.run_hormuz_test",
+        "peekOfCode": "ICONS = {\"OK\":\"OK  \",\"FAIL\":\"FAIL\",\"EMPTY\":\"MPTY\"}\nprint()\nprint(\"=\"*108)\nprint(\"   ARGUS — Strait of Hormuz External Data Source Report\")\nprint(\"   AOI : bbox 55-58 E  25-28 N  |  centre lon=56.5  lat=26.5\")\nprint(f\"   Win : {T1}  ->  {T2}\")\nprint(f\"   Srv : {BASE}\")\nprint(f\"   Run : {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}\")\nprint(\"=\"*108)\nprint()",
+        "detail": "tools.run_hormuz_test",
+        "documentation": {}
+    },
+    {
         "label": "services",
         "kind": 5,
         "importPath": "tools.status_check",
         "description": "tools.status_check",
         "peekOfCode": "services = {\n    'redis': 'Redis Cache',\n    'db': 'PostgreSQL/PostGIS',\n    'minio': 'Object Storage',\n    'api': 'FastAPI Application',\n    'worker': 'Celery Worker',\n    'beat': 'Celery Scheduler'\n}\nfor svc, desc in services.items():\n    print(f'  {svc:12s} : {desc}')",
         "detail": "tools.status_check",
+        "documentation": {}
+    },
+    {
+        "label": "KEY",
+        "kind": 5,
+        "importPath": "tools.test_aishub_latmin",
+        "description": "tools.test_aishub_latmin",
+        "peekOfCode": "KEY = \"d88c3a3441msh6577e9a8396594dp119d74jsn3dc1f859e097\"\nHOST = \"ais-hub.p.rapidapi.com\"\nHEADERS = {\"X-RapidAPI-Key\": KEY, \"X-RapidAPI-Host\": HOST}\nprint(\"=== ais-hub: latmin/latmax/lonmin/lonmax params (AIS Hub API format) ===\")\nprint()\n# Test 1: Gulf / Hormuz bbox\ntime.sleep(1)\nparams_gulf = {\n    \"latmin\": \"24.5\",\n    \"latmax\": \"27.5\",",
+        "detail": "tools.test_aishub_latmin",
+        "documentation": {}
+    },
+    {
+        "label": "HOST",
+        "kind": 5,
+        "importPath": "tools.test_aishub_latmin",
+        "description": "tools.test_aishub_latmin",
+        "peekOfCode": "HOST = \"ais-hub.p.rapidapi.com\"\nHEADERS = {\"X-RapidAPI-Key\": KEY, \"X-RapidAPI-Host\": HOST}\nprint(\"=== ais-hub: latmin/latmax/lonmin/lonmax params (AIS Hub API format) ===\")\nprint()\n# Test 1: Gulf / Hormuz bbox\ntime.sleep(1)\nparams_gulf = {\n    \"latmin\": \"24.5\",\n    \"latmax\": \"27.5\",\n    \"lonmin\": \"55.5\",",
+        "detail": "tools.test_aishub_latmin",
+        "documentation": {}
+    },
+    {
+        "label": "HEADERS",
+        "kind": 5,
+        "importPath": "tools.test_aishub_latmin",
+        "description": "tools.test_aishub_latmin",
+        "peekOfCode": "HEADERS = {\"X-RapidAPI-Key\": KEY, \"X-RapidAPI-Host\": HOST}\nprint(\"=== ais-hub: latmin/latmax/lonmin/lonmax params (AIS Hub API format) ===\")\nprint()\n# Test 1: Gulf / Hormuz bbox\ntime.sleep(1)\nparams_gulf = {\n    \"latmin\": \"24.5\",\n    \"latmax\": \"27.5\",\n    \"lonmin\": \"55.5\",\n    \"lonmax\": \"60.5\",",
+        "detail": "tools.test_aishub_latmin",
+        "documentation": {}
+    },
+    {
+        "label": "params_gulf",
+        "kind": 5,
+        "importPath": "tools.test_aishub_latmin",
+        "description": "tools.test_aishub_latmin",
+        "peekOfCode": "params_gulf = {\n    \"latmin\": \"24.5\",\n    \"latmax\": \"27.5\",\n    \"lonmin\": \"55.5\",\n    \"lonmax\": \"60.5\",\n    \"format\": \"1\",\n    \"output\": \"json\",\n}\nr = httpx.get(f\"https://{HOST}/vessels\", headers=HEADERS, params=params_gulf, timeout=10.0)\nprint(f\"Gulf bbox /vessels: {r.status_code}\")",
+        "detail": "tools.test_aishub_latmin",
+        "documentation": {}
+    },
+    {
+        "label": "r",
+        "kind": 5,
+        "importPath": "tools.test_aishub_latmin",
+        "description": "tools.test_aishub_latmin",
+        "peekOfCode": "r = httpx.get(f\"https://{HOST}/vessels\", headers=HEADERS, params=params_gulf, timeout=10.0)\nprint(f\"Gulf bbox /vessels: {r.status_code}\")\nprint(f\"  Response: {r.text[:400]}\")\nprint()\ntime.sleep(2)\n# Test 2: Mediterranean bbox (control — AISStream confirmed ships here)\nparams_med = {\n    \"latmin\": \"30.0\",\n    \"latmax\": \"47.0\",\n    \"lonmin\": \"-5.0\",",
+        "detail": "tools.test_aishub_latmin",
+        "documentation": {}
+    },
+    {
+        "label": "params_med",
+        "kind": 5,
+        "importPath": "tools.test_aishub_latmin",
+        "description": "tools.test_aishub_latmin",
+        "peekOfCode": "params_med = {\n    \"latmin\": \"30.0\",\n    \"latmax\": \"47.0\",\n    \"lonmin\": \"-5.0\",\n    \"lonmax\": \"37.0\",\n    \"format\": \"1\",\n    \"output\": \"json\",\n}\nr = httpx.get(f\"https://{HOST}/vessels\", headers=HEADERS, params=params_med, timeout=10.0)\nprint(f\"Mediterranean bbox /vessels: {r.status_code}\")",
+        "detail": "tools.test_aishub_latmin",
+        "documentation": {}
+    },
+    {
+        "label": "r",
+        "kind": 5,
+        "importPath": "tools.test_aishub_latmin",
+        "description": "tools.test_aishub_latmin",
+        "peekOfCode": "r = httpx.get(f\"https://{HOST}/vessels\", headers=HEADERS, params=params_med, timeout=10.0)\nprint(f\"Mediterranean bbox /vessels: {r.status_code}\")\nprint(f\"  Response: {r.text[:400]}\")\nprint()\ntime.sleep(2)\n# Test 3: /v1/vessels with same params\nparams_v1 = {\n    \"latmin\": \"30.0\",\n    \"latmax\": \"47.0\",\n    \"lonmin\": \"-5.0\",",
+        "detail": "tools.test_aishub_latmin",
+        "documentation": {}
+    },
+    {
+        "label": "params_v1",
+        "kind": 5,
+        "importPath": "tools.test_aishub_latmin",
+        "description": "tools.test_aishub_latmin",
+        "peekOfCode": "params_v1 = {\n    \"latmin\": \"30.0\",\n    \"latmax\": \"47.0\",\n    \"lonmin\": \"-5.0\",\n    \"lonmax\": \"37.0\",\n    \"format\": \"1\",\n    \"output\": \"json\",\n}\nr = httpx.get(f\"https://{HOST}/v1/vessels\", headers=HEADERS, params=params_v1, timeout=10.0)\nprint(f\"Mediterranean bbox /v1/vessels: {r.status_code}\")",
+        "detail": "tools.test_aishub_latmin",
+        "documentation": {}
+    },
+    {
+        "label": "r",
+        "kind": 5,
+        "importPath": "tools.test_aishub_latmin",
+        "description": "tools.test_aishub_latmin",
+        "peekOfCode": "r = httpx.get(f\"https://{HOST}/v1/vessels\", headers=HEADERS, params=params_v1, timeout=10.0)\nprint(f\"Mediterranean bbox /v1/vessels: {r.status_code}\")\nprint(f\"  Response: {r.text[:400]}\")\nprint()\ntime.sleep(2)\n# Test 4: No bbox params (return all vessels)\nr = httpx.get(\n    f\"https://{HOST}/vessels\",\n    headers=HEADERS,\n    params={\"format\": \"1\", \"output\": \"json\"},",
+        "detail": "tools.test_aishub_latmin",
+        "documentation": {}
+    },
+    {
+        "label": "r",
+        "kind": 5,
+        "importPath": "tools.test_aishub_latmin",
+        "description": "tools.test_aishub_latmin",
+        "peekOfCode": "r = httpx.get(\n    f\"https://{HOST}/vessels\",\n    headers=HEADERS,\n    params={\"format\": \"1\", \"output\": \"json\"},\n    timeout=10.0,\n)\nprint(f\"No bbox (all vessels) /vessels: {r.status_code}\")\nprint(f\"  Response: {r.text[:400]}\")",
+        "detail": "tools.test_aishub_latmin",
+        "documentation": {}
+    },
+    {
+        "label": "KEY",
+        "kind": 5,
+        "importPath": "tools.test_aishub_params",
+        "description": "tools.test_aishub_params",
+        "peekOfCode": "KEY = \"d88c3a3441msh6577e9a8396594dp119d74jsn3dc1f859e097\"\nHOST = \"ais-hub.p.rapidapi.com\"\nHEADERS = {\"X-RapidAPI-Key\": KEY, \"X-RapidAPI-Host\": HOST}\n# Gulf centre: lat=25.5, lon=57.5, radius=300km covers Hormuz + entire Arabian Gulf\nprint(\"=== ais-hub: lat/lon/radius params (what worked previously) ===\")\nfor params in [\n    {\"latitude\": \"25.5\", \"longitude\": \"57.5\", \"radius\": \"300\"},\n    {\"lat\": \"25.5\", \"lon\": \"57.5\", \"radius\": \"300\"},\n]:\n    time.sleep(2)  # avoid rate limit",
+        "detail": "tools.test_aishub_params",
+        "documentation": {}
+    },
+    {
+        "label": "HOST",
+        "kind": 5,
+        "importPath": "tools.test_aishub_params",
+        "description": "tools.test_aishub_params",
+        "peekOfCode": "HOST = \"ais-hub.p.rapidapi.com\"\nHEADERS = {\"X-RapidAPI-Key\": KEY, \"X-RapidAPI-Host\": HOST}\n# Gulf centre: lat=25.5, lon=57.5, radius=300km covers Hormuz + entire Arabian Gulf\nprint(\"=== ais-hub: lat/lon/radius params (what worked previously) ===\")\nfor params in [\n    {\"latitude\": \"25.5\", \"longitude\": \"57.5\", \"radius\": \"300\"},\n    {\"lat\": \"25.5\", \"lon\": \"57.5\", \"radius\": \"300\"},\n]:\n    time.sleep(2)  # avoid rate limit\n    r = httpx.get(f\"https://{HOST}/vessels\", headers=HEADERS, params=params, timeout=10.0)",
+        "detail": "tools.test_aishub_params",
+        "documentation": {}
+    },
+    {
+        "label": "HEADERS",
+        "kind": 5,
+        "importPath": "tools.test_aishub_params",
+        "description": "tools.test_aishub_params",
+        "peekOfCode": "HEADERS = {\"X-RapidAPI-Key\": KEY, \"X-RapidAPI-Host\": HOST}\n# Gulf centre: lat=25.5, lon=57.5, radius=300km covers Hormuz + entire Arabian Gulf\nprint(\"=== ais-hub: lat/lon/radius params (what worked previously) ===\")\nfor params in [\n    {\"latitude\": \"25.5\", \"longitude\": \"57.5\", \"radius\": \"300\"},\n    {\"lat\": \"25.5\", \"lon\": \"57.5\", \"radius\": \"300\"},\n]:\n    time.sleep(2)  # avoid rate limit\n    r = httpx.get(f\"https://{HOST}/vessels\", headers=HEADERS, params=params, timeout=10.0)\n    print(f\"  params={list(params.keys())}: {r.status_code} {r.text[:200]}\")",
+        "detail": "tools.test_aishub_params",
+        "documentation": {}
+    },
+    {
+        "label": "r",
+        "kind": 5,
+        "importPath": "tools.test_aishub_params",
+        "description": "tools.test_aishub_params",
+        "peekOfCode": "r = httpx.get(\n    f\"https://{HOST}/vessels\",\n    headers=HEADERS,\n    params={\"south\": \"24.5\", \"west\": \"55.5\", \"north\": \"27.5\", \"east\": \"60.5\"},\n    timeout=10.0,\n)\nprint(f\"  bbox params: {r.status_code} {r.text[:300]}\")\nprint()\nprint(\"=== ais-hub: /v1/vessels with various params ===\")\ntime.sleep(3)",
+        "detail": "tools.test_aishub_params",
+        "documentation": {}
+    },
+    {
+        "label": "API_KEY",
+        "kind": 5,
+        "importPath": "tools.test_aisstream_gulf",
+        "description": "tools.test_aisstream_gulf",
+        "peekOfCode": "API_KEY = \"048b46dade03ee3603271f1eae849acfa859d6b5\"\nURL = \"wss://stream.aisstream.io/v0/stream\"\nasync def test_bbox(name: str, bbox: list, timeout_s: int = 25) -> list:\n    \"\"\"Try AISStream bbox and return any messages received.\"\"\"\n    msg = {\n        \"APIKey\": API_KEY,\n        \"BoundingBoxes\": [bbox],\n        \"FilterMessageTypes\": [\"PositionReport\", \"ExtendedClassBPositionReport\"],\n    }\n    print(f\"\\n--- Testing {name} ---\")",
+        "detail": "tools.test_aisstream_gulf",
+        "documentation": {}
+    },
+    {
+        "label": "URL",
+        "kind": 5,
+        "importPath": "tools.test_aisstream_gulf",
+        "description": "tools.test_aisstream_gulf",
+        "peekOfCode": "URL = \"wss://stream.aisstream.io/v0/stream\"\nasync def test_bbox(name: str, bbox: list, timeout_s: int = 25) -> list:\n    \"\"\"Try AISStream bbox and return any messages received.\"\"\"\n    msg = {\n        \"APIKey\": API_KEY,\n        \"BoundingBoxes\": [bbox],\n        \"FilterMessageTypes\": [\"PositionReport\", \"ExtendedClassBPositionReport\"],\n    }\n    print(f\"\\n--- Testing {name} ---\")\n    print(f\"  BoundingBoxes: {[bbox]}\")",
+        "detail": "tools.test_aisstream_gulf",
         "documentation": {}
     },
     {
@@ -34322,6 +34874,492 @@
         "documentation": {}
     },
     {
+        "label": "Row",
+        "kind": 6,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "class Row:\n    def __init__(self, num: int, name: str):\n        self.num = num\n        self.name = name\n        self.status = \"UNTESTED\"\n        self.result = \"\"\n        self.detail: list[str] = []\n        self.error = \"\"\n        self.http_method = \"GET\"\n        self.raw: dict | list | None = None",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "BASE",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "BASE = \"http://localhost:8000\"\n# ── Hormuz AOI ────────────────────────────────────────────────────────────────\nHORMUZ_BBOX_STR = \"55.0,25.0,58.0,28.0\"   # lon1,lat1,lon2,lat2\nHORMUZ_LON = 56.5\nHORMUZ_LAT = 26.5\nHORMUZ_POLY = {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n        [[55.0, 25.0], [58.0, 25.0], [58.0, 28.0], [55.0, 28.0], [55.0, 25.0]]\n    ],",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "HORMUZ_BBOX_STR",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "HORMUZ_BBOX_STR = \"55.0,25.0,58.0,28.0\"   # lon1,lat1,lon2,lat2\nHORMUZ_LON = 56.5\nHORMUZ_LAT = 26.5\nHORMUZ_POLY = {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n        [[55.0, 25.0], [58.0, 25.0], [58.0, 28.0], [55.0, 28.0], [55.0, 25.0]]\n    ],\n}\nSTART_TIME = \"2026-03-15T00:00:00Z\"",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "HORMUZ_LON",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "HORMUZ_LON = 56.5\nHORMUZ_LAT = 26.5\nHORMUZ_POLY = {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n        [[55.0, 25.0], [58.0, 25.0], [58.0, 28.0], [55.0, 28.0], [55.0, 25.0]]\n    ],\n}\nSTART_TIME = \"2026-03-15T00:00:00Z\"\nEND_TIME   = \"2026-04-15T00:00:00Z\"",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "HORMUZ_LAT",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "HORMUZ_LAT = 26.5\nHORMUZ_POLY = {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n        [[55.0, 25.0], [58.0, 25.0], [58.0, 28.0], [55.0, 28.0], [55.0, 25.0]]\n    ],\n}\nSTART_TIME = \"2026-03-15T00:00:00Z\"\nEND_TIME   = \"2026-04-15T00:00:00Z\"\n# ── HTTP helpers ──────────────────────────────────────────────────────────────",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "HORMUZ_POLY",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "HORMUZ_POLY = {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n        [[55.0, 25.0], [58.0, 25.0], [58.0, 28.0], [55.0, 28.0], [55.0, 25.0]]\n    ],\n}\nSTART_TIME = \"2026-03-15T00:00:00Z\"\nEND_TIME   = \"2026-04-15T00:00:00Z\"\n# ── HTTP helpers ──────────────────────────────────────────────────────────────\ndef _get(path: str, timeout: int = 30) -> tuple[dict | list | None, str | None]:",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "START_TIME",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "START_TIME = \"2026-03-15T00:00:00Z\"\nEND_TIME   = \"2026-04-15T00:00:00Z\"\n# ── HTTP helpers ──────────────────────────────────────────────────────────────\ndef _get(path: str, timeout: int = 30) -> tuple[dict | list | None, str | None]:\n    url = f\"{BASE}{path}\"\n    try:\n        with urllib.request.urlopen(url, timeout=timeout) as resp:\n            return json.load(resp), None\n    except urllib.error.HTTPError as exc:\n        body = exc.read().decode(errors=\"replace\")[:300]",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(1, \"Imagery Search (STAC / all connectors)\")\nrow.http_method = \"POST /api/v1/imagery/search\"\nr, err = _post(\"/api/v1/imagery/search\", {\n    \"geometry\": HORMUZ_POLY,\n    \"start_time\": START_TIME,\n    \"end_time\": END_TIME,\n    \"max_cloud_cover\": 30,\n}, timeout=45)\nif err:\n    row.fail(err)",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"POST /api/v1/imagery/search\"\nr, err = _post(\"/api/v1/imagery/search\", {\n    \"geometry\": HORMUZ_POLY,\n    \"start_time\": START_TIME,\n    \"end_time\": END_TIME,\n    \"max_cloud_cover\": 30,\n}, timeout=45)\nif err:\n    row.fail(err)\nelif r:",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(2, \"Canonical Events Search\")\nrow.http_method = \"POST /api/v1/events/search\"\nr, err = _post(\"/api/v1/events/search\", {\n    \"geometry\": HORMUZ_POLY,\n    \"start_time\": START_TIME,\n    \"end_time\": END_TIME,\n}, timeout=30)\nif err:\n    row.fail(err)\nelif r:",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"POST /api/v1/events/search\"\nr, err = _post(\"/api/v1/events/search\", {\n    \"geometry\": HORMUZ_POLY,\n    \"start_time\": START_TIME,\n    \"end_time\": END_TIME,\n}, timeout=30)\nif err:\n    row.fail(err)\nelif r:\n    items = r.get(\"events\", r.get(\"items\", []))",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(3, \"Satellite Orbits (CelesTrak TLE)\")\nrow.http_method = \"GET /api/v1/orbits\"\nr, err = _get(\"/api/v1/orbits\")\nif err:\n    row.fail(err)\nelif r:\n    total = r.get(\"total\", 0)\n    demo = r.get(\"is_demo_data\", False)\n    detail = [f\"demo_mode={demo}\"]\n    for orb in r.get(\"orbits\", []):",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"GET /api/v1/orbits\"\nr, err = _get(\"/api/v1/orbits\")\nif err:\n    row.fail(err)\nelif r:\n    total = r.get(\"total\", 0)\n    demo = r.get(\"is_demo_data\", False)\n    detail = [f\"demo_mode={demo}\"]\n    for orb in r.get(\"orbits\", []):\n        detail.append(",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(4, \"Satellite Passes over Hormuz (ISS)\")\nrow.http_method = \"GET /api/v1/orbits/ISS-(ZARYA)/passes\"\nr, err = _get(\n    f\"/api/v1/orbits/ISS-(ZARYA)/passes\"\n    f\"?observer_lon={HORMUZ_LON}&observer_lat={HORMUZ_LAT}&horizon_hours=48\"\n)\nif err:\n    row.fail(err)\nelif r:\n    total = r.get(\"total\", 0)",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"GET /api/v1/orbits/ISS-(ZARYA)/passes\"\nr, err = _get(\n    f\"/api/v1/orbits/ISS-(ZARYA)/passes\"\n    f\"?observer_lon={HORMUZ_LON}&observer_lat={HORMUZ_LAT}&horizon_hours=48\"\n)\nif err:\n    row.fail(err)\nelif r:\n    total = r.get(\"total\", 0)\n    passes = r.get(\"passes\", [])",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(5, \"Airspace Restrictions (FAA NOTAM / stub)\")\nrow.http_method = \"GET /api/v1/airspace/restrictions\"\nr, err = _get(f\"/api/v1/airspace/restrictions?active_only=false&bbox={HORMUZ_BBOX_STR}\")\nif err:\n    row.fail(err)\nelif r:\n    items = r.get(\"restrictions\", r if isinstance(r, list) else [])\n    total = r.get(\"total\", len(items)) if isinstance(r, dict) else len(items)\n    detail = [f\"demo_mode={r.get('is_demo_data','?')}\"] if isinstance(r, dict) else []\n    for item in (items[:5] if isinstance(items, list) else []):",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"GET /api/v1/airspace/restrictions\"\nr, err = _get(f\"/api/v1/airspace/restrictions?active_only=false&bbox={HORMUZ_BBOX_STR}\")\nif err:\n    row.fail(err)\nelif r:\n    items = r.get(\"restrictions\", r if isinstance(r, list) else [])\n    total = r.get(\"total\", len(items)) if isinstance(r, dict) else len(items)\n    detail = [f\"demo_mode={r.get('is_demo_data','?')}\"] if isinstance(r, dict) else []\n    for item in (items[:5] if isinstance(items, list) else []):\n        detail.append(f\"  {item.get('restriction_id','?')}: {item.get('airspace_class','?')} {item.get('description','')[:50]}\")",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(6, \"NOTAMs (FAA NOTAM / stub)\")\nrow.http_method = \"GET /api/v1/airspace/notams\"\nr, err = _get(\"/api/v1/airspace/notams\")\nif err:\n    row.fail(err)\nelif r:\n    items = r.get(\"notams\", r if isinstance(r, list) else [])\n    total = r.get(\"total\", len(items)) if isinstance(r, dict) else len(items)\n    detail = []\n    for item in (items[:5] if isinstance(items, list) else []):",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"GET /api/v1/airspace/notams\"\nr, err = _get(\"/api/v1/airspace/notams\")\nif err:\n    row.fail(err)\nelif r:\n    items = r.get(\"notams\", r if isinstance(r, list) else [])\n    total = r.get(\"total\", len(items)) if isinstance(r, dict) else len(items)\n    detail = []\n    for item in (items[:5] if isinstance(items, list) else []):\n        detail.append(f\"  {item.get('notam_id','?')}: {item.get('location_icao','?')} — {item.get('subject','')[:60]}\")",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(7, \"GPS/GNSS Jamming Events [demo-only per JAM-03]\")\nrow.http_method = \"GET /api/v1/jamming/events\"\nr, err = _get(\"/api/v1/jamming/events\")\nif err:\n    row.fail(err)\nelif r:\n    items = r.get(\"events\", r if isinstance(r, list) else [])\n    total = r.get(\"total\", len(items)) if isinstance(r, dict) else len(items)\n    demo = r.get(\"is_demo_data\", True) if isinstance(r, dict) else True\n    detail = [f\"is_demo_data={demo}\"]",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"GET /api/v1/jamming/events\"\nr, err = _get(\"/api/v1/jamming/events\")\nif err:\n    row.fail(err)\nelif r:\n    items = r.get(\"events\", r if isinstance(r, list) else [])\n    total = r.get(\"total\", len(items)) if isinstance(r, dict) else len(items)\n    demo = r.get(\"is_demo_data\", True) if isinstance(r, dict) else True\n    detail = [f\"is_demo_data={demo}\"]\n    for item in (items[:3] if isinstance(items, list) else []):",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(8, \"Strike Events (ACLED stub)\")\nrow.http_method = \"GET /api/v1/strikes\"\nr, err = _get(\"/api/v1/strikes\")\nif err:\n    row.fail(err)\nelif r:\n    items = r.get(\"events\", [])\n    total = len(items)\n    demo = r.get(\"is_demo_data\", True)\n    detail = [f\"is_demo_data={demo}\"]",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"GET /api/v1/strikes\"\nr, err = _get(\"/api/v1/strikes\")\nif err:\n    row.fail(err)\nelif r:\n    items = r.get(\"events\", [])\n    total = len(items)\n    demo = r.get(\"is_demo_data\", True)\n    detail = [f\"is_demo_data={demo}\"]\n    for item in items[:3]:",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(9, \"Vessel Registry\")\nrow.http_method = \"GET /api/v1/vessels\"\nr, err = _get(\"/api/v1/vessels?limit=100\")\nif err:\n    row.fail(err)\nelif r:\n    vessels = r if isinstance(r, list) else r.get(\"vessels\", [])\n    total = len(vessels)\n    by_sanction: dict[str, int] = {}\n    by_risk: dict[str, int] = {}",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"GET /api/v1/vessels\"\nr, err = _get(\"/api/v1/vessels?limit=100\")\nif err:\n    row.fail(err)\nelif r:\n    vessels = r if isinstance(r, list) else r.get(\"vessels\", [])\n    total = len(vessels)\n    by_sanction: dict[str, int] = {}\n    by_risk: dict[str, int] = {}\n    for v in vessels:",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(10, \"Dark Ship Detection\")\nrow.http_method = \"GET /api/v1/dark-ships\"\nr, err = _get(\"/api/v1/dark-ships\")\nif err:\n    row.fail(err)\nelif r:\n    candidates = r.get(\"candidates\", r if isinstance(r, list) else [])\n    total = r.get(\"total\", len(candidates)) if isinstance(r, dict) else len(candidates)\n    if total:\n        detail = []",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"GET /api/v1/dark-ships\"\nr, err = _get(\"/api/v1/dark-ships\")\nif err:\n    row.fail(err)\nelif r:\n    candidates = r.get(\"candidates\", r if isinstance(r, list) else [])\n    total = r.get(\"total\", len(candidates)) if isinstance(r, dict) else len(candidates)\n    if total:\n        detail = []\n        for c in (candidates[:3] if isinstance(candidates, list) else []):",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(11, \"Maritime Chokepoints (incl. Hormuz)\")\nrow.http_method = \"GET /api/v1/chokepoints\"\nr, err = _get(\"/api/v1/chokepoints\")\nif err:\n    row.fail(err)\nelif r:\n    items = r.get(\"chokepoints\", r if isinstance(r, list) else [])\n    total = r.get(\"total\", len(items)) if isinstance(r, dict) else len(items)\n    detail = []\n    hormuz_found = False",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"GET /api/v1/chokepoints\"\nr, err = _get(\"/api/v1/chokepoints\")\nif err:\n    row.fail(err)\nelif r:\n    items = r.get(\"chokepoints\", r if isinstance(r, list) else [])\n    total = r.get(\"total\", len(items)) if isinstance(r, dict) else len(items)\n    detail = []\n    hormuz_found = False\n    for cp in (items if isinstance(items, list) else []):",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(12, \"Chokepoint Metrics: Strait of Hormuz\")\nrow.http_method = \"GET /api/v1/chokepoints/<hormuz_id>/metrics\"\nr_list, _ = _get(\"/api/v1/chokepoints\")\nhormuz_id = None\nif r_list:\n    items = r_list.get(\"chokepoints\", r_list if isinstance(r_list, list) else [])\n    for cp in (items if isinstance(items, list) else []):\n        nm = cp.get(\"name\", \"\")\n        if \"hormuz\" in nm.lower() or \"Hormuz\" in nm:\n            hormuz_id = cp.get(\"chokepoint_id\")",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"GET /api/v1/chokepoints/<hormuz_id>/metrics\"\nr_list, _ = _get(\"/api/v1/chokepoints\")\nhormuz_id = None\nif r_list:\n    items = r_list.get(\"chokepoints\", r_list if isinstance(r_list, list) else [])\n    for cp in (items if isinstance(items, list) else []):\n        nm = cp.get(\"name\", \"\")\n        if \"hormuz\" in nm.lower() or \"Hormuz\" in nm:\n            hormuz_id = cp.get(\"chokepoint_id\")\n            break",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "hormuz_id",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "hormuz_id = None\nif r_list:\n    items = r_list.get(\"chokepoints\", r_list if isinstance(r_list, list) else [])\n    for cp in (items if isinstance(items, list) else []):\n        nm = cp.get(\"name\", \"\")\n        if \"hormuz\" in nm.lower() or \"Hormuz\" in nm:\n            hormuz_id = cp.get(\"chokepoint_id\")\n            break\nif hormuz_id:\n    r, err = _get(f\"/api/v1/chokepoints/{hormuz_id}/metrics\")",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(13, \"Intel Briefing\")\nrow.http_method = \"GET /api/v1/intel/briefing\"\nr, err = _get(\"/api/v1/intel/briefing\")\nif err:\n    row.fail(err)\nelif r:\n    topics = r.get(\"topics\", r.get(\"items\", []))\n    total = len(topics)\n    detail = [f\"generated_at={r.get('generated_at','?')}\"]\n    for t in topics[:5]:",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"GET /api/v1/intel/briefing\"\nr, err = _get(\"/api/v1/intel/briefing\")\nif err:\n    row.fail(err)\nelif r:\n    topics = r.get(\"topics\", r.get(\"items\", []))\n    total = len(topics)\n    detail = [f\"generated_at={r.get('generated_at','?')}\"]\n    for t in topics[:5]:\n        detail.append(f\"  [{t.get('priority','?')}] {t.get('headline',t.get('title',''))[:80]}\")",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(14, \"Event Source Catalog\")\nrow.http_method = \"GET /api/v1/events/sources\"\nr, err = _get(\"/api/v1/events/sources\")\nif err:\n    row.fail(err)\nelif r:\n    sources = r.get(\"sources\", r if isinstance(r, list) else [])\n    total = r.get(\"total\", len(sources)) if isinstance(r, dict) else len(sources)\n    detail = []\n    for s in (sources if isinstance(sources, list) else []):",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"GET /api/v1/events/sources\"\nr, err = _get(\"/api/v1/events/sources\")\nif err:\n    row.fail(err)\nelif r:\n    sources = r.get(\"sources\", r if isinstance(r, list) else [])\n    total = r.get(\"total\", len(sources)) if isinstance(r, dict) else len(sources)\n    detail = []\n    for s in (sources if isinstance(sources, list) else []):\n        detail.append(f\"  {s.get('connector_id','?')}: events={s.get('event_count','?')} last_seen={s.get('last_seen','?')}\")",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(15, \"Source Health Dashboard (all connectors)\")\nrow.http_method = \"GET /api/v1/health/sources\"\nr, err = _get(\"/api/v1/health/sources\")\nif err:\n    row.fail(err)\nelif r:\n    conns = r.get(\"connectors\", [])\n    healthy = sum(1 for c in conns if c.get(\"is_healthy\"))\n    detail = [\n        f\"total={len(conns)} healthy={healthy} overall={r.get('overall_healthy','?')}\",",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"GET /api/v1/health/sources\"\nr, err = _get(\"/api/v1/health/sources\")\nif err:\n    row.fail(err)\nelif r:\n    conns = r.get(\"connectors\", [])\n    healthy = sum(1 for c in conns if c.get(\"is_healthy\"))\n    detail = [\n        f\"total={len(conns)} healthy={healthy} overall={r.get('overall_healthy','?')}\",\n        f\"total_requests_last_hour={r.get('total_requests_last_hour','?')}\",",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(16, \"AIS Maritime Positions (via event store)\")\nrow.http_method = \"POST /api/v1/events/search (event_type=ship_position)\"\nr, err = _post(\"/api/v1/events/search\", {\n    \"geometry\": HORMUZ_POLY,\n    \"start_time\": START_TIME,\n    \"end_time\": END_TIME,\n    \"event_types\": [\"ship_position\"],\n}, timeout=30)\nif err:\n    row.fail(err)",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"POST /api/v1/events/search (event_type=ship_position)\"\nr, err = _post(\"/api/v1/events/search\", {\n    \"geometry\": HORMUZ_POLY,\n    \"start_time\": START_TIME,\n    \"end_time\": END_TIME,\n    \"event_types\": [\"ship_position\"],\n}, timeout=30)\nif err:\n    row.fail(err)\nelif r:",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(17, \"OpenSky Aircraft Positions (via event store)\")\nrow.http_method = \"POST /api/v1/events/search (event_type=aircraft_position)\"\nr, err = _post(\"/api/v1/events/search\", {\n    \"geometry\": HORMUZ_POLY,\n    \"start_time\": START_TIME,\n    \"end_time\": END_TIME,\n    \"event_types\": [\"aircraft_position\"],\n}, timeout=30)\nif err:\n    row.fail(err)",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"POST /api/v1/events/search (event_type=aircraft_position)\"\nr, err = _post(\"/api/v1/events/search\", {\n    \"geometry\": HORMUZ_POLY,\n    \"start_time\": START_TIME,\n    \"end_time\": END_TIME,\n    \"event_types\": [\"aircraft_position\"],\n}, timeout=30)\nif err:\n    row.fail(err)\nelif r:",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(18, \"USGS Earthquake (via event store)\")\nrow.http_method = \"POST /api/v1/events/search (event_type=seismic_event)\"\nr, err = _post(\"/api/v1/events/search\", {\n    \"geometry\": HORMUZ_POLY,\n    \"start_time\": START_TIME,\n    \"end_time\": END_TIME,\n    \"event_types\": [\"seismic_event\"],\n}, timeout=30)\nif err:\n    row.fail(err)",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"POST /api/v1/events/search (event_type=seismic_event)\"\nr, err = _post(\"/api/v1/events/search\", {\n    \"geometry\": HORMUZ_POLY,\n    \"start_time\": START_TIME,\n    \"end_time\": END_TIME,\n    \"event_types\": [\"seismic_event\"],\n}, timeout=30)\nif err:\n    row.fail(err)\nelif r:",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(19, \"GDELT Contextual Events (via event store)\")\nrow.http_method = \"POST /api/v1/events/search (source_type=context_feed)\"\nr, err = _post(\"/api/v1/events/search\", {\n    \"geometry\": HORMUZ_POLY,\n    \"start_time\": START_TIME,\n    \"end_time\": END_TIME,\n    \"source_types\": [\"context_feed\"],\n}, timeout=30)\nif err:\n    row.fail(err)",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"POST /api/v1/events/search (source_type=context_feed)\"\nr, err = _post(\"/api/v1/events/search\", {\n    \"geometry\": HORMUZ_POLY,\n    \"start_time\": START_TIME,\n    \"end_time\": END_TIME,\n    \"source_types\": [\"context_feed\"],\n}, timeout=30)\nif err:\n    row.fail(err)\nelif r:",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row = Row(20, \"Imagery Providers Health\")\nrow.http_method = \"GET /api/v1/imagery/providers\"\nr, err = _get(\"/api/v1/imagery/providers\")\nif err:\n    row.fail(err)\nelif r:\n    providers = r.get(\"providers\", r if isinstance(r, list) else [])\n    total = r.get(\"total\", len(providers)) if isinstance(r, dict) else len(providers)\n    detail = []\n    for p in (providers if isinstance(providers, list) else []):",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "row.http_method",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "row.http_method = \"GET /api/v1/imagery/providers\"\nr, err = _get(\"/api/v1/imagery/providers\")\nif err:\n    row.fail(err)\nelif r:\n    providers = r.get(\"providers\", r if isinstance(r, list) else [])\n    total = r.get(\"total\", len(providers)) if isinstance(r, dict) else len(providers)\n    detail = []\n    for p in (providers if isinstance(providers, list) else []):\n        detail.append(",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "REPORT_TIME",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "REPORT_TIME = datetime.now(timezone.utc).strftime(\"%Y-%m-%d %H:%M UTC\")\nprint()\nprint(\"=\" * 90)\nprint(f\"  ARGUS — External Data Source Test Report\")\nprint(f\"  AOI: Strait of Hormuz  (bbox 55–58°E, 25–28°N  |  centre 56.5°E, 26.5°N)\")\nprint(f\"  Window: {START_TIME}  →  {END_TIME}\")\nprint(f\"  Base URL: {BASE}\")\nprint(f\"  Run at: {REPORT_TIME}\")\nprint(\"=\" * 90)\nprint()",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "ok_count",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "ok_count = sum(1 for r in rows if r.status == \"OK\")\nfail_count = sum(1 for r in rows if r.status == \"FAIL\")\nempty_count = sum(1 for r in rows if r.status == \"EMPTY\")\nstatus_icon = {\"OK\": \"✅\", \"FAIL\": \"❌\", \"EMPTY\": \"⚠️\", \"UNTESTED\": \"⬜\"}\nfor row in rows:\n    icon = status_icon.get(row.status, \"?\")\n    label = f\"{row.num:02d}. {row.name}\"\n    print(f\"{icon} {label}\")\n    print(f\"     Endpoint: {row.http_method}\")\n    if row.status == \"OK\":",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "fail_count",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "fail_count = sum(1 for r in rows if r.status == \"FAIL\")\nempty_count = sum(1 for r in rows if r.status == \"EMPTY\")\nstatus_icon = {\"OK\": \"✅\", \"FAIL\": \"❌\", \"EMPTY\": \"⚠️\", \"UNTESTED\": \"⬜\"}\nfor row in rows:\n    icon = status_icon.get(row.status, \"?\")\n    label = f\"{row.num:02d}. {row.name}\"\n    print(f\"{icon} {label}\")\n    print(f\"     Endpoint: {row.http_method}\")\n    if row.status == \"OK\":\n        print(f\"     Result:   {row.result}\")",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "empty_count",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "empty_count = sum(1 for r in rows if r.status == \"EMPTY\")\nstatus_icon = {\"OK\": \"✅\", \"FAIL\": \"❌\", \"EMPTY\": \"⚠️\", \"UNTESTED\": \"⬜\"}\nfor row in rows:\n    icon = status_icon.get(row.status, \"?\")\n    label = f\"{row.num:02d}. {row.name}\"\n    print(f\"{icon} {label}\")\n    print(f\"     Endpoint: {row.http_method}\")\n    if row.status == \"OK\":\n        print(f\"     Result:   {row.result}\")\n        for d in row.detail:",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "status_icon",
+        "kind": 5,
+        "importPath": "tools.test_hormuz",
+        "description": "tools.test_hormuz",
+        "peekOfCode": "status_icon = {\"OK\": \"✅\", \"FAIL\": \"❌\", \"EMPTY\": \"⚠️\", \"UNTESTED\": \"⬜\"}\nfor row in rows:\n    icon = status_icon.get(row.status, \"?\")\n    label = f\"{row.num:02d}. {row.name}\"\n    print(f\"{icon} {label}\")\n    print(f\"     Endpoint: {row.http_method}\")\n    if row.status == \"OK\":\n        print(f\"     Result:   {row.result}\")\n        for d in row.detail:\n            print(f\"               {d}\")",
+        "detail": "tools.test_hormuz",
+        "documentation": {}
+    },
+    {
+        "label": "BASE",
+        "kind": 5,
+        "importPath": "tools.test_opensky",
+        "description": "tools.test_opensky",
+        "peekOfCode": "BASE = \"https://opensky-network.org/api\"\nprint(\"=== OpenSky: Gulf (Hormuz area) ===\")\ntry:\n    r = httpx.get(\n        f\"{BASE}/states/all\",\n        params={\"lamin\": 24.5, \"lomin\": 55.5, \"lamax\": 27.5, \"lomax\": 60.5},\n        timeout=15.0,\n    )\n    print(f\"  Status: {r.status_code}\")\n    if r.status_code == 200:",
+        "detail": "tools.test_opensky",
+        "documentation": {}
+    },
+    {
         "label": "now",
         "kind": 5,
         "importPath": "tools.test_playback",
@@ -34355,6 +35393,105 @@
         "description": "tools.test_playback",
         "peekOfCode": "response = requests.post(\n    \"http://127.0.0.1:8000/api/v1/playback/query\",\n    json=body,\n    headers={\"Content-Type\": \"application/json\"}\n)\nprint(f\"Status: {response.status_code}\")\nif response.status_code == 200:\n    data = response.json()\n    print(f\"Total frames: {data['total_frames']}\")\n    print(f\"Sources: {data['sources_included']}\")",
         "detail": "tools.test_playback",
+        "documentation": {}
+    },
+    {
+        "label": "BASE",
+        "kind": 5,
+        "importPath": "tools.test_playback_live",
+        "description": "tools.test_playback_live",
+        "peekOfCode": "BASE = \"http://localhost:8000\"\nHEADERS = {\n    \"X-API-KEY\": \"b09b6bd90e781f0d000e840d6d81ff58de5b7e327a8988137d406a124f36b51a\",\n    \"Content-Type\": \"application/json\",\n}\n# Get AOI\naois = requests.get(f\"{BASE}/api/v1/aois\", headers=HEADERS, timeout=10).json()\nif not aois[\"items\"]:\n    print(\"ERROR: No AOIs found — AOI seeding failed\")\n    raise SystemExit(1)",
+        "detail": "tools.test_playback_live",
+        "documentation": {}
+    },
+    {
+        "label": "HEADERS",
+        "kind": 5,
+        "importPath": "tools.test_playback_live",
+        "description": "tools.test_playback_live",
+        "peekOfCode": "HEADERS = {\n    \"X-API-KEY\": \"b09b6bd90e781f0d000e840d6d81ff58de5b7e327a8988137d406a124f36b51a\",\n    \"Content-Type\": \"application/json\",\n}\n# Get AOI\naois = requests.get(f\"{BASE}/api/v1/aois\", headers=HEADERS, timeout=10).json()\nif not aois[\"items\"]:\n    print(\"ERROR: No AOIs found — AOI seeding failed\")\n    raise SystemExit(1)\naoi_id = aois[\"items\"][0][\"id\"]",
+        "detail": "tools.test_playback_live",
+        "documentation": {}
+    },
+    {
+        "label": "aois",
+        "kind": 5,
+        "importPath": "tools.test_playback_live",
+        "description": "tools.test_playback_live",
+        "peekOfCode": "aois = requests.get(f\"{BASE}/api/v1/aois\", headers=HEADERS, timeout=10).json()\nif not aois[\"items\"]:\n    print(\"ERROR: No AOIs found — AOI seeding failed\")\n    raise SystemExit(1)\naoi_id = aois[\"items\"][0][\"id\"]\nprint(f\"AOI: {aoi_id} ({aois['items'][0]['name']})\")\n# Call playback/query (same payload as useTracks)\nnow = datetime.now(UTC)\nbody = {\n    \"aoi_id\": aoi_id,",
+        "detail": "tools.test_playback_live",
+        "documentation": {}
+    },
+    {
+        "label": "aoi_id",
+        "kind": 5,
+        "importPath": "tools.test_playback_live",
+        "description": "tools.test_playback_live",
+        "peekOfCode": "aoi_id = aois[\"items\"][0][\"id\"]\nprint(f\"AOI: {aoi_id} ({aois['items'][0]['name']})\")\n# Call playback/query (same payload as useTracks)\nnow = datetime.now(UTC)\nbody = {\n    \"aoi_id\": aoi_id,\n    \"start_time\": (now - timedelta(days=1)).isoformat(),\n    \"end_time\": (now + timedelta(hours=1)).isoformat(),\n    \"source_types\": [\"telemetry\"],\n    \"limit\": 4000,",
+        "detail": "tools.test_playback_live",
+        "documentation": {}
+    },
+    {
+        "label": "now",
+        "kind": 5,
+        "importPath": "tools.test_playback_live",
+        "description": "tools.test_playback_live",
+        "peekOfCode": "now = datetime.now(UTC)\nbody = {\n    \"aoi_id\": aoi_id,\n    \"start_time\": (now - timedelta(days=1)).isoformat(),\n    \"end_time\": (now + timedelta(hours=1)).isoformat(),\n    \"source_types\": [\"telemetry\"],\n    \"limit\": 4000,\n}\nprint(\"Sending POST /api/v1/playback/query (live poll may take ~25s)...\")\nresp = requests.post(f\"{BASE}/api/v1/playback/query\", headers=HEADERS, json=body, timeout=120)",
+        "detail": "tools.test_playback_live",
+        "documentation": {}
+    },
+    {
+        "label": "body",
+        "kind": 5,
+        "importPath": "tools.test_playback_live",
+        "description": "tools.test_playback_live",
+        "peekOfCode": "body = {\n    \"aoi_id\": aoi_id,\n    \"start_time\": (now - timedelta(days=1)).isoformat(),\n    \"end_time\": (now + timedelta(hours=1)).isoformat(),\n    \"source_types\": [\"telemetry\"],\n    \"limit\": 4000,\n}\nprint(\"Sending POST /api/v1/playback/query (live poll may take ~25s)...\")\nresp = requests.post(f\"{BASE}/api/v1/playback/query\", headers=HEADERS, json=body, timeout=120)\nresp.raise_for_status()",
+        "detail": "tools.test_playback_live",
+        "documentation": {}
+    },
+    {
+        "label": "resp",
+        "kind": 5,
+        "importPath": "tools.test_playback_live",
+        "description": "tools.test_playback_live",
+        "peekOfCode": "resp = requests.post(f\"{BASE}/api/v1/playback/query\", headers=HEADERS, json=body, timeout=120)\nresp.raise_for_status()\ndata = resp.json()\ntotal = data[\"total\"]\nprint(f\"total={total}\")\nif total > 0:\n    types = sorted({e[\"event_type\"] for e in data[\"events\"]})\n    sources = sorted({e[\"source\"] for e in data[\"events\"]})\n    print(f\"event_types: {types}\")\n    print(f\"sources: {sources}\")",
+        "detail": "tools.test_playback_live",
+        "documentation": {}
+    },
+    {
+        "label": "data",
+        "kind": 5,
+        "importPath": "tools.test_playback_live",
+        "description": "tools.test_playback_live",
+        "peekOfCode": "data = resp.json()\ntotal = data[\"total\"]\nprint(f\"total={total}\")\nif total > 0:\n    types = sorted({e[\"event_type\"] for e in data[\"events\"]})\n    sources = sorted({e[\"source\"] for e in data[\"events\"]})\n    print(f\"event_types: {types}\")\n    print(f\"sources: {sources}\")\n    print(\"✓ PASS: aircraft/ships returned from live poll via playback/query\")\nelse:",
+        "detail": "tools.test_playback_live",
+        "documentation": {}
+    },
+    {
+        "label": "total",
+        "kind": 5,
+        "importPath": "tools.test_playback_live",
+        "description": "tools.test_playback_live",
+        "peekOfCode": "total = data[\"total\"]\nprint(f\"total={total}\")\nif total > 0:\n    types = sorted({e[\"event_type\"] for e in data[\"events\"]})\n    sources = sorted({e[\"source\"] for e in data[\"events\"]})\n    print(f\"event_types: {types}\")\n    print(f\"sources: {sources}\")\n    print(\"✓ PASS: aircraft/ships returned from live poll via playback/query\")\nelse:\n    print(\"WARN: 0 events — connectors may be rate-limited or timed out\")",
+        "detail": "tools.test_playback_live",
+        "documentation": {}
+    },
+    {
+        "label": "test_api",
+        "kind": 2,
+        "importPath": "tools.test_rapidapi",
+        "description": "tools.test_rapidapi",
+        "peekOfCode": "def test_api(host: str, paths: list[str], extra_params: dict | None = None) -> None:\n    print(f\"\\n=== {host} ===\")\n    params = extra_params or {}\n    for path in paths:\n        try:\n            r = httpx.get(\n                f\"https://{host}{path}\",\n                headers={\"X-RapidAPI-Key\": KEY, \"X-RapidAPI-Host\": host},\n                params=params,\n                timeout=6.0,",
+        "detail": "tools.test_rapidapi",
+        "documentation": {}
+    },
+    {
+        "label": "KEY",
+        "kind": 5,
+        "importPath": "tools.test_rapidapi",
+        "description": "tools.test_rapidapi",
+        "peekOfCode": "KEY = \"d88c3a3441msh6577e9a8396594dp119d74jsn3dc1f859e097\"\ndef test_api(host: str, paths: list[str], extra_params: dict | None = None) -> None:\n    print(f\"\\n=== {host} ===\")\n    params = extra_params or {}\n    for path in paths:\n        try:\n            r = httpx.get(\n                f\"https://{host}{path}\",\n                headers={\"X-RapidAPI-Key\": KEY, \"X-RapidAPI-Host\": host},\n                params=params,",
+        "detail": "tools.test_rapidapi",
         "documentation": {}
     },
     {

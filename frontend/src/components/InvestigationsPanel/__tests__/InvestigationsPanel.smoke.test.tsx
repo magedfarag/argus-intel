@@ -22,6 +22,7 @@ const defaultResult: UseInvestigationsResult = {
   refreshInvestigations: vi.fn(),
   generateAndDownloadEvidencePack: vi.fn(),
   generateAndShowBriefing: vi.fn(),
+  clearError: vi.fn(),
 };
 
 beforeEach(() => {
